@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Frigus</string>
+    <string name="termos_privacidade">Li e aceito os <font color="#2559D6"><b>Termos de Uso</b></font> e a <font color="#2559D6"><b>Política de Privacidade</b></font></string>
+    <string name="ja_tem_uma_conta">Já tem uma conta? <font color="#2559D6"><b>Entrar</b></font></string>
+</resources>
