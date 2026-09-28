@@ -33,5 +33,9 @@
             android:name=".ui.home.MainActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.recipes.ReceitaDetalhesActivity"
+            android:exported="false" />
+
     </application>
 </manifest>

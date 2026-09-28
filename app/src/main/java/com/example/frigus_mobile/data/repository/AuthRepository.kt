@@ -52,14 +52,17 @@ class AuthRepository(context: Context) {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
+                    android.util.Log.d("AuthRepository", "Cadastro realizado com sucesso: ${body.email}")
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Erro no cadastro. Código: ${response.code()}")
+                    android.util.Log.e("AuthRepository", "Falha no cadastro [${response.code()}]: $mensagemErro")
                     liveData.postValue(Resource.error(mensagemErro))
                 }
             }
 
             override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                android.util.Log.e("AuthRepository", "Falha de conexão com a API no cadastro: ${t.message}", t)
                 liveData.postValue(Resource.error("Falha de conexão com a API: ${t.message}"))
             }
         })
@@ -74,6 +77,7 @@ class AuthRepository(context: Context) {
             val errorBody = response.errorBody()
             if (errorBody != null) {
                 val errorJson = errorBody.string()
+                android.util.Log.e("AuthRepository", "Corpo de erro bruto da API [${response.code()}]: $errorJson")
                 val obj = gson.fromJson(errorJson, JsonObject::class.java)
                 if (obj.has("displayMessage") && !obj.get("displayMessage").isJsonNull) {
                     return obj.get("displayMessage").asString
@@ -81,8 +85,21 @@ class AuthRepository(context: Context) {
                 if (obj.has("message") && !obj.get("message").isJsonNull) {
                     return obj.get("message").asString
                 }
+                if (obj.has("errors") && obj.get("errors").isJsonArray) {
+                    val arr = obj.getAsJsonArray("errors")
+                    if (arr.size() > 0) {
+                        val first = arr[0]
+                        if (first.isJsonObject && first.asJsonObject.has("defaultMessage")) {
+                            return first.asJsonObject.get("defaultMessage").asString
+                        }
+                    }
+                }
+                if (obj.has("error") && !obj.get("error").isJsonNull) {
+                    return obj.get("error").asString
+                }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("AuthRepository", "Erro ao processar corpo de erro da API: ${e.message}", e)
         }
         return padrao
     }

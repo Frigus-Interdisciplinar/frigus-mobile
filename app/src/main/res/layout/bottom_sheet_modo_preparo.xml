@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_top_rounded"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_chip_ingredient" />
+
+    <TextView
+        android:id="@+id/txtSheetRecipeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:text="Modo de Preparo"
+        android:textColor="@color/darkBlue"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="@font/sarabun"
+        android:text="Siga o passo a passo com atenção:"
+        android:textColor="@color/gray"
+        android:textSize="13sp" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="360dp">
+
+        <TextView
+            android:id="@+id/txtSheetInstructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:lineSpacingExtra="5dp"
+            android:textColor="@color/color_text_primary"
+            android:textSize="14sp"
+            tools:text="1. Tempere o frango com alho e sal.\n\n2. Doure em uma frigideira quente.\n\n3. Adicione o creme de leite." />
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnFecharModoPreparo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="@color/blue_primary"
+        android:fontFamily="@font/sarabun"
+        android:text="Entendi"
+        android:textAllCaps="false"
+        android:textColor="@color/pure_white"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

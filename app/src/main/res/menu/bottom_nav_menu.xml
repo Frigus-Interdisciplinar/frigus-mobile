@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:fontFamily="@font/sarabun"
+        android:title="Início" />
+    <item
+        android:id="@+id/nav_estoque"
+        android:icon="@drawable/ic_estoque"
+        android:fontFamily="@font/sarabun"
+        android:title="Estoque" />
+    <item
+        android:id="@+id/nav_receitas"
+        android:icon="@drawable/ic_receita"
+        android:fontFamily="@font/sarabun"
+        android:title="Receitas" />
+    <item
+        android:id="@+id/nav_lista"
+        android:icon="@drawable/ic_lista"
+        android:fontFamily="@font/sarabun"
+        android:title="Lista" />
+    <item
+        android:id="@+id/nav_perfil"
+        android:icon="@drawable/ic_user"
+        android:fontFamily="@font/sarabun"
+        android:title="Perfil" />
+</menu>

@@ -149,7 +149,7 @@ class CreateAccountActivity : AppCompatActivity() {
         }
 
         if (!ValidationUtils.isSenhaValida(senha)) {
-            etSenha.error = "A senha deve ter no mínimo 8 caracteres e 1 caractere especial"
+            etSenha.error = "A senha deve ter de 8 a 20 caracteres, com 1 maiúscula, 1 minúscula, 1 número e 1 especial"
             etSenha.requestFocus()
             return
         }

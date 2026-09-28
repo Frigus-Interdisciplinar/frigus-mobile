@@ -1,7 +1,27 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
+
+val envFile = rootProject.file(".env")
+val envProperties = Properties()
+if (envFile.exists()) {
+    envFile.forEachLine { line ->
+        val trimmed = line.trim()
+        if (trimmed.isNotEmpty() && !trimmed.startsWith("#") && trimmed.contains("=")) {
+            val parts = trimmed.split("=", limit = 2)
+            val key = parts[0].trim()
+            var value = parts[1].trim()
+            if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.substring(1, value.length - 1)
+            }
+            envProperties.setProperty(key, value)
+        }
+    }
+}
+val frigusBaseUrl = envProperties.getProperty("FRIGUS_BASE_URL") ?: "https://frigus-core-api.onrender.com/"
 
 android {
     namespace = "com.example.frigus_mobile"
@@ -17,6 +37,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BASE_URL", "\"$frigusBaseUrl\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
