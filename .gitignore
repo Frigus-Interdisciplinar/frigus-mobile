@@ -16,3 +16,4 @@
 /.draft_features/
 local.properties
 .env
+.kotlin/
