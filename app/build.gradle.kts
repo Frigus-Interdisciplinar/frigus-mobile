@@ -22,6 +22,7 @@ if (envFile.exists()) {
     }
 }
 val frigusBaseUrl = envProperties.getProperty("FRIGUS_BASE_URL") ?: "https://frigus-core-api.onrender.com/"
+val googleClientId = envProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""
 
 android {
     namespace = "com.example.frigus_mobile"
@@ -38,6 +39,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BASE_URL", "\"$frigusBaseUrl\"")
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
     }
 
     buildFeatures {
@@ -70,6 +72,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")

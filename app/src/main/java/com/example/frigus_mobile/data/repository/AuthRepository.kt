@@ -43,6 +43,28 @@ class AuthRepository(context: Context) {
         })
     }
 
+    fun loginWithGoogle(idToken: String, liveData: MutableLiveData<Resource<UserLoginResponse>>) {
+        liveData.value = Resource.loading()
+
+        val request = com.example.frigus_mobile.data.model.GoogleLoginRequest(idToken)
+        apiService.loginComGoogle(request).enqueue(object : Callback<UserLoginResponse> {
+            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    sessionManager.saveTokens(body.accessToken, body.refreshToken)
+                    liveData.postValue(Resource.success(body))
+                } else {
+                    val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar com Google. Código: ${response.code()}")
+                    liveData.postValue(Resource.error(mensagemErro))
+                }
+            }
+
+            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                liveData.postValue(Resource.error("Erro de conexão com o servidor: ${t.message}"))
+            }
+        })
+    }
+
 
     fun register(name: String, birthDate: String, email: String, password: String, liveData: MutableLiveData<Resource<UserResponse>>) {
         liveData.value = Resource.loading()
@@ -53,7 +75,22 @@ class AuthRepository(context: Context) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
                     android.util.Log.d("AuthRepository", "Cadastro realizado com sucesso: ${body.email}")
-                    liveData.postValue(Resource.success(body))
+                    // Realiza login automático com as credenciais recém-cadastradas para salvar a sessão
+                    val loginRequest = UserLoginRequest(email, password)
+                    apiService.login(loginRequest).enqueue(object : Callback<UserLoginResponse> {
+                        override fun onResponse(loginCall: Call<UserLoginResponse>, loginResponse: Response<UserLoginResponse>) {
+                            val loginBody = loginResponse.body()
+                            if (loginResponse.isSuccessful && loginBody != null) {
+                                sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken)
+                            }
+                            liveData.postValue(Resource.success(body))
+                        }
+
+                        override fun onFailure(loginCall: Call<UserLoginResponse>, t: Throwable) {
+                            // Se o login falhar por conexão, ainda avisa sucesso no cadastro para não bloquear
+                            liveData.postValue(Resource.success(body))
+                        }
+                    })
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Erro no cadastro. Código: ${response.code()}")
                     android.util.Log.e("AuthRepository", "Falha no cadastro [${response.code()}]: $mensagemErro")
