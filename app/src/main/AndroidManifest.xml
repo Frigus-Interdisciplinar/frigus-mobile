@@ -37,5 +37,45 @@
             android:name=".ui.recipes.ReceitaDetalhesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ui.notifications.NotificacoesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.TodasCategoriasActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.CategoriaItensActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.AlimentoDetalhesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.EditarAlimentoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.qrcode.QrCodeScannerActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.qrcode.QrCodeCarregandoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.qrcode.QrCodeItensActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.qrcode.QrCodeConfirmacaoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.ai.ChatIaActivity"
+            android:exported="false" />
+
     </application>
 </manifest>

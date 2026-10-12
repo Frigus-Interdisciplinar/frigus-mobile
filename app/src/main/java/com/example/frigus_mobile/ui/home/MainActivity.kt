@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.ui.profile.PerfilFragment
 import com.example.frigus_mobile.ui.recipes.ReceitasFragment
+import com.example.frigus_mobile.ui.stock.EstoqueFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -17,15 +18,27 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.nav_receitas
+            bottomNav.selectedItemId = R.id.nav_home
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ReceitasFragment())
+                .replace(R.id.fragment_container, HomeFragment())
                 .commit()
         }
 
         bottomNav.setOnItemSelectedListener { item ->
             supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             when (item.itemId) {
+                R.id.nav_home -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, HomeFragment())
+                        .commit()
+                    true
+                }
+                R.id.nav_estoque -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, EstoqueFragment())
+                        .commit()
+                    true
+                }
                 R.id.nav_receitas -> {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, ReceitasFragment())
@@ -40,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, ReceitasFragment())
+                        .replace(R.id.fragment_container, HomeFragment())
                         .commit()
                     true
                 }

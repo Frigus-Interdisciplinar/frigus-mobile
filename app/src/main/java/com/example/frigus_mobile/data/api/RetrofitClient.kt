@@ -69,4 +69,13 @@ object RetrofitClient {
 
     val recipeService: RecipeApiService
         get() = getRetrofit().create(RecipeApiService::class.java)
+
+    val stockService: StockApiService
+        get() = getRetrofit().create(StockApiService::class.java)
+
+    val notificationService: NotificationApiService
+        get() = getRetrofit().create(NotificationApiService::class.java)
+
+    val aiRecipeService: AiRecipeApiService
+        get() = getRetrofit().create(AiRecipeApiService::class.java)
 }
