@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class EditarAlimentoActivity : AppCompatActivity() {
@@ -106,6 +107,8 @@ class EditarAlimentoActivity : AppCompatActivity() {
 
     private fun salvarAlteracoes() {
         val prodId = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { salvarAlteracoes() }) return
+
         val novaQtd = etQuantidade.text.toString().toIntOrNull()
         val novaValidade = etValidade.text.toString().trim()
         val localSelecionado = when (spinnerLocal.selectedItemPosition) {
@@ -115,14 +118,20 @@ class EditarAlimentoActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            repository.updateStockProduct(
-                id = prodId,
-                quantity = novaQtd,
-                expireDate = novaValidade,
-                storagePlace = localSelecionado
-            )
-            Toast.makeText(this@EditarAlimentoActivity, "Alimento atualizado com sucesso!", Toast.LENGTH_SHORT).show()
-            finish()
+            try {
+                repository.updateStockProduct(
+                    id = prodId,
+                    quantity = novaQtd,
+                    expireDate = novaValidade,
+                    storagePlace = localSelecionado
+                )
+                Toast.makeText(this@EditarAlimentoActivity, "Alimento atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@EditarAlimentoActivity, e.message) {
+                    salvarAlteracoes()
+                }
+            }
         }
     }
 }

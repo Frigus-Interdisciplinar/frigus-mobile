@@ -15,6 +15,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.ui.profile.PerfilFragment
 import com.example.frigus_mobile.ui.recipes.ReceitasFragment
 import com.example.frigus_mobile.ui.stock.EstoqueFragment
+import com.example.frigus_mobile.utils.NetworkGuard
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -121,6 +122,13 @@ class MainActivity : AppCompatActivity() {
                 mostrarDialogoSaida()
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NetworkGuard.ensureConnected(this) {
+            recreate()
+        }
     }
 
     private fun trocarFragmento(fragment: Fragment) {

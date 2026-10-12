@@ -19,6 +19,7 @@ import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class EstoqueFragment : Fragment() {
@@ -104,10 +105,18 @@ class EstoqueFragment : Fragment() {
 
     private fun carregarDados() {
         if (!::repository.isInitialized) return
-        lifecycleScope.launch {
-            allProducts = repository.getStockProducts()
-            atualizarResumo()
-            aplicarFiltroAtual()
+        if (!NetworkGuard.ensureConnected(activity) { carregarDados() }) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                allProducts = repository.getStockProducts()
+                atualizarResumo()
+                aplicarFiltroAtual()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(activity, e.message) {
+                    carregarDados()
+                }
+            }
         }
     }
 
@@ -145,7 +154,7 @@ class EstoqueFragment : Fragment() {
             val nameMatches = query.isEmpty() || (item.product?.name ?: "").lowercase().contains(query)
             placeMatches && nameMatches
         }
-        adapter.updateList(if (filtered.isNotEmpty()) filtered else allProducts.take(4))
+        adapter.updateList(filtered)
     }
 
     private fun filtrarProdutos(query: String) {

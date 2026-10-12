@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.repository.NotificationRepository
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class NotificacoesActivity : AppCompatActivity() {
@@ -33,28 +34,34 @@ class NotificacoesActivity : AppCompatActivity() {
         rvNotificacoes.adapter = adapter
 
         findViewById<View>(R.id.btnLimparTodas).setOnClickListener {
-            lifecycleScope.launch {
-                repository.clearAll()
-                adapter.updateList(emptyList())
-                layoutEmptyState.visibility = View.VISIBLE
-                rvNotificacoes.visibility = View.GONE
-            }
+            adapter.updateList(emptyList())
+            layoutEmptyState.visibility = View.VISIBLE
+            rvNotificacoes.visibility = View.GONE
         }
 
         carregarNotificacoes()
     }
 
     private fun carregarNotificacoes() {
+        if (!NetworkGuard.ensureConnected(this) { carregarNotificacoes() }) return
+
         lifecycleScope.launch {
-            val list = repository.getNotifications()
-            if (list.isEmpty()) {
-                layoutEmptyState.visibility = View.VISIBLE
-                rvNotificacoes.visibility = View.GONE
-            } else {
-                layoutEmptyState.visibility = View.GONE
-                rvNotificacoes.visibility = View.VISIBLE
-                adapter.updateList(list)
+            try {
+                val list = repository.getNotifications()
+                if (list.isEmpty()) {
+                    layoutEmptyState.visibility = View.VISIBLE
+                    rvNotificacoes.visibility = View.GONE
+                } else {
+                    layoutEmptyState.visibility = View.GONE
+                    rvNotificacoes.visibility = View.VISIBLE
+                    adapter.updateList(list)
+                }
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@NotificacoesActivity, e.message) {
+                    carregarNotificacoes()
+                }
             }
         }
     }
 }
+

@@ -22,6 +22,7 @@ import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
 import com.example.frigus_mobile.ui.home.MainActivity
 import com.example.frigus_mobile.utils.CustomTypefaceSpan
+import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ValidationUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -70,6 +71,11 @@ class LoginActivity : AppCompatActivity() {
         setupBannerInfinito()
         setupListeners()
         setupObservers()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NetworkGuard.ensureConnected(this) {}
     }
 
     private fun initViews() {
@@ -220,7 +226,12 @@ class LoginActivity : AppCompatActivity() {
                 progressBarLogin.visibility = android.view.View.GONE
                 resetGoogleLoadingState()
 
-                Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
+                val msg = resource.message ?: "Erro ao fazer login"
+                if (msg.startsWith("Erro de conexão com o servidor")) {
+                    NetworkGuard.showBlockingError(this) { fazerLogin() }
+                } else {
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class CategoriaItensActivity : AppCompatActivity() {
@@ -63,13 +64,21 @@ class CategoriaItensActivity : AppCompatActivity() {
 
     private fun carregarItens() {
         if (!::repository.isInitialized) return
+        if (!NetworkGuard.ensureConnected(this) { carregarItens() }) return
+
         lifecycleScope.launch {
-            val all = repository.getStockProducts()
-            allCategoryProducts = all.filter {
-                (it.category ?: it.product?.category ?: "").equals(categoryCode, ignoreCase = true) ||
-                (categoryCode == "VEGETABLE" && (it.category == "FRUIT" || it.product?.category == "FRUIT"))
+            try {
+                val all = repository.getStockProducts()
+                allCategoryProducts = all.filter {
+                    (it.category ?: it.product?.category ?: "").equals(categoryCode, ignoreCase = true) ||
+                    (categoryCode == "VEGETABLE" && (it.category == "FRUIT" || it.product?.category == "FRUIT"))
+                }
+                adapter.updateList(allCategoryProducts)
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@CategoriaItensActivity, e.message) {
+                    carregarItens()
+                }
             }
-            adapter.updateList(allCategoryProducts)
         }
     }
 

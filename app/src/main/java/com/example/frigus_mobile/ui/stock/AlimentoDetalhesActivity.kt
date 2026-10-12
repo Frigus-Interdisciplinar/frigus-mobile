@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
@@ -48,12 +49,23 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        item?.id?.let { id ->
-            lifecycleScope.launch {
+        atualizarDetalhesDaApi()
+    }
+
+    private fun atualizarDetalhesDaApi() {
+        val id = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { atualizarDetalhesDaApi() }) return
+
+        lifecycleScope.launch {
+            try {
                 val updated = repository.getStockProductById(id)
                 if (updated != null) {
                     item = updated
                     preencherDados()
+                }
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
+                    atualizarDetalhesDaApi()
                 }
             }
         }
@@ -92,7 +104,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         findViewById<ProgressBar>(R.id.pbQuantidadeRestante).progress = percent
         findViewById<TextView>(R.id.tvFracaoQuantidade).text = "$currentQty$unit de $originalQty$unit"
 
-        findViewById<TextView>(R.id.tvInfoValidade).text = prod.expireDate ?: "10/05/2026"
+        findViewById<TextView>(R.id.tvInfoValidade).text = prod.expireDate ?: "-"
         findViewById<TextView>(R.id.tvInfoCategoria).text = categoryName
         findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = "$originalQty$unit"
 
@@ -111,15 +123,26 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             .setTitle("Remover do estoque")
             .setMessage("Deseja realmente remover este alimento do seu estoque?")
             .setPositiveButton("Remover") { _, _ ->
-                item?.id?.let { id ->
-                    lifecycleScope.launch {
-                        repository.deleteStockProduct(id)
-                        Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                }
+                removerAlimento()
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    private fun removerAlimento() {
+        val id = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { removerAlimento() }) return
+
+        lifecycleScope.launch {
+            try {
+                repository.deleteStockProduct(id)
+                Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
+                    removerAlimento()
+                }
+            }
+        }
     }
 }

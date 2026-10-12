@@ -11,6 +11,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
 
 class QrCodeItensActivity : AppCompatActivity() {
@@ -46,33 +47,41 @@ class QrCodeItensActivity : AppCompatActivity() {
     }
 
     private fun salvarItens() {
-        lifecycleScope.launch {
-            for (nfItem in adapter.getItems()) {
-                val stockItem = StockProductResponse(
-                    id = nfItem.id,
-                    productId = nfItem.id,
-                    product = StockProductProductResponse(
-                        id = nfItem.id,
-                        name = nfItem.name,
-                        category = nfItem.category,
-                        storagePlace = "FRIDGE",
-                        unitPrice = nfItem.price,
-                        unitOfMeasure = if (nfItem.unit == "kg") "KILOGRAM" else "UNIT"
-                    ),
-                    stockId = 1,
-                    quantity = nfItem.quantity,
-                    minimalQuantity = nfItem.quantity,
-                    purchaseUnitPrice = nfItem.price,
-                    expireDate = "30/05/2026",
-                    productStatus = "FRESH",
-                    category = nfItem.category
-                )
-                repository.addStockProduct(stockItem)
-            }
+        if (!NetworkGuard.ensureConnected(this) { salvarItens() }) return
 
-            val intent = Intent(this@QrCodeItensActivity, QrCodeConfirmacaoActivity::class.java)
-            startActivity(intent)
-            finish()
+        lifecycleScope.launch {
+            try {
+                for (nfItem in adapter.getItems()) {
+                    val stockItem = StockProductResponse(
+                        id = nfItem.id,
+                        productId = nfItem.id,
+                        product = StockProductProductResponse(
+                            id = nfItem.id,
+                            name = nfItem.name,
+                            category = nfItem.category,
+                            storagePlace = "FRIDGE",
+                            unitPrice = nfItem.price,
+                            unitOfMeasure = if (nfItem.unit == "kg") "KILOGRAM" else "UNIT"
+                        ),
+                        stockId = 1,
+                        quantity = nfItem.quantity,
+                        minimalQuantity = nfItem.quantity,
+                        purchaseUnitPrice = nfItem.price,
+                        expireDate = "30/05/2026",
+                        productStatus = "FRESH",
+                        category = nfItem.category
+                    )
+                    repository.addStockProduct(stockItem)
+                }
+
+                val intent = Intent(this@QrCodeItensActivity, QrCodeConfirmacaoActivity::class.java)
+                startActivity(intent)
+                finish()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@QrCodeItensActivity, e.message) {
+                    salvarItens()
+                }
+            }
         }
     }
 }

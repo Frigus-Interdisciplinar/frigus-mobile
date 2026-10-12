@@ -19,6 +19,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.RecipeResponse
 import com.example.frigus_mobile.data.model.Resource
 import com.example.frigus_mobile.ui.recipes.adapter.RecipePopularAdapter
+import com.example.frigus_mobile.utils.NetworkGuard
 import com.google.android.material.card.MaterialCardView
 
 class ReceitasFragment : Fragment() {
@@ -113,7 +114,9 @@ class ReceitasFragment : Fragment() {
                 }
                 Resource.Status.ERROR -> {
                     progressBar.visibility = View.GONE
-                    Toast.makeText(requireContext(), resource.message ?: "Erro ao carregar receitas", Toast.LENGTH_SHORT).show()
+                    NetworkGuard.showBlockingError(activity, resource.message) {
+                        viewModel.loadRecipes()
+                    }
                 }
             }
         }

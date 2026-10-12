@@ -32,7 +32,7 @@ class RecipesViewModel(application: Application) : AndroidViewModel(application)
         loadRecipes()
     }
 
-    fun loadRecipes(stockId: Int = 1) {
+    fun loadRecipes(stockId: Int? = null) {
         repository.getRecipeSuggestions(stockId, _recipesResource)
     }
 

@@ -14,7 +14,7 @@ import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.ai.ChatIaActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
-import com.example.frigus_mobile.ui.recipes.ReceitaDetalhesActivity
+import com.example.frigus_mobile.utils.NetworkGuard
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
 
         // Nome do usuário conectado
         val tvGreeting = view.findViewById<TextView>(R.id.tvGreeting)
-        val nomeUsuario = sessionManager.userName?.split(" ")?.firstOrNull() ?: "Juliana"
+        val nomeUsuario = sessionManager.userName?.split(" ")?.firstOrNull() ?: "Usuário"
         tvGreeting.text = "Olá, $nomeUsuario!"
 
         // Abrir Central de Notificações
@@ -63,11 +63,7 @@ class HomeFragment : Fragment() {
 
         // Sugestão de Receita
         view.findViewById<View>(R.id.cardSugestaoReceita).setOnClickListener {
-            val intent = Intent(requireContext(), ReceitaDetalhesActivity::class.java).apply {
-                putExtra("RECIPE_ID", 1)
-                putExtra("RECIPE_TITLE", "Frango ao forno com legumes")
-            }
-            startActivity(intent)
+            navigateToBottomNav(R.id.nav_receitas)
         }
 
         // Escanear QR Code
@@ -106,15 +102,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun carregarDadosEstoque() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val produtos = stockRepository.getStockProducts()
-            val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
-            val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
-            val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
+        if (!NetworkGuard.ensureConnected(activity) { carregarDadosEstoque() }) return
 
-            view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = "$qtdGeladeira itens"
-            view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = "$qtdFreezer itens"
-            view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = "$qtdDespensa itens"
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val produtos = stockRepository.getStockProducts()
+                val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
+                val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
+                val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
+
+                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = "$qtdGeladeira itens"
+                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = "$qtdFreezer itens"
+                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = "$qtdDespensa itens"
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(activity, e.message) {
+                    carregarDadosEstoque()
+                }
+            }
         }
     }
 
