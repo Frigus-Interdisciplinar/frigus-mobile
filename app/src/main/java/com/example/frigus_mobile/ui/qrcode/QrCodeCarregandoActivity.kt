@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.example.frigus_mobile.R
 
 class QrCodeCarregandoActivity : AppCompatActivity() {
@@ -18,6 +19,7 @@ class QrCodeCarregandoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         setContentView(R.layout.activity_qr_code_carregando)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {

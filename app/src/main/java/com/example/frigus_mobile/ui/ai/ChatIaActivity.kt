@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +26,7 @@ class ChatIaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         setContentView(R.layout.activity_chat_ia)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
