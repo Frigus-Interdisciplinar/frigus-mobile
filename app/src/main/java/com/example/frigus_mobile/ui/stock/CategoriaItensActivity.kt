@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class CategoriaItensActivity : AppCompatActivity() {
 
-    private val repository = StockRepository()
+    private lateinit var repository: StockRepository
     private lateinit var adapter: EstoqueProdutoAdapter
     private var categoryCode = "MEAT"
     private var categoryName = "Carnes"
@@ -27,6 +27,8 @@ class CategoriaItensActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_categoria_itens)
+
+        repository = StockRepository(this)
 
         categoryCode = intent.getStringExtra("CATEGORY_CODE") ?: "MEAT"
         categoryName = intent.getStringExtra("CATEGORY_NAME") ?: "Carnes"
@@ -60,8 +62,9 @@ class CategoriaItensActivity : AppCompatActivity() {
     }
 
     private fun carregarItens() {
+        if (!::repository.isInitialized) return
         lifecycleScope.launch {
-            val all = repository.getStockProducts(stockId = 1)
+            val all = repository.getStockProducts()
             allCategoryProducts = all.filter {
                 (it.category ?: it.product?.category ?: "").equals(categoryCode, ignoreCase = true) ||
                 (categoryCode == "VEGETABLE" && (it.category == "FRUIT" || it.product?.category == "FRUIT"))

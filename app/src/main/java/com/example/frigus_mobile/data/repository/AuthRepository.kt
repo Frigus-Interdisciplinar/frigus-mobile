@@ -29,7 +29,7 @@ class AuthRepository(context: Context) {
             override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    sessionManager.saveTokens(body.accessToken, body.refreshToken)
+                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar na API. Código: ${response.code()}")
@@ -51,7 +51,7 @@ class AuthRepository(context: Context) {
             override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    sessionManager.saveTokens(body.accessToken, body.refreshToken)
+                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar com Google. Código: ${response.code()}")
@@ -81,7 +81,7 @@ class AuthRepository(context: Context) {
                         override fun onResponse(loginCall: Call<UserLoginResponse>, loginResponse: Response<UserLoginResponse>) {
                             val loginBody = loginResponse.body()
                             if (loginResponse.isSuccessful && loginBody != null) {
-                                sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken)
+                                sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken, body.name)
                             }
                             liveData.postValue(Resource.success(body))
                         }

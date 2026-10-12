@@ -15,12 +15,14 @@ import kotlinx.coroutines.launch
 
 class QrCodeItensActivity : AppCompatActivity() {
 
-    private val repository = StockRepository()
+    private lateinit var repository: StockRepository
     private lateinit var adapter: QrCodeProdutoAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_code_itens)
+
+        repository = StockRepository(this)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()

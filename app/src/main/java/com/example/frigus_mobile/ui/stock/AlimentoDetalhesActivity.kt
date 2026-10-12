@@ -17,12 +17,14 @@ import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
 
-    private val repository = StockRepository()
+    private lateinit var repository: StockRepository
     private var item: StockProductResponse? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alimento_detalhes)
+
+        repository = StockRepository(this)
 
         item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
 

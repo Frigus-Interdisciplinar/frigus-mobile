@@ -7,14 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.ai.ChatIaActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
 import com.example.frigus_mobile.ui.recipes.ReceitaDetalhesActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
+
+    private lateinit var sessionManager: SessionManager
+    private lateinit var stockRepository: StockRepository
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +33,14 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        sessionManager = SessionManager(requireContext())
+        stockRepository = StockRepository(requireContext())
+
+        // Nome do usuário conectado
+        val tvGreeting = view.findViewById<TextView>(R.id.tvGreeting)
+        val nomeUsuario = sessionManager.userName?.split(" ")?.firstOrNull() ?: "Juliana"
+        tvGreeting.text = "Olá, $nomeUsuario!"
 
         // Abrir Central de Notificações
         view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {
@@ -80,6 +95,26 @@ class HomeFragment : Fragment() {
 
         view.findViewById<View>(R.id.cardEstoqueDespensa).setOnClickListener {
             navigateToBottomNav(R.id.nav_estoque)
+        }
+
+        carregarDadosEstoque()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        carregarDadosEstoque()
+    }
+
+    private fun carregarDadosEstoque() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val produtos = stockRepository.getStockProducts()
+            val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
+            val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
+            val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
+
+            view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = "$qtdGeladeira itens"
+            view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = "$qtdFreezer itens"
+            view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = "$qtdDespensa itens"
         }
     }
 

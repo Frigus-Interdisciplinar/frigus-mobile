@@ -1,13 +1,17 @@
 package com.example.frigus_mobile.data.repository
 
+import android.content.Context
+import android.util.Log
 import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class StockRepository {
+class StockRepository(context: Context? = null) {
 
     private val api = RetrofitClient.stockService
+    private val sessionManager = context?.let { SessionManager(it) }
 
     // In-memory cache / fallback to guarantee smooth UI matching mock designs
     private val localStockProducts = mutableListOf(
@@ -173,19 +177,68 @@ class StockRepository {
         )
     )
 
-    suspend fun getStockProducts(stockId: Int = 1): List<StockProductResponse> = withContext(Dispatchers.IO) {
+    /**
+     * Resolve o ID do estoque do grupo do usuário autenticado.
+     * Fluxo no frigus-core-api:
+     * 1. GET /groups -> obtém os grupos do usuário.
+     * 2. GET /stocks?groupId={groupId} -> obtém o estoque daquele grupo.
+     */
+    suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
+        val cachedStockId = sessionManager?.activeStockId
+        if (cachedStockId != null && cachedStockId > 0) {
+            return@withContext cachedStockId
+        }
+
         try {
+            Log.d("StockRepository", "Buscando grupos do usuário em GET /groups...")
+            val groupsResponse = api.getMyGroups().execute()
+            if (groupsResponse.isSuccessful && !groupsResponse.body().isNullOrEmpty()) {
+                val groups = groupsResponse.body()!!
+                val userGroup = groups.firstOrNull { it.id != null }
+                val groupId = userGroup?.id
+
+                if (groupId != null) {
+                    Log.d("StockRepository", "Grupo do usuário encontrado: $groupId. Buscando estoque em GET /stocks?groupId=$groupId...")
+                    val stockResponse = api.getStocksByGroup(groupId).execute()
+                    if (stockResponse.isSuccessful && stockResponse.body()?.content?.isNotEmpty() == true) {
+                        val stock = stockResponse.body()!!.content.first()
+                        val stockId = stock.id
+                        Log.d("StockRepository", "Estoque do grupo resolvido: stockId=$stockId")
+                        sessionManager?.saveActiveGroupAndStock(groupId, stockId)
+                        return@withContext stockId
+                    }
+                }
+            } else {
+                Log.w("StockRepository", "Nenhum grupo retornado para o usuário ou status: ${groupsResponse.code()}")
+            }
+        } catch (e: Exception) {
+            Log.e("StockRepository", "Erro ao resolver grupo e estoque do usuário: ${e.message}")
+        }
+        null
+    }
+
+    /**
+     * Obtém os alimentos do estoque vinculado ao grupo do usuário autenticado.
+     */
+    suspend fun getStockProducts(): List<StockProductResponse> = withContext(Dispatchers.IO) {
+        val stockId = resolveUserStockId() ?: 1
+
+        try {
+            Log.d("StockRepository", "Buscando alimentos da API em GET /stock-products?stockId=$stockId...")
             val response = api.getStockProducts(stockId).execute()
             if (response.isSuccessful && response.body() != null && response.body()!!.content.isNotEmpty()) {
                 val apiProducts = response.body()!!.content
+                Log.d("StockRepository", "Sucesso! ${apiProducts.size} alimentos carregados da API para o estoque $stockId")
                 localStockProducts.clear()
                 localStockProducts.addAll(apiProducts)
-                apiProducts
+                return@withContext apiProducts
             } else {
-                localStockProducts.toList()
+                Log.d("StockRepository", "API retornou lista vazia ou status ${response.code()}. Usando itens locais.")
+                return@withContext localStockProducts.toList()
             }
         } catch (e: Exception) {
-            localStockProducts.toList()
+            Log.e("StockRepository", "Erro de conexão ao buscar produtos do estoque: ${e.message}. Usando dados locais.")
+            return@withContext localStockProducts.toList()
         }
     }
 
@@ -196,7 +249,7 @@ class StockRepository {
                 return@withContext response.body()
             }
         } catch (e: Exception) {
-            // fallback to local
+            Log.e("StockRepository", "Erro ao buscar alimento por ID da API: ${e.message}")
         }
         localStockProducts.find { it.id == id }
     }
@@ -215,9 +268,11 @@ class StockRepository {
         try {
             val response = api.updateStockProduct(id, req).execute()
             if (response.isSuccessful) {
-                // update local cache as well
+                Log.d("StockRepository", "Alimento atualizado na API: ID $id")
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e("StockRepository", "Erro ao atualizar alimento na API: ${e.message}")
+        }
 
         val item = localStockProducts.find { it.id == id }
         if (item != null) {
@@ -230,12 +285,34 @@ class StockRepository {
     suspend fun deleteStockProduct(id: Int): Boolean = withContext(Dispatchers.IO) {
         try {
             api.deleteStockProduct(id).execute()
-        } catch (_: Exception) {}
+            Log.d("StockRepository", "Alimento excluído da API: ID $id")
+        } catch (e: Exception) {
+            Log.e("StockRepository", "Erro ao excluir alimento na API: ${e.message}")
+        }
         localStockProducts.removeAll { it.id == id }
         true
     }
 
     suspend fun addStockProduct(item: StockProductResponse) = withContext(Dispatchers.IO) {
+        val stockId = sessionManager?.activeStockId ?: item.stockId ?: 1
+        val req = StockProductCreateRequest(
+            productId = item.productId ?: item.id ?: 1,
+            stockId = stockId,
+            quantity = item.quantity ?: 1,
+            minimalQuantity = item.minimalQuantity ?: 1,
+            purchaseUnitPrice = item.purchaseUnitPrice ?: 0.0,
+            expireDate = item.expireDate
+        )
+        try {
+            val resp = api.createStockProduct(req).execute()
+            if (resp.isSuccessful && resp.body() != null) {
+                Log.d("StockRepository", "Alimento adicionado à API no estoque $stockId: ${resp.body()?.id}")
+                localStockProducts.add(0, resp.body()!!)
+                return@withContext
+            }
+        } catch (e: Exception) {
+            Log.e("StockRepository", "Erro ao criar produto no estoque da API: ${e.message}")
+        }
         localStockProducts.add(0, item)
     }
 }

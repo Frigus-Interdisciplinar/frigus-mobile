@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class EditarAlimentoActivity : AppCompatActivity() {
 
-    private val repository = StockRepository()
+    private lateinit var repository: StockRepository
     private var item: StockProductResponse? = null
 
     private lateinit var etNome: EditText
@@ -33,6 +33,8 @@ class EditarAlimentoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editar_alimento)
+
+        repository = StockRepository(this)
 
         item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
 

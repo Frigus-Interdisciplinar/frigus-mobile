@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class EstoqueFragment : Fragment() {
 
-    private val repository = StockRepository()
+    private lateinit var repository: StockRepository
     private lateinit var adapter: EstoqueProdutoAdapter
     private var allProducts = listOf<StockProductResponse>()
     private var currentStoragePlace = "FRIDGE" // FRIDGE, FREEZER, PANTRY
@@ -43,6 +43,8 @@ class EstoqueFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        repository = StockRepository(requireContext())
 
         // Botão Ler QR Code
         view.findViewById<View>(R.id.btnEstoqueQrScanner).setOnClickListener {
@@ -101,8 +103,9 @@ class EstoqueFragment : Fragment() {
     }
 
     private fun carregarDados() {
+        if (!::repository.isInitialized) return
         lifecycleScope.launch {
-            allProducts = repository.getStockProducts(stockId = 1)
+            allProducts = repository.getStockProducts()
             atualizarResumo()
             aplicarFiltroAtual()
         }
