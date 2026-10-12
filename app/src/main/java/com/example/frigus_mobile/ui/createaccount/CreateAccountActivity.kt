@@ -19,6 +19,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ValidationUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -52,6 +53,11 @@ class CreateAccountActivity : AppCompatActivity() {
         initViews()
         setupListeners()
         setupObservers()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        NetworkGuard.ensureConnected(this) {}
     }
 
     private fun initViews() {
@@ -205,7 +211,12 @@ class CreateAccountActivity : AppCompatActivity() {
                 btnCriarConta.isEnabled = true
                 btnCriarConta.text = "Cadastrar"
                 progressBarCriarConta.visibility = View.GONE
-                Toast.makeText(this, resource.message ?: "Erro ao criar conta", Toast.LENGTH_LONG).show()
+                val msg = resource.message ?: "Erro ao criar conta"
+                if (msg.startsWith("Falha de conexão com a API")) {
+                    NetworkGuard.showBlockingError(this) { cadastrarUsuario() }
+                } else {
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
