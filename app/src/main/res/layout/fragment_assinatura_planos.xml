@@ -62,32 +62,35 @@
                     android:src="@drawable/ic_crown" />
 
                 <TextView
+                    android:id="@+id/tvPlanoAtualNome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Premium"
+                    android:text="Plano Gratuito"
                     android:textColor="@color/color_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvPlanoAtualPreco"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:fontFamily="@font/sarabun"
-                android:text="R$ 29,90/mês"
+                android:text="R$ 0,00/mês"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvPlanoAtualValidade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:fontFamily="@font/sarabun"
-                android:text="Válido até 25/12/2026"
+                android:text="Sem assinatura paga ativa"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>

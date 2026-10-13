@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.ai.ChatIaActivity
@@ -16,7 +17,9 @@ import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
 import com.example.frigus_mobile.utils.NetworkGuard
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -37,10 +40,7 @@ class HomeFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
         stockRepository = StockRepository(requireContext())
 
-        // Nome do usuário conectado
-        val tvGreeting = view.findViewById<TextView>(R.id.tvGreeting)
-        val nomeUsuario = sessionManager.userName?.split(" ")?.firstOrNull() ?: "Usuário"
-        tvGreeting.text = "Olá, $nomeUsuario!"
+        atualizarSaudacao(view)
 
         // Abrir Central de Notificações
         view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {
@@ -98,7 +98,18 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        view?.let { atualizarSaudacao(it) }
         carregarDadosEstoque()
+    }
+
+    private fun atualizarSaudacao(rootView: View) {
+        val tvGreeting = rootView.findViewById<TextView>(R.id.tvGreeting)
+        val nomeUsuario = sessionManager.userName?.trim()?.split(" ")?.firstOrNull()?.takeIf { it.isNotBlank() }
+        tvGreeting?.text = if (nomeUsuario != null) "Olá, $nomeUsuario!" else "Olá!"
+    }
+
+    private fun formatarQtdItens(qtd: Int): String {
+        return if (qtd == 1) "1 item" else "$qtd itens"
     }
 
     private fun carregarDadosEstoque() {
@@ -106,14 +117,46 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Sincroniza o perfil do usuário autenticado caso ainda não tenha nome/email salvos
+                withContext(Dispatchers.IO) {
+                    try {
+                        val profileResp = RetrofitClient.authService.getProfile().execute()
+                        if (profileResp.isSuccessful && profileResp.body() != null) {
+                            sessionManager.saveUserProfile(profileResp.body())
+                        }
+                    } catch (_: Exception) {
+                    }
+                }
+                view?.let { atualizarSaudacao(it) }
+
                 val produtos = stockRepository.getStockProducts()
+
+                val qtdVencendo = produtos.count {
+                    it.productStatus.equals("NEAR_EXPIRATION", ignoreCase = true) ||
+                        it.productStatus.equals("EXPIRED", ignoreCase = true)
+                }
+                val cardAlerta = view?.findViewById<View>(R.id.cardAlertaVencendo)
+                val tvAlertaTitulo = view?.findViewById<TextView>(R.id.tvAlertaVencendoTitulo)
+                if (qtdVencendo > 0) {
+                    cardAlerta?.visibility = View.VISIBLE
+                    tvAlertaTitulo?.text = if (qtdVencendo == 1) {
+                        "1 alimento vencendo"
+                    } else {
+                        "$qtdVencendo alimentos vencendo"
+                    }
+                } else {
+                    cardAlerta?.visibility = View.GONE
+                }
+
+                view?.findViewById<TextView>(R.id.tvQuickEstoqueQtd)?.text = formatarQtdItens(produtos.size)
+
                 val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
                 val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
                 val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
 
-                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = "$qtdGeladeira itens"
-                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = "$qtdFreezer itens"
-                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = "$qtdDespensa itens"
+                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = formatarQtdItens(qtdGeladeira)
+                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = formatarQtdItens(qtdFreezer)
+                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = formatarQtdItens(qtdDespensa)
             } catch (e: Exception) {
                 NetworkGuard.showBlockingError(activity, e.message) {
                     carregarDadosEstoque()

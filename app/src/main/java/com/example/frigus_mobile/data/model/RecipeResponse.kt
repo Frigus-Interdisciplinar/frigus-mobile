@@ -4,16 +4,16 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class RecipeResponse(
-    @SerializedName("recipeId")
+    @SerializedName(value = "recipeId", alternate = ["id"])
     val recipeId: Int? = null,
 
-    @SerializedName("recipeName")
+    @SerializedName(value = "recipeName", alternate = ["name"])
     val recipeName: String? = null,
 
-    @SerializedName("recipeDescription")
+    @SerializedName(value = "recipeDescription", alternate = ["description"])
     val recipeDescription: String? = null,
 
-    @SerializedName("recipeInstructions")
+    @SerializedName(value = "recipeInstructions", alternate = ["instructions"])
     val recipeInstructions: String? = null,
 
     @SerializedName("ingredients")
@@ -34,7 +34,7 @@ data class RecipeResponse(
     @SerializedName("nearestExpireDate")
     val nearestExpireDate: String? = null,
 
-    // Propriedades visuais adicionais (fallback / enriquecimento de UI)
+    // Propriedades visuais adicionais
     var rating: Double = 4.8,
     var timeMinutes: Int = 35,
     var difficulty: String = "Fácil",
@@ -50,8 +50,12 @@ data class RecipeResponse(
 
     val expiringBadgeText: String
         get() {
-            val count = matchedIngredients ?: 3
-            return "Usa $count ingredientes que vencem em breve"
+            val count = matchedIngredients ?: 0
+            return when {
+                count <= 0 -> recipeDescription ?: "Sugestão de receita"
+                count == 1 -> "Usa 1 ingrediente do seu estoque"
+                else -> "Usa $count ingredientes do seu estoque"
+            }
         }
 
     val availableIngredients: List<RecipeIngredientItem>

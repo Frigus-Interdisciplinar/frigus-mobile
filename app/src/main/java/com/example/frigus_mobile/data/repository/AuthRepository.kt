@@ -30,6 +30,7 @@ class AuthRepository(context: Context) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
                     sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
+                    sessionManager.saveUserProfile(body.user)
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar na API. Código: ${response.code()}")
@@ -52,6 +53,7 @@ class AuthRepository(context: Context) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
                     sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
+                    sessionManager.saveUserProfile(body.user)
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar com Google. Código: ${response.code()}")
@@ -75,6 +77,7 @@ class AuthRepository(context: Context) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
                     android.util.Log.d("AuthRepository", "Cadastro realizado com sucesso: ${body.email}")
+                    sessionManager.saveUserProfile(body)
                     // Realiza login automático com as credenciais recém-cadastradas para salvar a sessão
                     val loginRequest = UserLoginRequest(email, password)
                     apiService.login(loginRequest).enqueue(object : Callback<UserLoginResponse> {
@@ -82,6 +85,7 @@ class AuthRepository(context: Context) {
                             val loginBody = loginResponse.body()
                             if (loginResponse.isSuccessful && loginBody != null) {
                                 sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken, body.name)
+                                sessionManager.saveUserProfile(loginBody.user ?: body)
                             }
                             liveData.postValue(Resource.success(body))
                         }

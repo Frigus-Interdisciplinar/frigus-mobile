@@ -14,6 +14,14 @@ data class StockResponse(
     val name: String? = null
 ) : Serializable
 
+data class StockCreateRequest(
+    @SerializedName("groupId")
+    val groupId: String,
+
+    @SerializedName("name")
+    val name: String
+)
+
 data class StockProductProductResponse(
     @SerializedName("id")
     val id: Int? = null,

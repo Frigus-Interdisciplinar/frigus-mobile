@@ -125,10 +125,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdTodasCarnes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="8 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -184,10 +185,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdTodasLaticinios"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="6 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -243,10 +245,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdTodasHortifruti"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="7 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -302,10 +305,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdTodasBebidas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="7 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>

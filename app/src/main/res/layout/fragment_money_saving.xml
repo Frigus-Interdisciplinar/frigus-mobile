@@ -91,7 +91,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:fontFamily="@font/sarabun"
-                    android:text="Maio de 2026"
+                    android:text="Mês atual"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </RelativeLayout>
@@ -124,7 +124,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="@font/sarabun"
-                        android:text="R$ 84,30"
+                        android:text="R$ 0,00"
                         android:textColor="@color/color_green"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -150,7 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="@font/sarabun"
-                        android:text="R$ 458,70"
+                        android:text="R$ 0,00"
                         android:textColor="@color/darkBlue"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -190,7 +190,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="@font/sarabun"
-                        android:text="R$ 21,60"
+                        android:text="R$ 0,00"
                         android:textColor="@color/color_red"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -206,7 +206,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sarabun"
-                        android:text="Comparado ao mês anterior"
+                        android:text="Status do estoque"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="11sp" />
 
@@ -216,7 +216,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:fontFamily="@font/sarabun"
-                        android:text="▲ 12% menos gastos"
+                        android:text="0 itens em dia"
                         android:textColor="@color/color_green"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -227,7 +227,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="1dp"
                         android:fontFamily="@font/sarabun"
-                        android:text="▼ 8% mais desperdício"
+                        android:text="0 itens vencidos"
                         android:textColor="@color/color_red"
                         android:textSize="11sp"
                         android:textStyle="bold" />

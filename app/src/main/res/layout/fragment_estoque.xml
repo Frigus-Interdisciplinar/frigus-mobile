@@ -165,7 +165,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="32"
+                    android:text="0"
                     android:textColor="@color/color_green"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -196,7 +196,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="2"
+                    android:text="0"
                     android:textColor="@color/color_gold"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -227,7 +227,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="1"
+                    android:text="0"
                     android:textColor="@color/color_red"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -318,10 +318,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdCatCarnes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="8 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -361,10 +362,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdCatLaticinios"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="6 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -404,10 +406,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdCatHortifruti"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="7 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -447,10 +450,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvQtdCatBebidas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="7 itens"
+                    android:text="0 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>

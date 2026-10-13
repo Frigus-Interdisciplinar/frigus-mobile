@@ -21,11 +21,6 @@ class StockRepository(context: Context? = null) {
      * 2. GET /stocks?groupId={groupId} -> obtém o estoque daquele grupo.
      */
     suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
-        val cachedStockId = sessionManager?.activeStockId
-        if (cachedStockId != null && cachedStockId > 0) {
-            return@withContext cachedStockId
-        }
-
         Log.d("StockRepository", "Buscando grupos do usuário em GET /groups...")
         val groupsResponse = api.getMyGroups().execute()
         if (!groupsResponse.isSuccessful) {
@@ -33,7 +28,23 @@ class StockRepository(context: Context? = null) {
         }
 
         val groups = groupsResponse.body().orEmpty()
-        val groupId = groups.firstOrNull { it.id != null }?.id ?: return@withContext null
+        var groupId = groups.firstOrNull { it.id != null }?.id
+        if (groupId == null) {
+            try {
+                val createGroupResp = api.createGroup(
+                    mapOf("name" to "Minha Casa", "description" to "Grupo principal")
+                ).execute()
+                if (createGroupResp.isSuccessful) {
+                    groupId = createGroupResp.body()?.id
+                }
+            } catch (e: Exception) {
+                Log.w("StockRepository", "Não foi possível criar grupo automático: ${e.message}")
+            }
+        }
+        if (groupId == null) {
+            sessionManager?.saveActiveGroupAndStock(null, null)
+            return@withContext null
+        }
 
         Log.d("StockRepository", "Grupo encontrado: $groupId. Buscando estoque em GET /stocks?groupId=$groupId...")
         val stockResponse = api.getStocksByGroup(groupId).execute()
@@ -41,11 +52,15 @@ class StockRepository(context: Context? = null) {
             throw IOException("Não foi possível consultar o estoque do grupo (Código ${stockResponse.code()}).")
         }
 
-        val stock = stockResponse.body()?.content?.firstOrNull() ?: return@withContext null
-        val stockId = stock.id
-        if (stockId != null) {
-            sessionManager?.saveActiveGroupAndStock(groupId, stockId)
+        val existingStock = stockResponse.body()?.content?.firstOrNull()
+        val stockId = if (existingStock?.id != null) {
+            existingStock.id
+        } else {
+            val createResp = api.createStock(StockCreateRequest(groupId = groupId, name = "Estoque Principal")).execute()
+            if (createResp.isSuccessful) createResp.body()?.id else null
         }
+
+        sessionManager?.saveActiveGroupAndStock(groupId, stockId)
         return@withContext stockId
     }
 

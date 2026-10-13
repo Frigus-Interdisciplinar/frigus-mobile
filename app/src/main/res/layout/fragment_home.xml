@@ -31,7 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="Olá, Juliana!"
+                    android:text="Olá!"
                     android:textColor="@color/darkBlue"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -76,7 +76,8 @@
             android:focusable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="36dp"
@@ -92,10 +93,11 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tvAlertaVencendoTitulo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="3 alimentos vencendo"
+                    android:text="0 alimentos vencendo"
                     android:textColor="@color/color_red"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -159,10 +161,11 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvQuickEstoqueQtd"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sarabun"
-                        android:text="12 itens"
+                        android:text="0 itens"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="11sp" />
                 </LinearLayout>
@@ -336,10 +339,11 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvSubtituloChats"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="3 mensagens não lidas"
+                    android:text="Nenhuma mensagem não lida"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -506,7 +510,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="12 itens"
+                    android:text="0 itens"
                     android:textColor="@color/blue_primary"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -547,7 +551,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="18 itens"
+                    android:text="0 itens"
                     android:textColor="@color/blue_primary"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -588,7 +592,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="18 itens"
+                    android:text="0 itens"
                     android:textColor="@color/blue_primary"
                     android:textSize="11sp" />
             </LinearLayout>

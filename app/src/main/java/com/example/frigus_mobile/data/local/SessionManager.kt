@@ -3,23 +3,52 @@ package com.example.frigus_mobile.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.model.UserResponse
 
 class SessionManager(context: Context) {
     private val preferences: SharedPreferences =
         context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     init {
-        // Assegura que o RetrofitClient sempre tenha o token do usuário autenticado
-        RetrofitClient.setTokenProvider { accessToken }
+        RetrofitClient.setTokenProvider(
+            accessTokenProvider = { accessToken },
+            refreshTokenProvider = { refreshToken },
+            onTokensRefreshed = { newAccess, newRefresh, user ->
+                updateTokensOnly(newAccess, newRefresh)
+                if (user != null) {
+                    saveUserProfile(user)
+                }
+            }
+        )
     }
 
     fun saveTokens(accessToken: String?, refreshToken: String?, name: String? = null) {
         val editor = preferences.edit()
             .putString(KEY_ACCESS_TOKEN, accessToken)
             .putString(KEY_REFRESH_TOKEN, refreshToken)
+            // Limpa grupo/estoque em cache ao iniciar nova sessão para não usar stockId de outro usuário
+            .remove(KEY_ACTIVE_GROUP_ID)
+            .remove(KEY_ACTIVE_STOCK_ID)
         if (!name.isNullOrBlank()) {
             editor.putString(KEY_USER_NAME, name)
         }
+        editor.apply()
+    }
+
+    private fun updateTokensOnly(accessToken: String?, refreshToken: String?) {
+        preferences.edit()
+            .putString(KEY_ACCESS_TOKEN, accessToken)
+            .putString(KEY_REFRESH_TOKEN, refreshToken)
+            .apply()
+    }
+
+    fun saveUserProfile(user: UserResponse?) {
+        if (user == null) return
+        val editor = preferences.edit()
+        if (!user.name.isNullOrBlank()) editor.putString(KEY_USER_NAME, user.name)
+        if (!user.email.isNullOrBlank()) editor.putString(KEY_USER_EMAIL, user.email)
+        if (!user.birthDate.isNullOrBlank()) editor.putString(KEY_USER_BIRTH_DATE, user.birthDate)
+        if (!user.accountType.isNullOrBlank()) editor.putString(KEY_USER_ACCOUNT_TYPE, user.accountType)
         editor.apply()
     }
 
@@ -45,6 +74,15 @@ class SessionManager(context: Context) {
     val userName: String?
         get() = preferences.getString(KEY_USER_NAME, null)
 
+    val userEmail: String?
+        get() = preferences.getString(KEY_USER_EMAIL, null)
+
+    val userBirthDate: String?
+        get() = preferences.getString(KEY_USER_BIRTH_DATE, null)
+
+    val userAccountType: String?
+        get() = preferences.getString(KEY_USER_ACCOUNT_TYPE, null)
+
     val activeGroupId: String?
         get() = preferences.getString(KEY_ACTIVE_GROUP_ID, null)
 
@@ -63,6 +101,9 @@ class SessionManager(context: Context) {
         private const val KEY_ACCESS_TOKEN = "accessToken"
         private const val KEY_REFRESH_TOKEN = "refreshToken"
         private const val KEY_USER_NAME = "userName"
+        private const val KEY_USER_EMAIL = "userEmail"
+        private const val KEY_USER_BIRTH_DATE = "userBirthDate"
+        private const val KEY_USER_ACCOUNT_TYPE = "userAccountType"
         private const val KEY_ACTIVE_GROUP_ID = "activeGroupId"
         private const val KEY_ACTIVE_STOCK_ID = "activeStockId"
     }

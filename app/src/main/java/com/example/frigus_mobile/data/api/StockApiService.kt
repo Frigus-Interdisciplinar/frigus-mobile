@@ -2,6 +2,7 @@ package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.model.GroupResponse
 import com.example.frigus_mobile.data.model.PageResponse
+import com.example.frigus_mobile.data.model.StockCreateRequest
 import com.example.frigus_mobile.data.model.StockProductCreateRequest
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
@@ -14,10 +15,20 @@ interface StockApiService {
     @GET("groups")
     fun getMyGroups(): Call<List<GroupResponse>>
 
+    @POST("groups")
+    fun createGroup(
+        @Body request: Map<String, String>
+    ): Call<GroupResponse>
+
     @GET("stocks")
     fun getStocksByGroup(
         @Query("groupId") groupId: String
     ): Call<PageResponse<StockResponse>>
+
+    @POST("stocks")
+    fun createStock(
+        @Body request: StockCreateRequest
+    ): Call<StockResponse>
 
     @GET("stock-products")
     fun getStockProducts(

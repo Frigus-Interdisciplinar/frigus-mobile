@@ -8,19 +8,15 @@ import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.RecipeResponse
 import com.example.frigus_mobile.data.model.Resource
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class RecipeRepository(context: Context) {
+class RecipeRepository(private val context: Context) {
 
     private val sessionManager = SessionManager(context)
-    private val apiService: RecipeApiService
-
-    init {
-        RetrofitClient.setTokenProvider { sessionManager.accessToken }
-        apiService = RetrofitClient.recipeService
-    }
+    private val apiService: RecipeApiService = RetrofitClient.recipeService
+    private val stockRepository = StockRepository(context)
 
     fun getRecipeSuggestions(
         stockId: Int? = null,
@@ -28,32 +24,53 @@ class RecipeRepository(context: Context) {
     ) {
         liveData.value = Resource.loading()
 
-        val targetStockId = stockId ?: sessionManager.activeStockId ?: 1
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Resolve o stockId real do grupo do usuário autenticado (sem usar stockId = 1 de outro usuário)
+                val resolvedStockId = stockId ?: stockRepository.resolveUserStockId()
 
-        apiService.getSuggestionsByStock(targetStockId).enqueue(object : Callback<List<RecipeResponse>> {
-            override fun onResponse(
-                call: Call<List<RecipeResponse>>,
-                response: Response<List<RecipeResponse>>
-            ) {
-                if (response.isSuccessful) {
-                    val body = response.body().orEmpty()
-                    val enriched = body.mapIndexed { index, recipe ->
-                        enrichRecipeWithUiDefaults(recipe, index)
+                if (resolvedStockId != null) {
+                    val suggResp = apiService.getSuggestionsByStock(resolvedStockId).execute()
+                    if (suggResp.isSuccessful) {
+                        val suggestions = suggResp.body().orEmpty()
+                        if (suggestions.isNotEmpty()) {
+                            val enriched = suggestions.mapIndexed { idx, r -> enrichRecipeWithUiDefaults(r, idx) }
+                            liveData.postValue(Resource.success(enriched))
+                            return@launch
+                        }
+                    }
+                }
+
+                // Caso o usuário ainda não tenha grupo/estoque ou não haja sugestões da IA para o estoque,
+                // consulta o catálogo geral de receitas da API (GET /recipes)
+                val generalResp = apiService.getAllRecipes().execute()
+                if (generalResp.isSuccessful) {
+                    val recipes = generalResp.body()?.content.orEmpty()
+                    val enriched = recipes.mapIndexed { idx, r ->
+                        val ingList = if (r.recipeId != null && r.ingredients.isNullOrEmpty()) {
+                            try {
+                                val ingResp = apiService.getIngredientsByRecipeId(r.recipeId).execute()
+                                if (ingResp.isSuccessful) ingResp.body().orEmpty() else emptyList()
+                            } catch (_: Exception) {
+                                emptyList()
+                            }
+                        } else {
+                            r.ingredients.orEmpty()
+                        }
+                        enrichRecipeWithUiDefaults(r.copy(ingredients = ingList), idx)
                     }
                     liveData.postValue(Resource.success(enriched))
                 } else {
                     liveData.postValue(
-                        Resource.error("Servidor indisponível ao buscar receitas (Código ${response.code()}).")
+                        Resource.error("Servidor indisponível ao buscar receitas (Código ${generalResp.code()}).")
                     )
                 }
-            }
-
-            override fun onFailure(call: Call<List<RecipeResponse>>, t: Throwable) {
+            } catch (e: Exception) {
                 liveData.postValue(
-                    Resource.error("Não foi possível conectar ao servidor: ${t.message}")
+                    Resource.error("Não foi possível conectar ao servidor: ${e.message}")
                 )
             }
-        })
+        }
     }
 
     private fun enrichRecipeWithUiDefaults(recipe: RecipeResponse, index: Int): RecipeResponse {
@@ -68,4 +85,3 @@ class RecipeRepository(context: Context) {
         return recipe
     }
 }
-

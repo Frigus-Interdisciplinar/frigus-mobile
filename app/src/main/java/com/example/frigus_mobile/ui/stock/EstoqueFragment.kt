@@ -120,6 +120,10 @@ class EstoqueFragment : Fragment() {
         }
     }
 
+    private fun formatarQtdItens(qtd: Int): String {
+        return if (qtd == 1) "1 item" else "$qtd itens"
+    }
+
     private fun atualizarResumo() {
         val emDia = allProducts.count { it.productStatus == "FRESH" }
         val atencao = allProducts.count { it.productStatus == "NEAR_EXPIRATION" }
@@ -128,6 +132,25 @@ class EstoqueFragment : Fragment() {
         view?.findViewById<TextView>(R.id.tvCountEmDia)?.text = emDia.toString()
         view?.findViewById<TextView>(R.id.tvCountAtencao)?.text = atencao.toString()
         view?.findViewById<TextView>(R.id.tvCountVencendo)?.text = vencendo.toString()
+
+        val qtdCarnes = allProducts.count {
+            (it.category ?: it.product?.category ?: "").equals("MEAT", ignoreCase = true)
+        }
+        val qtdLaticinios = allProducts.count {
+            (it.category ?: it.product?.category ?: "").equals("DAIRY", ignoreCase = true)
+        }
+        val qtdHortifruti = allProducts.count {
+            val cat = (it.category ?: it.product?.category ?: "")
+            cat.equals("VEGETABLE", ignoreCase = true) || cat.equals("FRUIT", ignoreCase = true)
+        }
+        val qtdBebidas = allProducts.count {
+            (it.category ?: it.product?.category ?: "").equals("BEVERAGE", ignoreCase = true)
+        }
+
+        view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = formatarQtdItens(qtdCarnes)
+        view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = formatarQtdItens(qtdLaticinios)
+        view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = formatarQtdItens(qtdHortifruti)
+        view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = formatarQtdItens(qtdBebidas)
     }
 
     private fun selectTab(place: String) {
