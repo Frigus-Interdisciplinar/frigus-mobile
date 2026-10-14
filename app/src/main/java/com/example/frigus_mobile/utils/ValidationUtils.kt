@@ -10,8 +10,9 @@ object ValidationUtils {
     }
 
     fun isSenhaValida(senha: String?): Boolean {
-        return !TextUtils.isEmpty(senha) &&
-                (senha?.length ?: 0) >= 8 &&
-                (senha?.matches(Regex(".*[^a-zA-Z0-9].*")) == true)
+        if (senha.isNullOrEmpty()) return false
+        // Requisitos do backend: 8 a 20 caracteres, com pelo menos 1 maiúscula, 1 minúscula, 1 número e 1 especial
+        val regex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,20}$")
+        return regex.matches(senha)
     }
 }

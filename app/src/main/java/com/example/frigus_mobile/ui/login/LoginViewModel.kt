@@ -17,4 +17,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(email: String, password: String) {
         repository.login(email, password, loginResult)
     }
+
+    fun loginWithGoogle(idToken: String) {
+        repository.loginWithGoogle(idToken, loginResult)
+    }
 }

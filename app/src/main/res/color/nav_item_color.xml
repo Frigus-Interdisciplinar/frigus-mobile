@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Cor quando selecionado/ativo -->
+    <item android:color="@color/blue1" android:state_checked="true" />
+    <!-- Cor quando desmarcado/inativo -->
+    <item android:color="#787878" />
+</selector>

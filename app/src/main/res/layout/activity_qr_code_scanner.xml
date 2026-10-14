@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E1E40"
+    android:fitsSystemWindows="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
+
+        <ImageButton
+            android:id="@+id/btnVoltar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Voltar"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/pure_white" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/sarabun"
+        android:text="Escanear Nota Fiscal"
+        android:textColor="@color/pure_white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="@font/sarabun"
+        android:text="Aponte a câmera para o QR Code\nda nota fiscal"
+        android:textAlignment="center"
+        android:textColor="#93C5FD"
+        android:textSize="13sp" />
+
+    <!-- QR Code Viewfinder Box -->
+    <FrameLayout
+        android:id="@+id/btnSimularLeitura"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/bg_qr_frame"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
+            android:alpha="0.8"
+            android:src="@drawable/ic_qr_code_scanner"
+            app:tint="#60A5FA" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/sarabun"
+        android:text="Toque no quadro para simular a leitura"
+        android:textColor="#94A3B8"
+        android:textSize="12sp" />
+
+</LinearLayout>

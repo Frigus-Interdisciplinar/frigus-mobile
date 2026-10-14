@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="120dp"
+    android:viewportWidth="320"
+    android:viewportHeight="120">
+    <!-- Grid Lines -->
+    <path
+        android:strokeColor="#F1F5F9"
+        android:strokeWidth="1"
+        android:pathData="M 40,20 L 300,20 M 40,50 L 300,50 M 40,80 L 300,80 M 40,110 L 300,110" />
+
+    <!-- Chart Line -->
+    <path
+        android:strokeColor="@color/blue_primary"
+        android:strokeWidth="2.5"
+        android:pathData="M 50,90 L 95,75 L 145,60 L 195,70 L 245,50 L 290,30" />
+
+    <!-- Chart Points -->
+    <path
+        android:fillColor="@color/pure_white"
+        android:strokeColor="@color/blue_primary"
+        android:strokeWidth="2"
+        android:pathData="
+            M 50,90 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0
+            M 95,75 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0
+            M 145,60 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0
+            M 195,70 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0
+            M 245,50 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0
+            M 290,30 m -3.5,0 a 3.5,3.5 0 1,0 7,0 a 3.5,3.5 0 1,0 -7,0" />
+</vector>

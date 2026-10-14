@@ -29,10 +29,34 @@ class AuthRepository(context: Context) {
             override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    sessionManager.saveTokens(body.accessToken, body.refreshToken)
+                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
+                    sessionManager.saveUserProfile(body.user)
                     liveData.postValue(Resource.success(body))
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar na API. Código: ${response.code()}")
+                    liveData.postValue(Resource.error(mensagemErro))
+                }
+            }
+
+            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                liveData.postValue(Resource.error("Erro de conexão com o servidor: ${t.message}"))
+            }
+        })
+    }
+
+    fun loginWithGoogle(idToken: String, liveData: MutableLiveData<Resource<UserLoginResponse>>) {
+        liveData.value = Resource.loading()
+
+        val request = com.example.frigus_mobile.data.model.GoogleLoginRequest(idToken)
+        apiService.loginComGoogle(request).enqueue(object : Callback<UserLoginResponse> {
+            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
+                    sessionManager.saveUserProfile(body.user)
+                    liveData.postValue(Resource.success(body))
+                } else {
+                    val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar com Google. Código: ${response.code()}")
                     liveData.postValue(Resource.error(mensagemErro))
                 }
             }
@@ -52,14 +76,34 @@ class AuthRepository(context: Context) {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null) {
-                    liveData.postValue(Resource.success(body))
+                    android.util.Log.d("AuthRepository", "Cadastro realizado com sucesso: ${body.email}")
+                    sessionManager.saveUserProfile(body)
+                    // Realiza login automático com as credenciais recém-cadastradas para salvar a sessão
+                    val loginRequest = UserLoginRequest(email, password)
+                    apiService.login(loginRequest).enqueue(object : Callback<UserLoginResponse> {
+                        override fun onResponse(loginCall: Call<UserLoginResponse>, loginResponse: Response<UserLoginResponse>) {
+                            val loginBody = loginResponse.body()
+                            if (loginResponse.isSuccessful && loginBody != null) {
+                                sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken, body.name)
+                                sessionManager.saveUserProfile(loginBody.user ?: body)
+                            }
+                            liveData.postValue(Resource.success(body))
+                        }
+
+                        override fun onFailure(loginCall: Call<UserLoginResponse>, t: Throwable) {
+                            // Se o login falhar por conexão, ainda avisa sucesso no cadastro para não bloquear
+                            liveData.postValue(Resource.success(body))
+                        }
+                    })
                 } else {
                     val mensagemErro = extrairMensagemErro(response, "Erro no cadastro. Código: ${response.code()}")
+                    android.util.Log.e("AuthRepository", "Falha no cadastro [${response.code()}]: $mensagemErro")
                     liveData.postValue(Resource.error(mensagemErro))
                 }
             }
 
             override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                android.util.Log.e("AuthRepository", "Falha de conexão com a API no cadastro: ${t.message}", t)
                 liveData.postValue(Resource.error("Falha de conexão com a API: ${t.message}"))
             }
         })
@@ -74,6 +118,7 @@ class AuthRepository(context: Context) {
             val errorBody = response.errorBody()
             if (errorBody != null) {
                 val errorJson = errorBody.string()
+                android.util.Log.e("AuthRepository", "Corpo de erro bruto da API [${response.code()}]: $errorJson")
                 val obj = gson.fromJson(errorJson, JsonObject::class.java)
                 if (obj.has("displayMessage") && !obj.get("displayMessage").isJsonNull) {
                     return obj.get("displayMessage").asString
@@ -81,8 +126,21 @@ class AuthRepository(context: Context) {
                 if (obj.has("message") && !obj.get("message").isJsonNull) {
                     return obj.get("message").asString
                 }
+                if (obj.has("errors") && obj.get("errors").isJsonArray) {
+                    val arr = obj.getAsJsonArray("errors")
+                    if (arr.size() > 0) {
+                        val first = arr[0]
+                        if (first.isJsonObject && first.asJsonObject.has("defaultMessage")) {
+                            return first.asJsonObject.get("defaultMessage").asString
+                        }
+                    }
+                }
+                if (obj.has("error") && !obj.get("error").isJsonNull) {
+                    return obj.get("error").asString
+                }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("AuthRepository", "Erro ao processar corpo de erro da API: ${e.message}", e)
         }
         return padrao
     }
