@@ -26,17 +26,14 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_alimento_detalhes)
 
         repository = StockRepository(this)
-
         item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()
         }
-
         findViewById<View>(R.id.btnRemoverEstoque).setOnClickListener {
             confirmarRemocao()
         }
-
         findViewById<View>(R.id.btnEditarAlimento).setOnClickListener {
             val intent = Intent(this, EditarAlimentoActivity::class.java).apply {
                 putExtra("STOCK_PRODUCT", item)

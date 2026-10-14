@@ -23,6 +23,12 @@ class QrCodeProdutoAdapter(
 
     fun getItems(): List<NotaFiscalItem> = items
 
+    fun updateItems(newItems: List<NotaFiscalItem>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_qr_code_produto, parent, false)

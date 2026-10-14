@@ -4,6 +4,7 @@ import com.example.frigus_mobile.data.model.GroupResponse
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.StockCreateRequest
 import com.example.frigus_mobile.data.model.StockProductCreateRequest
+import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
 import com.example.frigus_mobile.data.model.StockResponse
@@ -29,6 +30,12 @@ interface StockApiService {
     fun createStock(
         @Body request: StockCreateRequest
     ): Call<StockResponse>
+
+    @GET("products")
+    fun getCatalogProducts(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 50
+    ): Call<PageResponse<StockProductProductResponse>>
 
     @GET("stock-products")
     fun getStockProducts(

@@ -90,15 +90,28 @@ class StockRepository(context: Context? = null) {
         }
     }
 
+    suspend fun getCatalogProducts(): List<StockProductProductResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.getCatalogProducts().execute()
+            if (response.isSuccessful) {
+                return@withContext response.body()?.content ?: emptyList<StockProductProductResponse>()
+            }
+        } catch (e: Exception) {
+            Log.w("StockRepository", "Erro ao buscar catálogo: ${e.message}")
+        }
+        emptyList<StockProductProductResponse>()
+    }
+
     suspend fun updateStockProduct(
         id: Int,
         quantity: Int?,
         expireDate: String?,
         storagePlace: String?
     ): Boolean = withContext(Dispatchers.IO) {
+        val isoExpireDate = expireDate?.let { normalizeToIsoDate(it) }
         val req = StockProductUpdateRequest(
             quantity = quantity,
-            expireDate = expireDate,
+            expireDate = isoExpireDate,
             storagePlace = storagePlace
         )
         val response = api.updateStockProduct(id, req).execute()
@@ -106,7 +119,9 @@ class StockRepository(context: Context? = null) {
             Log.d("StockRepository", "Alimento atualizado na API: ID $id")
             return@withContext true
         } else {
-            throw IOException("Falha ao atualizar alimento na API (Código ${response.code()}).")
+            val err = parseDisplayMessage(response.errorBody()?.string())
+                ?: "Falha ao atualizar alimento na API (Código ${response.code()})."
+            throw IOException(err)
         }
     }
 
@@ -116,25 +131,99 @@ class StockRepository(context: Context? = null) {
             Log.d("StockRepository", "Alimento excluído da API: ID $id")
             return@withContext true
         } else {
-            throw IOException("Falha ao excluir alimento na API (Código ${response.code()}).")
+            val err = parseDisplayMessage(response.errorBody()?.string())
+                ?: "Falha ao excluir alimento na API (Código ${response.code()})."
+            throw IOException(err)
         }
     }
 
     suspend fun addStockProduct(item: StockProductResponse) = withContext(Dispatchers.IO) {
         val stockId = resolveUserStockId() ?: item.stockId ?: throw IOException("Nenhum estoque vinculado ao grupo do usuário.")
+        val isoExpireDate = normalizeToIsoDate(item.expireDate)
+        val validPrice = if (item.purchaseUnitPrice != null && item.purchaseUnitPrice > 0.0) {
+            item.purchaseUnitPrice
+        } else {
+            1.0
+        }
+
         val req = StockProductCreateRequest(
             productId = item.productId ?: item.id ?: 1,
             stockId = stockId,
             quantity = item.quantity ?: 1,
             minimalQuantity = item.minimalQuantity ?: 1,
-            purchaseUnitPrice = item.purchaseUnitPrice ?: 0.0,
-            expireDate = item.expireDate
+            purchaseUnitPrice = validPrice,
+            expireDate = isoExpireDate
         )
+
+        Log.d("StockRepository", "Cadastrando produto no estoque: productId=${req.productId}, stockId=$stockId, expireDate=$isoExpireDate, price=$validPrice")
         val resp = api.createStockProduct(req).execute()
-        if (!resp.isSuccessful) {
-            throw IOException("Falha ao cadastrar produto no estoque (Código ${resp.code()}).")
+
+        if (resp.isSuccessful) {
+            Log.d("StockRepository", "Alimento adicionado à API no estoque $stockId: ${resp.body()?.id}")
+            return@withContext
         }
-        Log.d("StockRepository", "Alimento adicionado à API no estoque $stockId: ${resp.body()?.id}")
+
+        // Se der conflito (409), significa que o produto com a mesma validade já existe neste estoque.
+        // Nesse caso, soma a quantidade ao item existente.
+        if (resp.code() == 409) {
+            try {
+                val stockProductsResp = api.getStockProducts(stockId).execute()
+                if (stockProductsResp.isSuccessful) {
+                    val existing = stockProductsResp.body()?.content?.firstOrNull {
+                        it.productId == req.productId && (it.expireDate == isoExpireDate || it.expireDate == item.expireDate)
+                    }
+                    if (existing?.id != null) {
+                        val newQty = (existing.quantity ?: 0) + req.quantity
+                        val updateResp = api.updateStockProduct(
+                            existing.id,
+                            StockProductUpdateRequest(quantity = newQty, expireDate = isoExpireDate)
+                        ).execute()
+                        if (updateResp.isSuccessful) {
+                            Log.d("StockRepository", "Item existente no estoque atualizado: ID ${existing.id}, Nova Qtd $newQty")
+                            return@withContext
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("StockRepository", "Falha ao somar quantidade de item já existente: ${e.message}")
+            }
+        }
+
+        val errorBodyStr = resp.errorBody()?.string()
+        Log.e("StockRepository", "Falha ao cadastrar produto no estoque (Código ${resp.code()}): $errorBodyStr")
+        val displayMsg = parseDisplayMessage(errorBodyStr)
+            ?: "Falha ao cadastrar produto no estoque (Código ${resp.code()})."
+        throw IOException(displayMsg)
+    }
+
+    private fun normalizeToIsoDate(dateStr: String?): String {
+        if (dateStr.isNullOrBlank()) {
+            return java.time.LocalDate.now().plusDays(15).toString()
+        }
+        val trimmed = dateStr.trim()
+        if (trimmed.matches(Regex("""^\d{4}-\d{2}-\d{2}$"""))) {
+            return trimmed
+        }
+        if (trimmed.matches(Regex("""^\d{2}/\d{2}/\d{4}$"""))) {
+            val parts = trimmed.split("/")
+            return "${parts[2]}-${parts[1]}-${parts[0]}"
+        }
+        return try {
+            java.time.LocalDate.parse(trimmed).toString()
+        } catch (e: Exception) {
+            java.time.LocalDate.now().plusDays(15).toString()
+        }
+    }
+
+    private fun parseDisplayMessage(errorJson: String?): String? {
+        if (errorJson.isNullOrBlank()) return null
+        return try {
+            val json = org.json.JSONObject(errorJson)
+            json.optString("displayMessage").takeIf { it.isNotBlank() }
+                ?: json.optString("message").takeIf { it.isNotBlank() }
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
