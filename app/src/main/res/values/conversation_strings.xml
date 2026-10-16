@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversations_title">Chats</string>
+    <string name="conversations_search_hint">Buscar conversas</string>
+    <string name="conversations_empty">Comece uma conversa para trocar ideias, receitas e novidades com sua família.</string>
+    <string name="conversations_error">Não foi possível carregar as conversas.</string>
+    <string name="conversations_avatar">Foto da conversa</string>
+    <string name="conversation_back">Voltar</string>
+    <string name="conversation_empty">Ainda não há mensagens nesta conversa.</string>
+    <string name="conversation_error">Não foi possível carregar as mensagens.</string>
+    <string name="conversation_message_hint">Digite uma mensagem...</string>
+    <string name="conversation_send">Enviar mensagem</string>
+    <string name="conversation_self">Você</string>
+</resources>
