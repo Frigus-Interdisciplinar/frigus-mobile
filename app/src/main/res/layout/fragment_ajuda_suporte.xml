@@ -1,280 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fillViewport="true">
-
+    android:background="@color/pure_white"
+    android:fillViewport="true"
+    android:clipToPadding="false">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="32dp"
         android:paddingBottom="24dp">
-
-        <!-- Top Bar com Botão Voltar e Título Centralizado -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="48dp">
             <ImageButton
                 android:id="@+id/btnVoltar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
+                android:contentDescription="@string/profile_back"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="@color/darkBlue" />
-
+                app:tint="@color/darkBlue"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Ajuda e suporte"
                 android:textColor="@color/darkBlue"
+                android:text="@string/profile_support"
+                android:layout_centerInParent="true"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
         </RelativeLayout>
-
-        <!-- Como podemos te ajudar? -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
             android:fontFamily="@font/sarabun"
-            android:text="Como podemos te ajudar?"
-            android:textColor="@color/color_text_primary"
+            android:textColor="@color/darkBlue"
+            android:text="@string/profile_how_help"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp"
             android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Card Perguntas Frequentes Abaixo -->
+            android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_blue_tint"
-            android:gravity="center_vertical"
+            android:layout_height="56dp"
             android:orientation="horizontal"
-            android:padding="14dp">
-
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/bg_card_white_rounded">
             <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_help_outline"
-                app:tint="@color/blue_primary" />
-
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_profile_figma_faqhelp"
+                android:contentDescription="@null"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 android:fontFamily="@font/sarabun"
-                android:text="Perguntas frequentes abaixo"
-                android:textColor="@color/color_text_primary"
-                android:textSize="14sp" />
+                android:textColor="@color/darkBlue"
+                android:text="@string/profile_faq_below"
+                android:layout_marginStart="18dp"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
         </LinearLayout>
-
-        <!-- Dúvidas frequentes -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp"
             android:fontFamily="@font/sarabun"
-            android:text="Dúvidas frequentes"
-            android:textColor="@color/blue_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <!-- Card com Lista de FAQs -->
+            android:textColor="@color/profile_primary"
+            android:text="@string/profile_faq_title"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_white_rounded"
             android:orientation="vertical"
-            android:paddingVertical="4dp">
-
-            <!-- FAQ 1 -->
+            android:background="@drawable/bg_card_white_rounded"
+            android:layout_marginTop="0dp"
+            android:paddingHorizontal="12dp">
             <LinearLayout
                 android:id="@+id/btnFaqScanner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Como funciona o scanner de nota fiscal?"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- FAQ 2 -->
-            <LinearLayout
-                android:id="@+id/btnFaqManual"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_faq_scanner"
                     android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="Como adicionar alimentos manualmente?"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp" />
-
+                    android:layout_marginStart="2dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- FAQ 3 -->
-            <LinearLayout
-                android:id="@+id/btnFaqQuantidade"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="Como atualizar a quantidade de um produto?"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- FAQ 4 -->
-            <LinearLayout
-                android:id="@+id/btnFaqMoneySaving"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="Como funciona o MoneySaving?"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
         </LinearLayout>
-
-        <!-- Card de Atendimento / Contato -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/bg_card_blue_tint"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="20dp">
-
+            android:background="@drawable/bg_card_white_rounded"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="12dp">
+            <LinearLayout
+                android:id="@+id/btnFaqManual"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_faq_manual"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_white_rounded"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="12dp">
+            <LinearLayout
+                android:id="@+id/btnFaqQuantidade"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_faq_quantity"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="24dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_profile_contact"
+            android:layout_marginBottom="22dp"
+            android:padding="16dp">
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="Precisa falar com a gente?"
-                android:textColor="@color/color_text_primary"
+                android:textColor="@color/darkBlue"
+                android:text="@string/profile_contact_title"
+                android:gravity="center"
                 android:textSize="15sp"
-                android:textStyle="bold" />
-
+                android:textStyle="bold"/>
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
                 android:fontFamily="@font/sarabun"
-                android:text="Nosso time responde em até 24h"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="12sp" />
-
+                android:textColor="@color/gray"
+                android:text="@string/profile_contact_detail"
+                android:layout_marginTop="3dp"
+                android:gravity="center"
+                android:textSize="12sp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEntrarContato"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="14dp"
-                android:fontFamily="@font/sarabun"
-                android:text="Entrar em contato"
+                android:layout_marginTop="12dp"
+                android:text="@string/profile_contact_button"
                 android:textAllCaps="false"
                 android:textColor="@color/pure_white"
-                android:textSize="14sp"
-                app:backgroundTint="@color/blue_primary"
-                app:cornerRadius="10dp" />
+                android:textSize="13sp"
+                android:fontFamily="@font/sarabun"
+                app:backgroundTint="@color/profile_primary"
+                app:cornerRadius="10dp"/>
         </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <View
+                android:id="@+id/btnFaqMoneySaving"
+                android:layout_width="0dp"
+                android:layout_height="0dp"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

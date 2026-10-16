@@ -18,4 +18,9 @@
     <color name="color_text_secondary">#64748B</color>
     <color name="color_border">#D0D5DD</color>
     <color name="color_light_blue_bg">#EEF2FF</color>
+    <color name="profile_primary">#2552C8</color>
+    <color name="profile_red">#C62828</color>
+    <color name="profile_divider">#E2E8F0</color>
+    <color name="profile_plan_bg">#F5F8FC</color>
+    <color name="profile_contact_bg">#EAF3FF</color>
 </resources>
