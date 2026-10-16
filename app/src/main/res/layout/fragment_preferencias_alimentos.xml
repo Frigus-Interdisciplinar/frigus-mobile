@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/pure_white" android:fillViewport="true"
+    android:clipToPadding="false">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingHorizontal="24dp"
+        android:paddingTop="32dp" android:paddingBottom="24dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp"
+                android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_centerInParent="true" android:layout_marginHorizontal="48dp"
+                android:fontFamily="@font/sarabun" android:gravity="center"
+                android:text="@string/profile_food_preferences" android:textColor="@color/darkBlue"
+                android:textSize="18sp" android:textStyle="bold" />
+        </RelativeLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:text="@string/profile_food_intro"
+            android:textColor="@color/gray" android:textSize="13sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="26dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_food_diet_title" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/rowVegetarian" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_vegetarian" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkVegetarian" />
+            <CheckBox android:id="@+id/checkVegetarian" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_vegetarian" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowVegan" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_vegan" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkVegan" />
+            <CheckBox android:id="@+id/checkVegan" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_vegan" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowNoRedMeat" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_no_red_meat" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkNoRedMeat" />
+            <CheckBox android:id="@+id/checkNoRedMeat" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_no_red_meat" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowNoSeafood" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_no_seafood" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkNoSeafood" />
+            <CheckBox android:id="@+id/checkNoSeafood" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_no_seafood" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="18dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_food_restrictions_title" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/rowNoLactose" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_no_lactose" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkNoLactose" />
+            <CheckBox android:id="@+id/checkNoLactose" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_no_lactose" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowNoGluten" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_no_gluten" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkNoGluten" />
+            <CheckBox android:id="@+id/checkNoGluten" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_no_gluten" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowNoSugar" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_no_sugar" android:textColor="@color/darkBlue"
+                android:textSize="15sp" android:labelFor="@id/checkNoSugar" />
+            <CheckBox android:id="@+id/checkNoSugar" android:layout_width="48dp"
+                android:layout_height="48dp" android:gravity="center"
+                android:buttonTint="@color/profile_checkbox_tint"
+                android:contentDescription="@string/profile_food_no_sugar" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="16dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_allergies_title"
+                android:textColor="@color/profile_primary" android:textSize="15sp"
+                android:textStyle="bold" />
+            <TextView android:id="@+id/btnAddAllergy" android:layout_width="wrap_content"
+                android:layout_height="48dp" android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true" android:focusable="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_add_allergy"
+                android:textColor="@color/profile_primary" android:textSize="14sp" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/allergyListContainer"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_food_other_title" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_quick_recipes" android:textColor="@color/darkBlue"
+                android:textSize="15sp" />
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchQuickRecipes" android:layout_width="wrap_content"
+                android:layout_height="48dp" android:minWidth="44dp"
+                android:contentDescription="@string/profile_food_quick_recipes"
+                app:thumbTint="@color/pure_white"
+                app:trackTint="@color/profile_preference_switch_track"
+                app:useMaterialThemeColors="false" tools:checked="true" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_economical_recipes" android:textColor="@color/darkBlue"
+                android:textSize="15sp" />
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchEconomicalRecipes" android:layout_width="wrap_content"
+                android:layout_height="48dp" android:minWidth="44dp"
+                android:contentDescription="@string/profile_food_economical_recipes"
+                app:thumbTint="@color/pure_white"
+                app:trackTint="@color/profile_preference_switch_track"
+                app:useMaterialThemeColors="false" tools:checked="true" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+    </LinearLayout>
+</ScrollView>

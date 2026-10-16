@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/pure_white" android:fillViewport="true"
+    android:clipToPadding="false">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingHorizontal="24dp"
+        android:paddingTop="32dp" android:paddingBottom="24dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp"
+                android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_centerInParent="true" android:layout_marginHorizontal="48dp"
+                android:fontFamily="@font/sarabun" android:gravity="center"
+                android:text="@string/profile_units" android:textColor="@color/darkBlue"
+                android:textSize="18sp" android:textStyle="bold" />
+        </RelativeLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="0dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_units_intro" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_units_weight" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/rowUnitKg" android:layout_width="match_parent"
+            android:layout_height="48dp" android:layout_marginTop="6dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_kg" tools:activated="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_kg"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitKg" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" tools:visibility="visible" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitG" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_g">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_g"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitG" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitLb" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_lb">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_lb"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitLb" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitOz" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_oz">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_oz"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitOz" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_units_volume" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/rowUnitL" android:layout_width="match_parent"
+            android:layout_height="48dp" android:layout_marginTop="6dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_l" tools:activated="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_l"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitL" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" tools:visibility="visible" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitMl" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_ml">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_ml"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitMl" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitCups" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_cups">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_cups"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitCups" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitSpoons" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_spoons">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_spoons"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitSpoons" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" android:fontFamily="@font/sarabun"
+            android:text="@string/profile_units_temperature" android:textColor="@color/profile_primary"
+            android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/rowUnitCelsius" android:layout_width="match_parent"
+            android:layout_height="48dp" android:layout_marginTop="6dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_celsius" tools:activated="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_celsius"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitCelsius" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" tools:visibility="visible" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/rowUnitFahrenheit" android:layout_width="match_parent"
+            android:layout_height="48dp" android:orientation="horizontal"
+            android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:background="?attr/selectableItemBackground"
+            android:contentDescription="@string/profile_units_fahrenheit">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_fahrenheit"
+                android:textColor="@color/profile_unit_text" android:duplicateParentState="true"
+                android:textSize="15sp" />
+            <TextView android:id="@+id/checkUnitFahrenheit" android:layout_width="24dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_units_checkmark"
+                android:textColor="@color/profile_primary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/profile_units_selected" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+    </LinearLayout>
+</ScrollView>
