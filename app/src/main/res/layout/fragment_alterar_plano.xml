@@ -6,7 +6,7 @@
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_choose_plan" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
         </RelativeLayout>
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="12sp" android:text="@string/profile_plan_swipe_hint" android:gravity="center" android:layout_marginTop="4dp" />
-        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:fillViewport="true">
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="34dp" android:fillViewport="true" android:scrollbars="none">
             <LinearLayout android:id="@+id/containerPlanos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" />
         </HorizontalScrollView>
         <ProgressBar android:id="@+id/progressPlanos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:visibility="gone" />
