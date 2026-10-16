@@ -4,6 +4,7 @@
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:id="@+id/tvPlanoOpcaoNome" android:textStyle="bold" android:gravity="center" android:layout_marginTop="22dp" />
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:id="@+id/tvPlanoOpcaoPreco" android:textStyle="bold" android:gravity="center" android:layout_marginTop="8dp" />
     <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="42dp" android:scrollbars="none">
+
         <LinearLayout android:id="@+id/containerBeneficios" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
     </ScrollView>
     <com.google.android.material.button.MaterialButton android:id="@+id/btnEscolherPlano" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginHorizontal="0dp" android:layout_marginTop="16dp" android:text="@string/profile_choose_this_plan" android:textAllCaps="false" android:textSize="16sp" android:fontFamily="@font/sarabun" android:textColor="@color/pure_white" app:backgroundTint="@color/blue1" app:cornerRadius="13dp" />

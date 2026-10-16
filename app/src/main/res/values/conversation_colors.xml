@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="conversation_search_bg">#F8FAFD</color>
+    <color name="conversation_border">#DFE6F0</color>
+    <color name="conversation_sent_bg">#C9DEF9</color>
+</resources>
