@@ -1,0 +1,33 @@
+<resources>
+    <string name="settings_privacy_profile_section">Privacidade do perfil</string>
+    <string name="settings_privacy_visibility">Quem pode ver meu perfil</string>
+    <string name="settings_privacy_data_section">Dados e personalização</string>
+    <string name="settings_privacy_usage">Permitir coleta de dados de uso</string>
+    <string name="settings_privacy_usage_detail">Melhora sua experiência no app</string>
+    <string name="settings_privacy_personalized">Permitir sugestões personalizadas</string>
+    <string name="settings_privacy_personalized_detail">Com base nos seus hábitos</string>
+    <string name="settings_change_password">Alterar senha</string>
+    <string name="settings_current_password">Senha atual</string>
+    <string name="settings_current_password_hint">Digite sua senha atual</string>
+    <string name="settings_new_password">Nova senha</string>
+    <string name="settings_new_password_hint">Digite sua nova senha</string>
+    <string name="settings_confirm_password">Confirmar nova senha</string>
+    <string name="settings_confirm_password_hint">Confirme sua nova senha</string>
+    <string name="settings_password_requirements">Requisitos da senha</string>
+    <string name="settings_password_min_length">Mínimo de 8 caracteres</string>
+    <string name="settings_password_letters_numbers">Incluir números e letras</string>
+    <string name="settings_password_special">Incluir caractere especial</string>
+    <string name="settings_save_new_password">Salvar nova senha</string>
+    <string name="settings_verification_title">Verificação de e-mail</string>
+    <string name="settings_verification_heading">Verifique seu e-mail</string>
+    <string name="settings_verification_sent">Enviamos um link de redefinição para</string>
+    <string name="settings_verification_missing">Não recebeu o e-mail?</string>
+    <string name="settings_verification_resend">Reenviar e-mail</string>
+    <string name="settings_verification_change">Alterar e-mail</string>
+    <string name="settings_account_title">Informações da Conta</string>
+    <string name="settings_account_name">Nome completo</string>
+    <string name="settings_account_email">E-mail</string>
+    <string name="settings_account_birthdate">Data de nascimento</string>
+    <string name="settings_account_type">Tipo de conta</string>
+    <string name="settings_toggle_password_visibility">Alternar visibilidade da senha</string>
+</resources>

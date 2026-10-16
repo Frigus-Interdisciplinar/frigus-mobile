@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/pure_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingHorizontal="24dp"
+        android:paddingTop="32dp" android:paddingBottom="24dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp"
+                android:layout_height="48dp" android:layout_alignParentStart="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/profile_back"
+                android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_centerInParent="true" android:layout_marginHorizontal="48dp"
+                android:fontFamily="@font/sarabun" android:gravity="center"
+                android:text="@string/settings_verification_title" android:textColor="@color/darkBlue"
+                android:textSize="18sp" android:textStyle="bold" />
+        </RelativeLayout>
+        <FrameLayout android:layout_width="64dp" android:layout_height="64dp"
+            android:layout_gravity="center_horizontal" android:layout_marginTop="90dp"
+            android:background="@drawable/bg_profile_notification_blue">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:layout_gravity="center" android:src="@drawable/ic_settings_mail"
+                android:contentDescription="@null" />
+        </FrameLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="32dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:text="@string/settings_verification_heading"
+            android:textColor="@color/darkBlue" android:textSize="21sp"
+            android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:text="@string/settings_verification_sent"
+            android:textColor="@color/gray" android:textSize="14sp" />
+        <TextView android:id="@+id/tvVerificationEmail"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:textColor="@color/darkBlue"
+            android:textSize="14sp" android:textStyle="bold"
+            tools:text="usuario@email.com" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="72dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:text="@string/settings_verification_missing"
+            android:textColor="@color/gray" android:textSize="13sp" />
+        <TextView android:id="@+id/btnResendVerificationEmail"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="6dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:background="?attr/selectableItemBackground"
+            android:clickable="true" android:focusable="true"
+            android:text="@string/settings_verification_resend"
+            android:textColor="@color/profile_primary" android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView android:id="@+id/btnChangeVerificationEmail"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:fontFamily="@font/sarabun" android:gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true" android:focusable="true"
+            android:text="@string/settings_verification_change"
+            android:textColor="@color/profile_primary" android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</ScrollView>
