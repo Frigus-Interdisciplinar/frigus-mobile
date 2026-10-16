@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="62dp" android:paddingHorizontal="18dp">
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="12sp" android:id="@+id/tvCobrancaPlano" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="12sp" android:id="@+id/tvCobrancaData" android:layout_marginTop="4dp" />
+    </LinearLayout>
+    <TextView android:layout_width="84dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvCobrancaValor" android:gravity="end" />
+    <TextView android:layout_width="70dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/color_green" android:textSize="12sp" android:id="@+id/tvCobrancaStatus" android:gravity="end" />
+</LinearLayout>

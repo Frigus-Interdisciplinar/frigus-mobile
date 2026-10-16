@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="profile_about_plan">Sobre o plano</string>
+    <string name="profile_renewal">Renovação</string>
+    <string name="profile_next_charge">Próxima cobrança</string>
+    <string name="profile_next_charge_amount">Valor da próxima cobrança</string>
+    <string name="profile_actions">Ações</string>
+    <string name="profile_change_plan">Alterar plano</string>
+    <string name="profile_choose_plan">Escolha seu plano</string>
+    <string name="profile_plan_swipe_hint">Deslize os cartões para comparar os planos.</string>
+    <string name="profile_no_plans">Nenhum plano disponível.</string>
+    <string name="profile_plans_error">Não foi possível carregar os planos.</string>
+    <string name="profile_choose_this_plan">Escolher plano</string>
+    <string name="profile_payment">Pagamento</string>
+    <string name="profile_change">Alterar</string>
+    <string name="profile_you_are_subscribing">Você está contratando</string>
+    <string name="profile_total">Total</string>
+    <string name="profile_pay_now">Pagar agora</string>
+    <string name="profile_secure_environment">Ambiente seguro</string>
+    <string name="profile_payment_complete">Pagamento realizado</string>
+    <string name="profile_payment_success">Pagamento realizado!</string>
+    <string name="profile_payment_success_detail">Seu plano foi ativado com sucesso.</string>
+    <string name="profile_go_home">Ir para o início</string>
+    <string name="profile_saved_cards">Cartões salvos</string>
+    <string name="profile_no_cards">Nenhum cartão salvo.</string>
+    <string name="profile_cards_error">Não foi possível carregar os cartões.</string>
+    <string name="profile_add_card">Adicionar cartão</string>
+    <string name="profile_payments_secure">Seus pagamentos são processados de forma segura.</string>
+    <string name="profile_recent_charges">Cobranças recentes</string>
+    <string name="profile_no_charges">Nenhuma cobrança encontrada.</string>
+    <string name="profile_charges_error">Não foi possível carregar as cobranças.</string>
+    <string name="profile_invite_intro">Envie o convite para que a pessoa faça parte do seu grupo no Frigus.</string>
+    <string name="profile_invite_recipient">Nome ou e-mail</string>
+    <string name="profile_role">Função</string>
+    <string name="profile_choose_role">Selecione a função</string>
+    <string name="profile_stock_permission">Permitir gestão do estoque</string>
+    <string name="profile_stock_permission_detail">Define se a pessoa pode editar alimentos, quantidades e estoque</string>
+    <string name="profile_send_invite">Enviar convite</string>
+    <string name="profile_share_invite_link">Compartilhar link do convite</string>
+    <string name="profile_family_intro">Gerencie as pessoas que têm acesso ao Frigus na sua casa.</string>
+    <string name="profile_no_members">Nenhum membro encontrado.</string>
+    <string name="profile_members_error">Não foi possível carregar os membros.</string>
+    <string name="profile_payment_pix">Pix</string>
+    <string name="profile_payment_card">Cartão</string>
+    <string name="profile_available_methods">Métodos disponíveis</string>
+    <string name="profile_pix_at_checkout">Disponível na finalização do pagamento</string>
+</resources>

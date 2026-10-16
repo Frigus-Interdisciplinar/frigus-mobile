@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp" android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_billing_history" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
+        </RelativeLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_recent_charges" android:textStyle="bold" android:layout_marginTop="24dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_card_white_rounded" android:padding="0dp" android:layout_marginTop="10dp">
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvCobrancas" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </LinearLayout>
+        <ProgressBar android:id="@+id/progressCobrancas" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:visibility="gone" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_no_charges" android:id="@+id/tvCobrancasVazio" android:gravity="center" android:layout_marginTop="24dp" android:visibility="visible" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_charges_error" android:id="@+id/tvCobrancasErro" android:gravity="center" android:layout_marginTop="24dp" android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

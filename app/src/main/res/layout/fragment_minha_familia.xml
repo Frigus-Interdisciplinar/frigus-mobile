@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white">
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:clipToPadding="false" android:paddingBottom="104dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+                <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp" android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_my_family" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
+            </RelativeLayout>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="13sp" android:text="@string/profile_family_intro" android:gravity="center" android:layout_marginTop="24dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_card_white_rounded" android:padding="0dp" android:layout_marginTop="32dp">
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvMembrosFamilia" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            </LinearLayout>
+            <ProgressBar android:id="@+id/progressMembros" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:visibility="gone" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_no_members" android:id="@+id/tvMembrosVazio" android:gravity="center" android:layout_marginTop="24dp" android:visibility="visible" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_members_error" android:id="@+id/tvMembrosErro" android:gravity="center" android:layout_marginTop="24dp" android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_gravity="bottom" android:background="@color/pure_white" android:paddingBottom="12dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnConvidarMembro" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginHorizontal="16dp" android:layout_marginTop="16dp" android:text="@string/profile_invite_member" android:textAllCaps="false" android:textSize="16sp" android:fontFamily="@font/sarabun" android:textColor="@color/pure_white" app:backgroundTint="@color/blue1" app:cornerRadius="13dp" />
+    </LinearLayout>
+</FrameLayout>

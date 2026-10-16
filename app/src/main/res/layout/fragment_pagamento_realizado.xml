@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_payment_complete" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
+        </RelativeLayout>
+        <FrameLayout android:layout_width="180dp" android:layout_height="122dp" android:layout_gravity="center_horizontal" android:layout_marginTop="2dp" android:contentDescription="@string/profile_payment_success">
+            <ImageView android:layout_width="104dp" android:layout_height="104dp" android:layout_gravity="top|start" android:layout_marginStart="38dp" android:layout_marginTop="16dp" android:src="@drawable/profile_success_halo" android:contentDescription="@null" />
+            <ImageView android:layout_width="80dp" android:layout_height="80dp" android:layout_gravity="top|start" android:layout_marginStart="50dp" android:layout_marginTop="28dp" android:src="@drawable/profile_success_circle" android:contentDescription="@null" />
+            <ImageView android:layout_width="38dp" android:layout_height="28dp" android:layout_gravity="top|start" android:layout_marginStart="70dp" android:layout_marginTop="51dp" android:src="@drawable/ic_profile_success_check" android:contentDescription="@null" />
+            <ImageView android:layout_width="28dp" android:layout_height="28dp" android:layout_gravity="top|start" android:layout_marginStart="152dp" android:layout_marginTop="0dp" android:src="@drawable/profile_success_star_top" android:contentDescription="@null" />
+            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="top|start" android:layout_marginStart="8dp" android:layout_marginTop="32dp" android:src="@drawable/profile_success_star_left" android:contentDescription="@null" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="top|start" android:layout_marginStart="7dp" android:layout_marginTop="92dp" android:src="@drawable/profile_success_star_left_large" android:contentDescription="@null" />
+            <ImageView android:layout_width="17dp" android:layout_height="17dp" android:layout_gravity="top|start" android:layout_marginStart="162dp" android:layout_marginTop="64dp" android:src="@drawable/profile_success_star_right" android:contentDescription="@null" />
+        </FrameLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="20sp" android:text="@string/profile_payment_success" android:textStyle="bold" android:gravity="center" android:layout_marginTop="34dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="12sp" android:text="@string/profile_payment_success_detail" android:gravity="center" android:layout_marginTop="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="top" android:background="@drawable/bg_profile_plan" android:minHeight="126dp" android:layout_marginTop="34dp" android:paddingHorizontal="18dp" android:paddingTop="20dp" android:paddingBottom="16dp">
+            <ImageView android:layout_width="35dp" android:layout_height="35dp" android:src="@drawable/ic_profile_enterprise" android:contentDescription="@null" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1" android:layout_marginStart="18dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="16sp" android:id="@+id/tvPlanoAtivado" android:textStyle="bold" tools:text="Comercial" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvPrecoPlanoAtivado" android:textStyle="bold" android:layout_marginTop="5dp" tools:text="R$ 99,90/mês" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="11sp" android:id="@+id/tvProximaCobrancaAtivado" android:layout_marginTop="8dp" tools:text="Próxima cobrança: 20/05/2026" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:id="@+id/btnIrInicio" android:background="@drawable/bg_card_white_rounded" android:minHeight="58dp" android:paddingHorizontal="18dp" android:layout_marginTop="62dp" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_home" android:contentDescription="@null" app:tint="@color/blue1" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/blue1" android:textSize="14sp" android:text="@string/profile_go_home" android:layout_weight="1" android:layout_marginStart="12dp" />
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" android:contentDescription="@null" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

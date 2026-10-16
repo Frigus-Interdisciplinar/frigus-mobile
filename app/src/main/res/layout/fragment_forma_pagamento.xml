@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp" android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_payment_method" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
+        </RelativeLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:fontFamily="@font/sarabun" android:text="@string/profile_available_methods" android:textColor="@color/darkBlue" android:textSize="15sp" android:textStyle="bold" />
+        <LinearLayout android:id="@+id/opcaoPix" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="74dp" android:layout_marginTop="10dp" android:paddingHorizontal="18dp" android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/bg_card_white_rounded">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_qr_code_scanner" android:contentDescription="@null" app:tint="@color/blue1" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:text="@string/profile_payment_pix" android:textColor="@color/darkBlue" android:textSize="14sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:fontFamily="@font/sarabun" android:text="@string/profile_pix_at_checkout" android:textColor="@color/gray" android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_saved_cards" android:textStyle="bold" android:layout_marginTop="24dp" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvCartoesSalvos" android:layout_width="match_parent" android:layout_height="wrap_content" android:nestedScrollingEnabled="false" android:layout_marginTop="10dp" app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        <ProgressBar android:id="@+id/progressCartoes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:visibility="gone" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_no_cards" android:id="@+id/tvCartoesVazio" android:gravity="center" android:layout_marginTop="24dp" android:visibility="visible" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_cards_error" android:id="@+id/tvCartoesErro" android:gravity="center" android:layout_marginTop="24dp" android:visibility="gone" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:id="@+id/btnAdicionarCartao" android:background="@drawable/bg_card_white_rounded" android:minHeight="58dp" android:paddingHorizontal="18dp" android:layout_marginTop="20dp" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add" android:contentDescription="@null" app:tint="@color/blue1" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/blue1" android:textSize="14sp" android:text="@string/profile_add_card" android:layout_marginStart="12dp" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/bg_profile_plan" android:minHeight="82dp" android:paddingHorizontal="16dp" android:layout_marginTop="20dp">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_profile_figma_creditcard" android:contentDescription="@null" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="12sp" android:text="@string/profile_payments_secure" android:layout_weight="1" android:layout_marginStart="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
