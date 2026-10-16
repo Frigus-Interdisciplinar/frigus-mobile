@@ -1,403 +1,373 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fillViewport="true">
-
+    android:background="@color/pure_white"
+    android:fillViewport="true"
+    android:clipToPadding="false">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="32dp"
         android:paddingBottom="24dp">
-
-        <!-- Top Bar com Botão Voltar e Título Centralizado -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="48dp">
             <ImageButton
                 android:id="@+id/btnVoltar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
+                android:contentDescription="@string/profile_back"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="@color/darkBlue" />
-
+                app:tint="@color/darkBlue"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Assinatura e planos"
                 android:textColor="@color/darkBlue"
+                android:text="@string/profile_plans"
+                android:layout_centerInParent="true"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
         </RelativeLayout>
-
-        <!-- Card Plano Atual -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_card_blue_tint"
-            android:orientation="vertical"
-            android:padding="16dp">
-
+            android:layout_height="126dp"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal"
+            android:padding="18dp"
+            android:background="@drawable/bg_profile_plan">
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_profile_figma_gift"
+                android:contentDescription="@null"
+                android:layout_marginTop="4dp"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_crown" />
-
+                android:layout_marginStart="18dp"
+                android:orientation="vertical">
                 <TextView
-                    android:id="@+id/tvPlanoAtualNome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Plano Gratuito"
-                    android:textColor="@color/color_text_primary"
+                    android:textColor="@color/darkBlue"
+                    android:id="@+id/tvPlanoAtualNome"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="Free"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:id="@+id/tvPlanoAtualPreco"
+                    android:layout_marginTop="6dp"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="R$ 0,00/mês"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/gray"
+                    android:id="@+id/tvPlanoAtualValidade"
+                    android:layout_marginTop="6dp"
+                    android:textSize="11sp"
+                    tools:text="Válido até 25/10/2026"/>
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvPlanoAtualPreco"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:fontFamily="@font/sarabun"
-                android:text="R$ 0,00/mês"
-                android:textColor="@color/color_text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvPlanoAtualValidade"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:fontFamily="@font/sarabun"
-                android:text="Sem assinatura paga ativa"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="12sp" />
         </LinearLayout>
-
-        <!-- Seção Gerenciar -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
             android:fontFamily="@font/sarabun"
-            android:text="Gerenciar"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <!-- Card Opções de Gerenciamento -->
+            android:textColor="@color/darkBlue"
+            android:text="@string/profile_plan_payments"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_white_rounded"
             android:orientation="vertical"
-            android:paddingVertical="4dp">
-
-            <!-- Gerenciar plano -->
+            android:background="@drawable/bg_card_white_rounded"
+            android:paddingHorizontal="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp">
             <LinearLayout
                 android:id="@+id/btnGerenciarPlano"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_receipt_long"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_subscription"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Gerenciar plano"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_manage_plan"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Forma de pagamento -->
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnFormaPagamento"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_credit_card"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_creditcard"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Forma de pagamento"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_payment_method"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Histórico de cobranças -->
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnHistoricoCobrancas"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_history"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_history"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Histórico de cobranças"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_billing_history"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Benefícios do plano -->
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnBeneficiosPlano"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_shield_check"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_benefit"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Benefícios do plano"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_plan_benefits"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Convidar membro -->
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/darkBlue"
+                android:text="@string/profile_family"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="10dp"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="0dp"
+                android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnConvidarMembro"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_person_add"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_invite"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Convidar membro"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_invite_member"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Minha família -->
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnMinhaFamilia"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
+                android:minHeight="48dp">
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_group"
-                    app:tint="@color/color_text_secondary" />
-
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_figma_family"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Minha família"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_my_family"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
             </LinearLayout>
-
         </LinearLayout>
-
-        <!-- Cancelar Assinatura (Ação Destrutiva) -->
         <LinearLayout
-            android:id="@+id/btnCancelarAssinatura"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_card_white_rounded"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="14dp">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_cancel" />
-
-            <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <View
+                android:id="@+id/btnCancelarAssinatura"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/sarabun"
-                android:text="Cancelar assinatura"
-                android:textColor="@color/color_red"
-                android:textSize="14sp" />
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="@color/color_red" />
+                android:layout_height="0dp"/>
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>
