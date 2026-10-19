@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/pure_white"
     android:fitsSystemWindows="true"
     android:fillViewport="true">
 
@@ -28,7 +28,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
+                android:contentDescription="@string/stock_back"
                 android:src="@drawable/ic_chevron_left"
                 app:tint="@color/darkBlue" />
 
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Editar alimento"
+                android:text="@string/stock_edit"
                 android:textColor="@color/darkBlue"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -47,10 +47,10 @@
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgEditarAlimento"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:background="@drawable/bg_card_blue_tint"
+            android:layout_height="140dp"
+            android:background="@color/pure_white"
+            android:contentDescription="@string/stock_product_image"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_food_package"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent" />
 
         <!-- Campo: Nome do alimento -->
@@ -60,7 +60,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="6dp"
             android:fontFamily="@font/sarabun"
-            android:text="Nome do alimento"
+            android:text="@string/stock_food_name"
             android:textColor="@color/darkBlue"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -71,7 +71,7 @@
             android:layout_height="48dp"
             android:background="@drawable/bg_search_bar"
             android:fontFamily="@font/sarabun"
-            android:hint="Nome do alimento"
+            android:hint="@string/stock_food_name"
             android:paddingHorizontal="14dp"
             android:textColor="@color/color_text_primary"
             android:textSize="14sp" />
@@ -83,7 +83,7 @@
             android:layout_marginTop="14dp"
             android:layout_marginBottom="6dp"
             android:fontFamily="@font/sarabun"
-            android:text="Categoria"
+            android:text="@string/stock_category"
             android:textColor="@color/darkBlue"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -102,7 +102,7 @@
             android:layout_marginTop="14dp"
             android:layout_marginBottom="6dp"
             android:fontFamily="@font/sarabun"
-            android:text="Local"
+            android:text="@string/stock_location"
             android:textColor="@color/darkBlue"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -121,7 +121,7 @@
             android:layout_marginTop="14dp"
             android:layout_marginBottom="6dp"
             android:fontFamily="@font/sarabun"
-            android:text="Validade"
+            android:text="@string/stock_expiration"
             android:textColor="@color/darkBlue"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -132,7 +132,7 @@
             android:layout_height="48dp"
             android:background="@drawable/bg_search_bar"
             android:fontFamily="@font/sarabun"
-            android:hint="DD/MM/AAAA"
+            android:hint="@string/stock_expiration_hint"
             android:inputType="date"
             android:paddingHorizontal="14dp"
             android:textColor="@color/color_text_primary"
@@ -145,7 +145,7 @@
             android:layout_marginTop="14dp"
             android:layout_marginBottom="6dp"
             android:fontFamily="@font/sarabun"
-            android:text="Quantidade total"
+            android:text="@string/stock_total_quantity"
             android:textColor="@color/darkBlue"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -163,7 +163,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_search_bar"
                 android:fontFamily="@font/sarabun"
-                android:hint="700"
+                android:hint="@string/stock_quantity_hint"
                 android:inputType="number"
                 android:paddingHorizontal="14dp"
                 android:textColor="@color/color_text_primary"
@@ -184,7 +184,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="30dp"
             android:fontFamily="@font/sarabun"
-            android:text="Salvar alterações"
+            android:text="@string/stock_save_changes"
             android:textAllCaps="false"
             android:textColor="@color/pure_white"
             android:textSize="14sp"

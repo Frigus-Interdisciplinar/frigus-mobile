@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fillViewport="true">
+    android:background="@color/pure_white">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,7 +16,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingTop="20dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="88dp">
 
         <!-- Top Bar: Título Estoque + Botão Scanner QR Code -->
         <RelativeLayout
@@ -24,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Estoque"
+                android:text="@string/stock_title"
                 android:textColor="@color/darkBlue"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -37,6 +41,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/bg_tab_selected"
                 android:clickable="true"
+                android:contentDescription="@string/stock_scan_receipt"
                 android:focusable="true">
 
                 <ImageView
@@ -65,7 +70,7 @@
                 android:background="@drawable/bg_tab_selected"
                 android:fontFamily="@font/sarabun"
                 android:gravity="center"
-                android:text="Geladeira"
+                android:text="@string/stock_fridge"
                 android:textColor="@color/pure_white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -77,7 +82,7 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/sarabun"
                 android:gravity="center"
-                android:text="Freezer"
+                android:text="@string/stock_freezer"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="13sp" />
 
@@ -88,7 +93,7 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/sarabun"
                 android:gravity="center"
-                android:text="Despensa"
+                android:text="@string/stock_pantry"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -117,7 +122,7 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:fontFamily="@font/sarabun"
-                android:hint="Buscar alimento"
+                android:hint="@string/stock_search_food"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:textColor="@color/color_text_primary"
@@ -126,8 +131,10 @@
 
             <ImageView
                 android:id="@+id/btnFiltro"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="@string/stock_filter"
+                android:padding="12dp"
                 android:src="@drawable/ic_sliders"
                 app:tint="@color/color_text_secondary" />
         </LinearLayout>
@@ -139,7 +146,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/sarabun"
-            android:text="Resumo"
+            android:text="@string/stock_summary"
             android:textColor="@color/darkBlue"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -165,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0"
+                    android:text=""
                     android:textColor="@color/color_green"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -175,7 +182,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Em dia"
+                    android:text="@string/stock_on_time"
                     android:textColor="@color/color_green"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -196,7 +203,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0"
+                    android:text=""
                     android:textColor="@color/color_gold"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -206,7 +213,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Atenção"
+                    android:text="@string/stock_attention"
                     android:textColor="@color/color_gold"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -227,7 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0"
+                    android:text=""
                     android:textColor="@color/color_red"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -237,7 +244,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Vencendo"
+                    android:text="@string/stock_expiring"
                     android:textColor="@color/color_red"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -256,7 +263,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Categorias"
+                android:text="@string/stock_categories"
                 android:textColor="@color/darkBlue"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -268,7 +275,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Ver todas"
+                android:text="@string/stock_see_more"
                 android:textColor="@color/blue_primary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -303,6 +310,7 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
+                        android:id="@+id/imgCatCarnes"
                         android:src="@drawable/ic_cat_meat"
                         app:tint="#EF4444" />
                 </FrameLayout>
@@ -312,7 +320,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Carnes"
+                    android:id="@+id/tvNomeCatCarnes"
+                    android:text="@string/stock_meat"
                     android:textColor="@color/darkBlue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -322,7 +331,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -347,6 +356,7 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
+                        android:id="@+id/imgCatLaticinios"
                         android:src="@drawable/ic_cat_dairy"
                         app:tint="@color/blue_primary" />
                 </FrameLayout>
@@ -356,7 +366,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Laticínios"
+                    android:id="@+id/tvNomeCatLaticinios"
+                    android:text="@string/stock_dairy"
                     android:textColor="@color/darkBlue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -366,7 +377,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -391,6 +402,7 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
+                        android:id="@+id/imgCatHortifruti"
                         android:src="@drawable/ic_cat_hortifruti"
                         app:tint="@color/color_green" />
                 </FrameLayout>
@@ -400,7 +412,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Hortifruti"
+                    android:id="@+id/tvNomeCatHortifruti"
+                    android:text="@string/stock_produce"
                     android:textColor="@color/darkBlue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -410,7 +423,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -435,6 +448,7 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
+                        android:id="@+id/imgCatBebidas"
                         android:src="@drawable/ic_cat_beverages"
                         app:tint="#EC4899" />
                 </FrameLayout>
@@ -444,7 +458,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Bebidas"
+                    android:id="@+id/tvNomeCatBebidas"
+                    android:text="@string/stock_drinks"
                     android:textColor="@color/darkBlue"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -454,7 +469,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>
@@ -467,7 +482,7 @@
             android:layout_marginTop="22dp"
             android:layout_marginBottom="10dp"
             android:fontFamily="@font/sarabun"
-            android:text="Próximos do vencimento"
+            android:text="@string/stock_expiring_soon"
             android:textColor="@color/darkBlue"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -479,4 +494,25 @@
             android:nestedScrollingEnabled="false" />
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:id="@+id/btnAdicionarAlimentoEstoque"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_stock_add_button"
+        android:clickable="true"
+        android:contentDescription="@string/stock_add_food"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_add" />
+    </FrameLayout>
+</FrameLayout>
