@@ -32,8 +32,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/img_frango_molho_cremoso"
-                    android:contentDescription="Foto da receita" />
+                    tools:src="@drawable/img_frango_molho_cremoso"
+                    android:contentDescription="@string/recipe_photo" />
 
                 <!-- Floating Back Button -->
                 <FrameLayout
@@ -54,7 +54,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_chevron_left"
                         app:tint="@color/pure_white"
-                        android:contentDescription="Voltar" />
+                        android:contentDescription="@string/profile_back" />
                 </FrameLayout>
 
                 <!-- Floating Heart/Favorite Button -->
@@ -77,7 +77,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_heart"
                         app:tint="@color/pure_white"
-                        android:contentDescription="Favoritar receita" />
+                        android:contentDescription="@string/recipe_favorite" />
                 </FrameLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -86,11 +86,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_top_rounded"
-                android:layout_marginTop="-20dp"
+                android:background="@color/pure_white"
+                android:layout_marginTop="0dp"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="12dp"
                 android:paddingBottom="24dp">
 
                 <!-- Recipe Title -->
@@ -168,7 +168,7 @@
                     android:id="@+id/txtDetailRecipeDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="18dp"
                     android:fontFamily="@font/sarabun"
                     android:lineSpacingExtra="3dp"
                     android:textColor="@color/color_text_secondary"
@@ -182,7 +182,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="10dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Usa ingredientes que você tem"
+                    android:text="@string/recipe_uses_your_ingredients"
                     android:textColor="@color/darkBlue"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -203,7 +203,7 @@
                     android:layout_marginTop="22dp"
                     android:layout_marginBottom="12dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="Ingredientes (4)"
+                    android:text="@string/recipe_ingredients_title"
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -216,7 +216,7 @@
                     app:cardElevation="0dp"
                     app:strokeWidth="1dp"
                     app:strokeColor="@color/color_card_border"
-                    app:cardBackgroundColor="@color/pure_white">
+                    app:cardBackgroundColor="@color/recipe_ingredient_card">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvDetailIngredients"
@@ -225,6 +225,39 @@
                         android:nestedScrollingEnabled="false"
                         tools:listitem="@layout/item_recipe_ingredient" />
                 </com.google.android.material.card.MaterialCardView>
+
+                <!-- Populated and shown by future recipe integration; no example instructions at runtime. -->
+                <LinearLayout
+                    android:id="@+id/layoutRecipeInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_recipe_instructions"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/recipe_instructions_title"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtDetailRecipeInstructions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:fontFamily="@font/sarabun"
+                        android:lineSpacingExtra="6dp"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        tools:text="1. Temperar: Corte o frango e tempere.&#10;2. Picar: Corte os tomates." />
+                </LinearLayout>
 
             </LinearLayout>
         </LinearLayout>
@@ -248,7 +281,7 @@
             android:layout_height="52dp"
             android:backgroundTint="@color/blue_primary"
             android:fontFamily="@font/sarabun"
-            android:text="Ver modo de preparo"
+            android:text="@string/recipe_view_instructions"
             android:textAllCaps="false"
             android:textColor="@color/pure_white"
             android:textSize="15sp"
