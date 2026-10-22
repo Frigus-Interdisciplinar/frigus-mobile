@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -68,7 +69,7 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:fontFamily="@font/sarabun"
-                android:hint="Buscar alimentos"
+                android:hint="@string/stock_search_food_plural"
                 android:inputType="text"
                 android:textColor="@color/color_text_primary"
                 android:textColorHint="@color/color_text_secondary"
@@ -129,7 +130,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
+                    tools:text="6 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -189,7 +191,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
+                    tools:text="6 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -249,7 +252,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
+                    tools:text="6 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -309,7 +313,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="0 itens"
+                    android:text=""
+                    tools:text="6 itens"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
