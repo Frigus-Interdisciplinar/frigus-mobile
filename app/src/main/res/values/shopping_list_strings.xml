@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lista_onde_adicionar">Onde quer adicionar?</string>
+    <string name="lista_destino_estoque">Estoque</string>
+    <string name="lista_destino_lista_compras">Lista de Compras</string>
+    <string name="lista_observacoes_opcional">Observações (opcional)</string>
+    <string name="lista_adicionar_foto">Adicionar foto do produto</string>
+</resources>
