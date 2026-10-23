@@ -1,172 +1,94 @@
 package com.example.frigus_mobile.ui.home
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.repository.StockRepository
-import com.example.frigus_mobile.ui.ai.ChatIaActivity
-import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
-import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
-import com.example.frigus_mobile.utils.NetworkGuard
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.frigus_mobile.data.model.InventoryHomeResponse
+import com.google.android.material.button.MaterialButton
+import java.text.NumberFormat
 
-class HomeFragment : Fragment() {
-
-    private lateinit var sessionManager: SessionManager
-    private lateinit var stockRepository: StockRepository
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
-
+class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val session = SessionManager(requireContext())
+        val name = session.userName?.trim()?.split(Regex("\\s+"))?.firstOrNull()?.takeIf { it.isNotBlank() }
+        view.findViewById<TextView>(R.id.tvGreeting).text = if (name == null)
+            getString(R.string.home_greeting) else getString(R.string.home_named_greeting, name)
 
-        sessionManager = SessionManager(requireContext())
-        stockRepository = StockRepository(requireContext())
-
-        atualizarSaudacao(view)
-
-        // Abrir Central de Notificações
-        view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {
-            startActivity(Intent(requireContext(), NotificacoesActivity::class.java))
+        val main = requireActivity() as MainActivity
+        listOf(R.id.cardQuickEstoque, R.id.cardAlertaVencendo, R.id.cardEstoqueGeladeira,
+            R.id.cardEstoqueFreezer, R.id.cardEstoqueDespensa).forEach { id ->
+            view.findViewById<View>(id).setOnClickListener { main.selectTab(R.id.nav_estoque) }
+        }
+        view.findViewById<View>(R.id.cardQuickReceitas).setOnClickListener { main.selectTab(R.id.nav_receitas) }
+        mapOf(R.id.btnNotificacoes to R.string.home_notifications,
+            R.id.cardChats to R.string.home_conversations,
+            R.id.cardEscanearQrCode to R.string.home_qr,
+            R.id.cardFaleComIa to R.string.home_ai).forEach { (id, title) ->
+            view.findViewById<View>(id).setOnClickListener { main.showUnavailable(title) }
         }
 
-        // Navegar para Estoque
-        view.findViewById<View>(R.id.cardAlertaVencendo).setOnClickListener {
-            navigateToBottomNav(R.id.nav_estoque)
-        }
-
-        view.findViewById<View>(R.id.cardQuickEstoque).setOnClickListener {
-            navigateToBottomNav(R.id.nav_estoque)
-        }
-
-        // Navegar para Receitas
-        view.findViewById<View>(R.id.cardQuickReceitas).setOnClickListener {
-            navigateToBottomNav(R.id.nav_receitas)
-        }
-
-        // Sugestão de Receita
-        view.findViewById<View>(R.id.cardSugestaoReceita).setOnClickListener {
-            navigateToBottomNav(R.id.nav_receitas)
-        }
-
-        // Escanear QR Code
-        view.findViewById<View>(R.id.cardEscanearQrCode).setOnClickListener {
-            startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))
-        }
-
-        // Fale com nossa IA
-        view.findViewById<View>(R.id.cardFaleComIa).setOnClickListener {
-            startActivity(Intent(requireContext(), ChatIaActivity::class.java))
-        }
-
-        view.findViewById<View>(R.id.cardChats).setOnClickListener {
-            startActivity(Intent(requireContext(), ChatIaActivity::class.java))
-        }
-
-        // Cards de Local de Estoque
-        view.findViewById<View>(R.id.cardEstoqueGeladeira).setOnClickListener {
-            navigateToBottomNav(R.id.nav_estoque)
-        }
-
-        view.findViewById<View>(R.id.cardEstoqueFreezer).setOnClickListener {
-            navigateToBottomNav(R.id.nav_estoque)
-        }
-
-        view.findViewById<View>(R.id.cardEstoqueDespensa).setOnClickListener {
-            navigateToBottomNav(R.id.nav_estoque)
-        }
-
-        carregarDadosEstoque()
+        val model = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+        view.findViewById<View>(R.id.homeReloadButton).setOnClickListener { model.reload() }
+        model.state.observe(viewLifecycleOwner) { state -> render(view, state) }
+        model.loadIfNeeded()
     }
 
-    override fun onResume() {
-        super.onResume()
-        view?.let { atualizarSaudacao(it) }
-        carregarDadosEstoque()
-    }
-
-    private fun atualizarSaudacao(rootView: View) {
-        val tvGreeting = rootView.findViewById<TextView>(R.id.tvGreeting)
-        val nomeUsuario = sessionManager.userName?.trim()?.split(" ")?.firstOrNull()?.takeIf { it.isNotBlank() }
-        tvGreeting?.text = if (nomeUsuario != null) "Olá, $nomeUsuario!" else "Olá!"
-    }
-
-    private fun formatarQtdItens(qtd: Int): String {
-        return if (qtd == 1) "1 item" else "$qtd itens"
-    }
-
-    private fun carregarDadosEstoque() {
-        if (!NetworkGuard.ensureConnected(activity) { carregarDadosEstoque() }) return
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Sincroniza o perfil do usuário autenticado caso ainda não tenha nome/email salvos
-                withContext(Dispatchers.IO) {
-                    try {
-                        val profileResp = RetrofitClient.authService.getProfile().execute()
-                        if (profileResp.isSuccessful && profileResp.body() != null) {
-                            sessionManager.saveUserProfile(profileResp.body())
-                        }
-                    } catch (_: Exception) {
-                    }
-                }
-                view?.let { atualizarSaudacao(it) }
-
-                val produtos = stockRepository.getStockProducts()
-
-                val qtdVencendo = produtos.count {
-                    it.productStatus.equals("NEAR_EXPIRATION", ignoreCase = true) ||
-                        it.productStatus.equals("EXPIRED", ignoreCase = true)
-                }
-                val cardAlerta = view?.findViewById<View>(R.id.cardAlertaVencendo)
-                val tvAlertaTitulo = view?.findViewById<TextView>(R.id.tvAlertaVencendoTitulo)
-                if (qtdVencendo > 0) {
-                    cardAlerta?.visibility = View.VISIBLE
-                    tvAlertaTitulo?.text = if (qtdVencendo == 1) {
-                        "1 alimento vencendo"
-                    } else {
-                        "$qtdVencendo alimentos vencendo"
-                    }
-                } else {
-                    cardAlerta?.visibility = View.GONE
-                }
-
-                view?.findViewById<TextView>(R.id.tvQuickEstoqueQtd)?.text = formatarQtdItens(produtos.size)
-
-                val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
-                val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
-                val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
-
-                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = formatarQtdItens(qtdGeladeira)
-                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = formatarQtdItens(qtdFreezer)
-                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = formatarQtdItens(qtdDespensa)
-            } catch (e: Exception) {
-                NetworkGuard.showBlockingError(activity, e.message) {
-                    carregarDadosEstoque()
-                }
+    private fun render(view: View, state: HomeUiState) {
+        view.findViewById<View>(R.id.homeProgress).visibility = if (state.loading) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.homeSummary).visibility = if (state.home != null) View.VISIBLE else View.GONE
+        view.findViewById<MaterialButton>(R.id.homeReloadButton).apply {
+            isEnabled = !state.loading
+            setText(if (state.error == null) R.string.home_refresh else R.string.home_retry)
+        }
+        view.findViewById<TextView>(R.id.homeStatus).apply {
+            visibility = if (state.loading || state.error != null) View.VISIBLE else View.GONE
+            text = when {
+                state.loading -> getString(R.string.home_loading)
+                state.error?.code == "NETWORK_ERROR" -> getString(R.string.home_network_error)
+                state.error?.code == "INVALID_RESPONSE" -> getString(R.string.home_invalid_response)
+                state.error != null -> state.error.userMessage(getString(
+                    if (state.error.status == 403) R.string.home_forbidden else R.string.home_load_error))
+                else -> ""
             }
         }
+        state.home?.let { renderSummary(view, it) }
     }
 
-    private fun navigateToBottomNav(menuItemId: Int) {
-        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        bottomNav?.selectedItemId = menuItemId
+    private fun renderSummary(view: View, home: InventoryHomeResponse) {
+        val total = home.summary?.itemCount
+        view.findViewById<TextView>(R.id.tvQuickEstoqueQtd).text = itemCount(total)
+        val places = home.summary?.itemsByStoragePlace
+        mapOf(R.id.tvQtdGeladeira to "FRIDGE", R.id.tvQtdFreezer to "FREEZER", R.id.tvQtdDespensa to "PANTRY")
+            .forEach { (id, place) ->
+                val count = if (places == null) null else if (places.containsKey(place)) places[place] else 0L
+                view.findViewById<TextView>(id).text = itemCount(count)
+            }
+        view.findViewById<TextView>(R.id.homeEmptyState).apply {
+            visibility = if (home.stocks.isNullOrEmpty() || total == 0L) View.VISIBLE else View.GONE
+            setText(if (home.stocks.isNullOrEmpty()) R.string.home_no_stocks else R.string.home_empty_stock)
+        }
+        val near = home.statusCounts?.nearExpiration?.takeIf { it >= 0 }
+        val expired = home.statusCounts?.expired?.takeIf { it >= 0 }
+        val hasAlerts = (near != null && near > 0) || (expired != null && expired > 0)
+        view.findViewById<View>(R.id.cardAlertaVencendo).visibility = if (hasAlerts) View.VISIBLE else View.GONE
+        view.findViewById<TextView>(R.id.tvAlertaVencendoTitulo).text =
+            getString(R.string.home_expiration_counts, number(near), number(expired))
+        view.findViewById<TextView>(R.id.homeStatusNote).apply {
+            visibility = if (near == null || expired == null) View.VISIBLE else View.GONE
+            setText(R.string.home_expiration_unknown)
+        }
     }
+
+    private fun itemCount(value: Long?): String {
+        if (value == null || value < 0) return getString(R.string.home_unknown_count)
+        return resources.getQuantityString(R.plurals.home_item_count, if (value == 1L) 1 else 2, number(value))
+    }
+
+    private fun number(value: Long?): String = if (value == null || value < 0)
+        getString(R.string.home_unknown_count) else NumberFormat.getIntegerInstance().format(value)
 }

@@ -1,5 +1,6 @@
 package com.example.frigus_mobile.data.api
 
+import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import com.example.frigus_mobile.data.model.GroupResponse
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.StockCreateRequest
@@ -12,6 +13,9 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface StockApiService {
+
+    @GET("mobile/inventory/home")
+    fun getInventoryHome(): Call<InventoryHomeResponse>
 
     @GET("groups")
     fun getMyGroups(): Call<List<GroupResponse>>

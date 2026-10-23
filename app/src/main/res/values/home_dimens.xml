@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="home_spacing_small">8dp</dimen>
+    <dimen name="home_spacing_medium">16dp</dimen>
+    <dimen name="home_spacing_large">24dp</dimen>
+    <dimen name="home_touch_size">48dp</dimen>
+    <dimen name="home_progress_size">32dp</dimen>
+    <dimen name="home_body_size">14sp</dimen>
+</resources>
