@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_sign_in">Entrar</string>
+    <string name="auth_register">Cadastrar</string>
+    <string name="auth_google_unavailable">Google indisponível</string>
+    <string name="auth_password_reset_unavailable">A recuperação de senha ainda não está disponível nesta versão. Nenhum e-mail foi enviado.</string>
+    <string name="auth_invalid_email">Informe um e-mail válido.</string>
+    <string name="auth_enter_password">Informe sua senha.</string>
+    <string name="auth_invalid_birth_date">Informe uma data válida. É necessário ter pelo menos 16 anos.</string>
+    <string name="auth_generic_error">Não foi possível concluir. Verifique os dados e tente novamente.</string>
+    <string name="auth_invalid_response">O servidor retornou uma resposta incompleta. Tente entrar novamente.</string>
+    <string name="auth_storage_error">Não foi possível proteger a sessão neste dispositivo. Entre novamente.</string>
+    <string name="auth_network_error">Não foi possível conectar ao Frigus. Verifique a conexão e tente novamente.</string>
+    <string name="auth_registration_uncertain">Não foi possível confirmar o resultado do cadastro. Tente entrar com os dados informados antes de cadastrar novamente.</string>
+    <string name="auth_account_created_login_pending">Sua conta foi criada, mas o login não foi concluído. Entre com o e-mail e a senha cadastrados.</string>
+    <string name="auth_validating_session">Validando sua sessão…</string>
+    <string name="auth_signing_in">Entrando…</string>
+    <string name="auth_retry_session">Tentar validar novamente</string>
+    <string name="auth_change_account">Sair da sessão salva</string>
+    <string name="auth_sign_out">Sair da conta</string>
+    <string name="auth_back_login">Voltar ao login</string>
+    <string name="auth_access_confirmed">Acesso confirmado</string>
+    <string name="auth_features_pending">Os demais recursos do Frigus ainda estão indisponíveis nesta versão.</string>
+</resources>

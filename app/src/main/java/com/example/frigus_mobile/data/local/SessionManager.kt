@@ -1,110 +1,99 @@
 package com.example.frigus_mobile.data.local
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import androidx.lifecycle.MutableLiveData
+import com.example.frigus_mobile.BuildConfig
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.model.UserResponse
+import com.google.gson.Gson
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 class SessionManager(context: Context) {
-    private val preferences: SharedPreferences =
-        context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val preferences = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    val state: SessionState
 
     init {
-        RetrofitClient.setTokenProvider(
-            accessTokenProvider = { accessToken },
-            refreshTokenProvider = { refreshToken },
-            onTokensRefreshed = { newAccess, newRefresh, user ->
-                updateTokensOnly(newAccess, newRefresh)
-                if (user != null) {
-                    saveUserProfile(user)
+        synchronized(SessionManager::class.java) {
+            if (sharedState == null) {
+                // Old Core credentials must never become BFF credentials implicitly.
+                context.applicationContext.getSharedPreferences("auth", Context.MODE_PRIVATE).edit().clear().apply()
+                var token: String? = null
+                var user: UserResponse? = null
+                try {
+                    val ciphertext = preferences.getString("access", null)
+                    val iv = preferences.getString("iv", null)
+                    if (preferences.getString("origin", null) != BuildConfig.BFF_BASE_URL) {
+                        preferences.edit().clear().apply()
+                    } else if (ciphertext != null && iv != null) {
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
+                        token = String(cipher.doFinal(Base64.decode(ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
+                        user = Gson().fromJson(preferences.getString("profile", null), UserResponse::class.java)
+                    }
+                } catch (_: Exception) {
+                    token = null
+                    user = null
+                    preferences.edit().clear().apply()
                 }
+                sharedState = SessionState(token, user,
+                    persist = { access, profile ->
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        cipher.init(Cipher.ENCRYPT_MODE, key())
+                        val encrypted = cipher.doFinal(access.toByteArray(Charsets.UTF_8))
+                        check(preferences.edit().clear()
+                            .putString("origin", BuildConfig.BFF_BASE_URL)
+                            .putString("access", Base64.encodeToString(encrypted, Base64.NO_WRAP))
+                            .putString("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
+                            .putString("profile", Gson().toJson(profile))
+                            .commit()) { "Session persistence failed" }
+                    },
+                    erase = { preferences.edit().clear().apply() },
+                    changed = { authenticated.postValue(it) })
             }
-        )
-    }
-
-    fun saveTokens(accessToken: String?, refreshToken: String?, name: String? = null) {
-        val editor = preferences.edit()
-            .putString(KEY_ACCESS_TOKEN, accessToken)
-            .putString(KEY_REFRESH_TOKEN, refreshToken)
-            // Limpa grupo/estoque em cache ao iniciar nova sessão para não usar stockId de outro usuário
-            .remove(KEY_ACTIVE_GROUP_ID)
-            .remove(KEY_ACTIVE_STOCK_ID)
-        if (!name.isNullOrBlank()) {
-            editor.putString(KEY_USER_NAME, name)
+            state = sharedState!!
         }
-        editor.apply()
+        RetrofitClient.setSession(state)
     }
 
-    private fun updateTokensOnly(accessToken: String?, refreshToken: String?) {
-        preferences.edit()
-            .putString(KEY_ACCESS_TOKEN, accessToken)
-            .putString(KEY_REFRESH_TOKEN, refreshToken)
-            .apply()
-    }
+    val accessToken: String? get() = state.accessToken
+    val isLoggedIn: Boolean get() = state.validated && !accessToken.isNullOrBlank()
+    val userName: String? get() = state.user?.name
+    val userEmail: String? get() = state.user?.email
+    val userBirthDate: String? get() = state.user?.birthDate
+    val userAccountType: String? get() = state.user?.accountType
+    val activeGroupId: String? get() = preferences.getString("group", null)
+    val activeStockId: Int? get() = preferences.getInt("stock", -1).takeIf { it > 0 }
 
-    fun saveUserProfile(user: UserResponse?) {
-        if (user == null) return
-        val editor = preferences.edit()
-        if (!user.name.isNullOrBlank()) editor.putString(KEY_USER_NAME, user.name)
-        if (!user.email.isNullOrBlank()) editor.putString(KEY_USER_EMAIL, user.email)
-        if (!user.birthDate.isNullOrBlank()) editor.putString(KEY_USER_BIRTH_DATE, user.birthDate)
-        if (!user.accountType.isNullOrBlank()) editor.putString(KEY_USER_ACCOUNT_TYPE, user.accountType)
-        editor.apply()
-    }
-
+    fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
+    fun clearSession() = state.clear()
     fun saveActiveGroupAndStock(groupId: String?, stockId: Int?) {
-        preferences.edit()
-            .putString(KEY_ACTIVE_GROUP_ID, groupId)
-            .apply {
-                if (stockId != null) {
-                    putInt(KEY_ACTIVE_STOCK_ID, stockId)
-                } else {
-                    remove(KEY_ACTIVE_STOCK_ID)
-                }
-            }
-            .apply()
+        preferences.edit().putString("group", groupId).apply {
+            if (stockId != null) putInt("stock", stockId) else remove("stock")
+        }.apply()
     }
-
-    val accessToken: String?
-        get() = preferences.getString(KEY_ACCESS_TOKEN, null)
-
-    val refreshToken: String?
-        get() = preferences.getString(KEY_REFRESH_TOKEN, null)
-
-    val userName: String?
-        get() = preferences.getString(KEY_USER_NAME, null)
-
-    val userEmail: String?
-        get() = preferences.getString(KEY_USER_EMAIL, null)
-
-    val userBirthDate: String?
-        get() = preferences.getString(KEY_USER_BIRTH_DATE, null)
-
-    val userAccountType: String?
-        get() = preferences.getString(KEY_USER_ACCOUNT_TYPE, null)
-
-    val activeGroupId: String?
-        get() = preferences.getString(KEY_ACTIVE_GROUP_ID, null)
-
-    val activeStockId: Int?
-        get() = if (preferences.contains(KEY_ACTIVE_STOCK_ID)) preferences.getInt(KEY_ACTIVE_STOCK_ID, -1).takeIf { it > 0 } else null
-
-    fun clearSession() {
-        preferences.edit().clear().apply()
-    }
-
-    val isLoggedIn: Boolean
-        get() = accessToken != null
 
     companion object {
-        private const val PREF_NAME = "auth"
-        private const val KEY_ACCESS_TOKEN = "accessToken"
-        private const val KEY_REFRESH_TOKEN = "refreshToken"
-        private const val KEY_USER_NAME = "userName"
-        private const val KEY_USER_EMAIL = "userEmail"
-        private const val KEY_USER_BIRTH_DATE = "userBirthDate"
-        private const val KEY_USER_ACCOUNT_TYPE = "userAccountType"
-        private const val KEY_ACTIVE_GROUP_ID = "activeGroupId"
-        private const val KEY_ACTIVE_STOCK_ID = "activeStockId"
+        const val PREF_NAME = "mobile_bff_session"
+        val authenticated = MutableLiveData(false)
+        private var sharedState: SessionState? = null
+        private const val KEY_ALIAS = "frigus_mobile_bff_access_v1"
+
+        private fun key(): SecretKey {
+            val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+            (store.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+            return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
+                init(KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .build())
+            }.generateKey()
+        }
     }
 }

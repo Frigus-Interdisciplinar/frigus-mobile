@@ -2,146 +2,127 @@ package com.example.frigus_mobile.data.repository
 
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
+import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.AuthApiService
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.model.Resource
-import com.example.frigus_mobile.data.model.UserLoginRequest
-import com.example.frigus_mobile.data.model.UserLoginResponse
-import com.example.frigus_mobile.data.model.UserRegisterRequest
-import com.example.frigus_mobile.data.model.UserResponse
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import com.example.frigus_mobile.data.local.SessionCredential
+import com.example.frigus_mobile.data.local.SessionState
+import com.example.frigus_mobile.data.model.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class AuthRepository(context: Context) {
-    private val apiService: AuthApiService = RetrofitClient.authService
-    val sessionManager: SessionManager = SessionManager(context)
-    private val gson = Gson()
+class AuthRepository(
+    private val api: AuthApiService,
+    val session: SessionState,
+    private val text: (Int) -> String
+) {
+    constructor(context: Context) : this(RetrofitClient.authService, SessionManager(context).state,
+        { context.applicationContext.getString(it) })
 
-    fun login(email: String, password: String, liveData: MutableLiveData<Resource<UserLoginResponse>>) {
-        liveData.value = Resource.loading()
+    private var pending: Call<*>? = null
 
-        val request = UserLoginRequest(email, password)
-        apiService.login(request).enqueue(object : Callback<UserLoginResponse> {
+    fun login(email: String, password: String, result: (AuthResult) -> Unit) {
+        cancel()
+        val generation = session.beginAuthentication()
+        result(AuthResult.Loading)
+        signIn(email, password, generation, result)
+    }
+
+    private fun signIn(email: String, password: String, generation: Long, result: (AuthResult) -> Unit,
+                       accountCreated: Boolean = false) {
+        val call = api.login(UserLoginRequest(email, password))
+        pending = call
+        call.enqueue(object : Callback<UserLoginResponse> {
             override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                if (call.isCanceled || generation != session.generation) return
                 val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
-                    sessionManager.saveUserProfile(body.user)
-                    liveData.postValue(Resource.success(body))
-                } else {
-                    val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar na API. Código: ${response.code()}")
-                    liveData.postValue(Resource.error(mensagemErro))
+                try {
+                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
+                        result(AuthResult.Authenticated)
+                    } else {
+                        finishError(if (response.isSuccessful) ApiError(displayMessage = text(R.string.auth_invalid_response))
+                            else ApiError.parse(response))
+                    }
+                } catch (_: Exception) {
+                    session.clear()
+                    finishError(ApiError(displayMessage = text(R.string.auth_storage_error)))
                 }
             }
-
             override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
-                liveData.postValue(Resource.error("Erro de conexão com o servidor: ${t.message}"))
+                if (!call.isCanceled && generation == session.generation) finishError(networkError())
+            }
+            private fun finishError(error: ApiError) {
+                result(if (accountCreated) AuthResult.CreatedNeedsLogin(error) else AuthResult.Failure(error))
             }
         })
     }
 
-    fun loginWithGoogle(idToken: String, liveData: MutableLiveData<Resource<UserLoginResponse>>) {
-        liveData.value = Resource.loading()
-
-        val request = com.example.frigus_mobile.data.model.GoogleLoginRequest(idToken)
-        apiService.loginComGoogle(request).enqueue(object : Callback<UserLoginResponse> {
-            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    sessionManager.saveTokens(body.accessToken, body.refreshToken, body.user?.name)
-                    sessionManager.saveUserProfile(body.user)
-                    liveData.postValue(Resource.success(body))
-                } else {
-                    val mensagemErro = extrairMensagemErro(response, "Falha ao autenticar com Google. Código: ${response.code()}")
-                    liveData.postValue(Resource.error(mensagemErro))
-                }
-            }
-
-            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
-                liveData.postValue(Resource.error("Erro de conexão com o servidor: ${t.message}"))
-            }
-        })
-    }
-
-
-    fun register(name: String, birthDate: String, email: String, password: String, liveData: MutableLiveData<Resource<UserResponse>>) {
-        liveData.value = Resource.loading()
-
-        val request = UserRegisterRequest(name, birthDate, email, password)
-        apiService.cadastrar(request).enqueue(object : Callback<UserResponse> {
+    fun register(name: String, birthDate: String, email: String, password: String, result: (AuthResult) -> Unit) {
+        cancel()
+        val generation = session.beginAuthentication()
+        result(AuthResult.Loading)
+        val call = api.cadastrar(UserRegisterRequest(name, birthDate, email, password))
+        pending = call
+        call.enqueue(object : Callback<UserResponse> {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    android.util.Log.d("AuthRepository", "Cadastro realizado com sucesso: ${body.email}")
-                    sessionManager.saveUserProfile(body)
-                    // Realiza login automático com as credenciais recém-cadastradas para salvar a sessão
-                    val loginRequest = UserLoginRequest(email, password)
-                    apiService.login(loginRequest).enqueue(object : Callback<UserLoginResponse> {
-                        override fun onResponse(loginCall: Call<UserLoginResponse>, loginResponse: Response<UserLoginResponse>) {
-                            val loginBody = loginResponse.body()
-                            if (loginResponse.isSuccessful && loginBody != null) {
-                                sessionManager.saveTokens(loginBody.accessToken, loginBody.refreshToken, body.name)
-                                sessionManager.saveUserProfile(loginBody.user ?: body)
-                            }
-                            liveData.postValue(Resource.success(body))
-                        }
-
-                        override fun onFailure(loginCall: Call<UserLoginResponse>, t: Throwable) {
-                            // Se o login falhar por conexão, ainda avisa sucesso no cadastro para não bloquear
-                            liveData.postValue(Resource.success(body))
-                        }
-                    })
-                } else {
-                    val mensagemErro = extrairMensagemErro(response, "Erro no cadastro. Código: ${response.code()}")
-                    android.util.Log.e("AuthRepository", "Falha no cadastro [${response.code()}]: $mensagemErro")
-                    liveData.postValue(Resource.error(mensagemErro))
-                }
+                if (call.isCanceled || generation != session.generation) return
+                if (response.code() == 201) {
+                    signIn(email, password, generation, result, accountCreated = true)
+                } else result(AuthResult.Failure(ApiError.parse(response)))
             }
-
             override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                android.util.Log.e("AuthRepository", "Falha de conexão com a API no cadastro: ${t.message}", t)
-                liveData.postValue(Resource.error("Falha de conexão com a API: ${t.message}"))
+                if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(
+                    ApiError(code = "REGISTRATION_UNCERTAIN", displayMessage = text(R.string.auth_registration_uncertain))))
             }
         })
     }
+
+    fun restore(result: (AuthResult) -> Unit) {
+        val token = session.accessToken ?: return
+        val generation = session.generation
+        result(AuthResult.Loading)
+        val call = api.getProfile()
+        pending = call
+        call.enqueue(object : Callback<UserResponse> {
+            override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
+                if (call.isCanceled) return
+                if (generation != session.generation) {
+                    // The interceptor may already have cleared this very session for a 401.
+                    if (response.code() == 401 && session.generation == generation + 1 && session.accessToken == null)
+                        result(AuthResult.Failure(ApiError.parse(response)))
+                    return
+                }
+                val user = response.body()
+                try {
+                    if (response.code() == 200 && user != null && validUser(user) && session.validate(generation, token, user)) {
+                        result(AuthResult.Authenticated)
+                    } else {
+                        if (response.code() == 401) session.invalidate(SessionCredential(token, generation))
+                        result(AuthResult.Failure(if (response.isSuccessful)
+                            ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
+                    }
+                } catch (_: Exception) {
+                    session.clear()
+                    result(AuthResult.Failure(ApiError(displayMessage = text(R.string.auth_storage_error))))
+                }
+            }
+            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(networkError()))
+            }
+        })
+    }
+
+    private fun validUser(user: UserResponse?): Boolean = try {
+        val id = user?.id
+        id != null && java.util.UUID.fromString(id).toString().equals(id, ignoreCase = true)
+    } catch (_: IllegalArgumentException) { false }
+
+    private fun networkError() = ApiError(displayMessage = text(R.string.auth_network_error))
+    fun cancel() { pending?.cancel(); pending = null }
 
     fun sendPasswordReset(email: String, liveData: MutableLiveData<Resource<Void>>) {
-        liveData.value = Resource.success(null as Void)
-    }
-
-    private fun <T> extrairMensagemErro(response: Response<T>, padrao: String): String {
-        try {
-            val errorBody = response.errorBody()
-            if (errorBody != null) {
-                val errorJson = errorBody.string()
-                android.util.Log.e("AuthRepository", "Corpo de erro bruto da API [${response.code()}]: $errorJson")
-                val obj = gson.fromJson(errorJson, JsonObject::class.java)
-                if (obj.has("displayMessage") && !obj.get("displayMessage").isJsonNull) {
-                    return obj.get("displayMessage").asString
-                }
-                if (obj.has("message") && !obj.get("message").isJsonNull) {
-                    return obj.get("message").asString
-                }
-                if (obj.has("errors") && obj.get("errors").isJsonArray) {
-                    val arr = obj.getAsJsonArray("errors")
-                    if (arr.size() > 0) {
-                        val first = arr[0]
-                        if (first.isJsonObject && first.asJsonObject.has("defaultMessage")) {
-                            return first.asJsonObject.get("defaultMessage").asString
-                        }
-                    }
-                }
-                if (obj.has("error") && !obj.get("error").isJsonNull) {
-                    return obj.get("error").asString
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("AuthRepository", "Erro ao processar corpo de erro da API: ${e.message}", e)
-        }
-        return padrao
+        liveData.value = Resource.error(text(R.string.auth_password_reset_unavailable))
     }
 }
