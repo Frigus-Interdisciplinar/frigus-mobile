@@ -151,46 +151,6 @@
                     android:textSize="14sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo Telefone -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:fontFamily="@font/sarabun"
-                android:text="Telefone"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilTelefone"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxStrokeColor="@color/color_border"
-                app:boxStrokeWidth="1dp"
-                app:hintEnabled="false"
-                app:startIconDrawable="@drawable/ic_phone_outline"
-                app:startIconTint="@color/color_text_secondary">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTelefone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:hint="(00) 00000-0000"
-                    android:inputType="phone"
-                    android:paddingVertical="14dp"
-                    android:textColor="@color/color_text_primary"
-                    android:textColorHint="@color/color_text_secondary"
-                    android:textSize="14sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
             <!-- Campo Data de Nascimento -->
             <TextView
                 android:layout_width="wrap_content"
@@ -284,6 +244,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSenha"
+                    android:saveEnabled="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
@@ -326,6 +287,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etConfirmarSenha"
+                    android:saveEnabled="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"

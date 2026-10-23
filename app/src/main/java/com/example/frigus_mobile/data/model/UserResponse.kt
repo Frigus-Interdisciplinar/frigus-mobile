@@ -16,7 +16,10 @@ data class UserResponse(
     var accountType: String? = null,
 
     @SerializedName("birthDate")
-    var birthDate: String? = null
+    var birthDate: String? = null,
+
+    @SerializedName("profilePictureUrl")
+    var profilePictureUrl: String? = null
 )
 
 data class PlanResponse(

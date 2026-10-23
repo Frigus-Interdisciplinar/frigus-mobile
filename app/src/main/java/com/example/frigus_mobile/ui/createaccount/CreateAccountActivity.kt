@@ -5,8 +5,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,7 +17,8 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.ui.home.MainActivity
-import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.data.model.AuthResult
+import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.utils.ValidationUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -33,7 +32,6 @@ class CreateAccountActivity : AppCompatActivity() {
     private lateinit var btnVoltar: ImageButton
     private lateinit var etNome: TextInputEditText
     private lateinit var etEmail: TextInputEditText
-    private lateinit var etTelefone: TextInputEditText
     private lateinit var etDataNascimento: TextInputEditText
     private lateinit var tilDataNascimento: TextInputLayout
     private lateinit var etSenha: TextInputEditText
@@ -55,16 +53,10 @@ class CreateAccountActivity : AppCompatActivity() {
         setupObservers()
     }
 
-    override fun onResume() {
-        super.onResume()
-        NetworkGuard.ensureConnected(this) {}
-    }
-
     private fun initViews() {
         btnVoltar = findViewById(R.id.btnVoltar)
         etNome = findViewById(R.id.etNome)
         etEmail = findViewById(R.id.etEmail)
-        etTelefone = findViewById(R.id.etTelefone)
         etDataNascimento = findViewById(R.id.etDataNascimento)
         tilDataNascimento = findViewById(R.id.tilDataNascimento)
         etSenha = findViewById(R.id.etSenha)
@@ -83,55 +75,13 @@ class CreateAccountActivity : AppCompatActivity() {
         etDataNascimento.setOnClickListener { abrirDatePicker() }
         tilDataNascimento.setOnClickListener { abrirDatePicker() }
 
-        // Máscara dinâmica de telefone: (11) 99999-9999
-        configurarMascaraTelefone()
-
         // Limpa mensagens de erro automaticamente ao digitar
         configurarLimpezaErrosAoDigitar()
-    }
-
-    private fun configurarMascaraTelefone() {
-        etTelefone.addTextChangedListener(object : TextWatcher {
-            private var isUpdating = false
-            private val mask10 = "(##) ####-####"
-            private val mask11 = "(##) #####-####"
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isUpdating) return
-                isUpdating = true
-
-                val digits = s?.toString()?.replace(Regex("[^\\d]"), "") ?: ""
-                val mask = if (digits.length > 10) mask11 else mask10
-                val formatted = StringBuilder()
-                var i = 0
-
-                for (m in mask.toCharArray()) {
-                    if (m != '#' && digits.length > i) {
-                        formatted.append(m)
-                        continue
-                    }
-                    if (i < digits.length) {
-                        formatted.append(digits[i])
-                        i++
-                    } else {
-                        break
-                    }
-                }
-
-                etTelefone.setText(formatted.toString())
-                etTelefone.setSelection(formatted.length)
-                isUpdating = false
-            }
-        })
     }
 
     private fun configurarLimpezaErrosAoDigitar() {
         etNome.doAfterTextChanged { if (!it.isNullOrBlank()) etNome.error = null }
         etEmail.doAfterTextChanged { if (!it.isNullOrBlank()) etEmail.error = null }
-        etTelefone.doAfterTextChanged { if (!it.isNullOrBlank()) etTelefone.error = null }
         etDataNascimento.doAfterTextChanged { if (!it.isNullOrBlank()) etDataNascimento.error = null }
         etSenha.doAfterTextChanged { if (!it.isNullOrBlank()) etSenha.error = null }
         etConfirmarSenha.doAfterTextChanged { if (!it.isNullOrBlank()) etConfirmarSenha.error = null }
@@ -191,34 +141,47 @@ class CreateAccountActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.getRegisterResult().observe(this) { resource ->
-            if (resource == null) return@observe
-
-            if (resource.isLoading) {
-                btnCriarConta.isEnabled = false
-                btnCriarConta.text = ""
-                progressBarCriarConta.visibility = View.VISIBLE
-            } else if (resource.isSuccess) {
-                btnCriarConta.isEnabled = true
-                btnCriarConta.text = "Cadastrar"
-                progressBarCriarConta.visibility = View.GONE
-                Toast.makeText(this, "Conta criada com sucesso!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-            } else if (resource.isError) {
-                btnCriarConta.isEnabled = true
-                btnCriarConta.text = "Cadastrar"
-                progressBarCriarConta.visibility = View.GONE
-                val msg = resource.message ?: "Erro ao criar conta"
-                if (msg.startsWith("Falha de conexão com a API")) {
-                    NetworkGuard.showBlockingError(this) { cadastrarUsuario() }
-                } else {
-                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        viewModel.result.observe(this) { result ->
+            val busy = result == AuthResult.Loading
+            btnCriarConta.isEnabled = !busy
+            btnCriarConta.text = if (busy) "" else getString(R.string.auth_register)
+            progressBarCriarConta.visibility = if (busy) View.VISIBLE else View.GONE
+            when (result) {
+                AuthResult.Authenticated -> {
+                    startActivity(Intent(this, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    })
+                    finish()
                 }
+                is AuthResult.CreatedNeedsLogin -> openLogin(getString(R.string.auth_account_created_login_pending))
+                is AuthResult.Failure -> {
+                    val message = result.error.userMessage(getString(R.string.auth_generic_error))
+                    if (result.error.code == "REGISTRATION_UNCERTAIN") openLogin(message)
+                    else {
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                        result.error.fields.orEmpty().forEach { field ->
+                            val input = when (field.fieldName) {
+                                "name" -> etNome
+                                "email" -> etEmail
+                                "birthDate" -> etDataNascimento
+                                "rawPassword" -> etSenha
+                                else -> null
+                            }
+                            input?.error = field.displayMessage ?: field.errorMessage
+                        }
+                    }
+                }
+                else -> Unit
             }
         }
+    }
+
+    private fun openLogin(message: String) {
+        startActivity(Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(LoginActivity.EXTRA_NOTICE, message)
+        })
+        finish()
     }
 
     private fun abrirDatePicker() {
@@ -245,7 +208,7 @@ class CreateAccountActivity : AppCompatActivity() {
         val dia = calendar.get(Calendar.DAY_OF_MONTH)
 
         val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            val dataFormatada = String.format(Locale.getDefault(), "%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear)
+            val dataFormatada = String.format(Locale.ROOT, "%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear)
             etDataNascimento.setText(dataFormatada)
             etDataNascimento.error = null
         }, ano, mes, dia)
@@ -258,19 +221,12 @@ class CreateAccountActivity : AppCompatActivity() {
     private fun cadastrarUsuario() {
         val nome = etNome.text?.toString()?.trim() ?: ""
         val email = etEmail.text?.toString()?.trim() ?: ""
-        val telefone = etTelefone.text?.toString()?.trim() ?: ""
         val dataNascimento = etDataNascimento.text?.toString()?.trim() ?: ""
-        val senha = etSenha.text?.toString()?.trim() ?: ""
-        val confirmarSenha = etConfirmarSenha.text?.toString()?.trim() ?: ""
+        val senha = etSenha.text?.toString() ?: ""
+        val confirmarSenha = etConfirmarSenha.text?.toString() ?: ""
 
         if (nome.isEmpty()) {
             etNome.error = "Informe seu nome completo"
-            etNome.requestFocus()
-            return
-        }
-
-        if (nome.length < 3) {
-            etNome.error = "Nome muito curto"
             etNome.requestFocus()
             return
         }
@@ -287,17 +243,15 @@ class CreateAccountActivity : AppCompatActivity() {
             return
         }
 
-        val apenasDigitosTelefone = telefone.replace(Regex("[^\\d]"), "")
-        if (telefone.isNotEmpty() && apenasDigitosTelefone.length < 10) {
-            etTelefone.error = "Informe um telefone válido com DDD"
-            etTelefone.requestFocus()
-            return
-        }
-
         if (dataNascimento.isEmpty()) {
             etDataNascimento.error = "Informe sua data de nascimento"
             etDataNascimento.requestFocus()
             abrirDatePicker()
+            return
+        }
+
+        if (!ValidationUtils.isBirthDateValida(dataNascimento)) {
+            etDataNascimento.error = getString(R.string.auth_invalid_birth_date)
             return
         }
 

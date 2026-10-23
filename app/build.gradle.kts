@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
 }
 
 val envFile = rootProject.file(".env")
@@ -21,8 +20,11 @@ if (envFile.exists()) {
         }
     }
 }
-val frigusBaseUrl = envProperties.getProperty("FRIGUS_BASE_URL") ?: "https://frigus-core-api.onrender.com/"
-val googleClientId = envProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""
+val frigusBffBaseUrl = providers.environmentVariable("FRIGUS_BFF_BASE_URL").orNull
+    ?: envProperties.getProperty("FRIGUS_BFF_BASE_URL") ?: "http://10.0.2.2:3001/"
+require(frigusBffBaseUrl.none { it == '"' || it == '\\' || it.isISOControl() }) {
+    "FRIGUS_BFF_BASE_URL must be a plain BFF origin URL"
+}
 
 android {
     namespace = "com.example.frigus_mobile"
@@ -38,8 +40,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BASE_URL", "\"$frigusBaseUrl\"")
-        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
+        buildConfigField("String", "BFF_BASE_URL", "\"$frigusBffBaseUrl\"")
     }
 
     buildFeatures {
@@ -70,9 +71,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")

@@ -2,23 +2,29 @@ package com.example.frigus_mobile.ui.login
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.frigus_mobile.data.model.Resource
-import com.example.frigus_mobile.data.model.UserLoginResponse
+import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.data.repository.AuthRepository
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: AuthRepository = AuthRepository(application)
-    val loginResult: MutableLiveData<Resource<UserLoginResponse>> = MutableLiveData()
-
-    fun getLoginResult(): LiveData<Resource<UserLoginResponse>> = loginResult
-
+    private val repository = AuthRepository(application)
+    val result = MutableLiveData<AuthResult?>()
+    val hasStoredSession: Boolean get() = repository.session.accessToken != null
+    val isAuthenticated: Boolean get() = repository.session.validated
+    init {
+        if (isAuthenticated) result.value = AuthResult.Authenticated
+        else if (hasStoredSession) restore()
+    }
     fun login(email: String, password: String) {
-        repository.login(email, password, loginResult)
+        if (result.value != AuthResult.Loading) repository.login(email, password) { result.value = it }
     }
-
-    fun loginWithGoogle(idToken: String) {
-        repository.loginWithGoogle(idToken, loginResult)
+    fun restore() {
+        if (result.value != AuthResult.Loading) repository.restore { result.value = it }
     }
+    fun signOut() {
+        repository.cancel()
+        repository.session.clear()
+        result.value = null
+    }
+    override fun onCleared() { repository.cancel() }
 }
