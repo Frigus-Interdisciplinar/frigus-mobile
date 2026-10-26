@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.Dispatchers
@@ -151,11 +152,19 @@ class PerfilFragment : Fragment() {
             .setTitle("Sair da conta")
             .setMessage("Tem certeza de que deseja encerrar a sua sessão?")
             .setPositiveButton("Sair") { _, _ ->
-                SessionManager(requireContext()).clearSession()
-                val intent = Intent(requireActivity(), LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                requireActivity().finish()
+                val appContext = requireContext().applicationContext
+                val host = requireActivity()
+                lifecycleScope.launch {
+                    try {
+                        PushRegistration.unregister(appContext)
+                    } finally {
+                        SessionManager(appContext).clearSession()
+                        val intent = Intent(host, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        host.startActivity(intent)
+                        host.finish()
+                    }
+                }
             }
             .setNegativeButton("Cancelar", null)
             .show()

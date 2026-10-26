@@ -27,6 +27,7 @@ object MobileHttp {
         "GET|DELETE" to "/mobile/notifications",
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
+        "POST|DELETE" to "/mobile/push-tokens",
         "GET" to "/mobile/advertisements/active",
         "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
