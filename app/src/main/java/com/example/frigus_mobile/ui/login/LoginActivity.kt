@@ -18,6 +18,7 @@ import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
 import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.utils.CustomTypefaceSpan
 import com.example.frigus_mobile.utils.ValidationUtils
 import com.google.android.material.button.MaterialButton
@@ -58,6 +59,9 @@ class LoginActivity : AppCompatActivity() {
                     navigated = true
                     startActivity(Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        if (PushNotifications.shouldOpenCenter(this@LoginActivity.intent)) {
+                            putExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS, true)
+                        }
                     })
                     finish()
                 }

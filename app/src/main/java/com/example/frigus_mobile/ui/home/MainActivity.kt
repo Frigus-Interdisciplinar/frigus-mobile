@@ -1,18 +1,28 @@
 package com.example.frigus_mobile.ui.home
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.push.PushNotifications
+import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.login.LoginActivity
+import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var session: SessionManager
@@ -22,6 +32,11 @@ class MainActivity : AppCompatActivity() {
     private val backToHome = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() { showHome() }
     }
+    private val notificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            updatePermissionAction()
+            if (granted) PushRegistration.sync(this)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Restore only the safe navigation state, never legacy feature fragments.
@@ -41,7 +56,23 @@ class MainActivity : AppCompatActivity() {
         }
         ViewCompat.requestApplyInsets(findViewById(R.id.main))
         findViewById<TextView>(R.id.sessionIdentity).text = session.userName ?: session.userEmail.orEmpty()
-        findViewById<View>(R.id.btnSessionLogout).setOnClickListener { session.clearSession(); openLogin() }
+        findViewById<View>(R.id.btnSessionNotifications).setOnClickListener { openNotifications() }
+        findViewById<View>(R.id.btnEnablePush).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        findViewById<View>(R.id.btnSessionLogout).setOnClickListener { button ->
+            button.isEnabled = false
+            lifecycleScope.launch {
+                try {
+                    PushRegistration.unregister(this@MainActivity)
+                } finally {
+                    session.clearSession()
+                    openLogin()
+                }
+            }
+        }
         SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
         onBackPressedDispatcher.addCallback(this, backToHome)
 
@@ -53,6 +84,12 @@ class MainActivity : AppCompatActivity() {
         navigation.menu.findItem(validSelected).isChecked = true
         val pendingTitle = savedInstanceState?.getInt(UNAVAILABLE_TITLE) ?: 0
         if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
+
+        updatePermissionAction()
+        if (PushNotifications.shouldOpenCenter(intent)) {
+            intent.removeExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS)
+            openNotifications()
+        }
     }
 
     fun selectTab(id: Int) { navigation.selectedItemId = id }
@@ -90,6 +127,23 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::session.isInitialized && !session.isLoggedIn) openLogin()
+        else if (::session.isInitialized) {
+            PushRegistration.sync(this)
+            updatePermissionAction()
+        }
+    }
+
+    private fun openNotifications() {
+        startActivity(Intent(this, NotificacoesActivity::class.java))
+    }
+
+    private fun updatePermissionAction() {
+        if (!::session.isInitialized || !session.isLoggedIn) return
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        findViewById<View>(R.id.pushPermissionBanner).visibility =
+            if (needsPermission) View.VISIBLE else View.GONE
     }
 
     private fun openLogin() {

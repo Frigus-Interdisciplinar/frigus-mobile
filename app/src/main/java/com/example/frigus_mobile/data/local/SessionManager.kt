@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.frigus_mobile.BuildConfig
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.model.UserResponse
+import com.example.frigus_mobile.push.PushRegistration
 import com.google.gson.Gson
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -55,7 +56,10 @@ class SessionManager(context: Context) {
                             .commit()) { "Session persistence failed" }
                     },
                     erase = { preferences.edit().clear().apply() },
-                    changed = { authenticated.postValue(it) })
+                    changed = {
+                        authenticated.postValue(it)
+                        PushRegistration.onSessionChanged(context.applicationContext, it)
+                    })
             }
             state = sharedState!!
         }
