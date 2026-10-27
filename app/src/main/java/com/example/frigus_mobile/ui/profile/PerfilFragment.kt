@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.api.requireBody
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.login.LoginActivity
@@ -18,7 +19,6 @@ import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
 class PerfilFragment : Fragment() {
 
@@ -91,34 +91,17 @@ class PerfilFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val (profile, subscription) = withContext(Dispatchers.IO) {
-                    val profResp = RetrofitClient.authService.getProfile().execute()
-                    if (!profResp.isSuccessful) {
-                        throw IOException("Não foi possível carregar os dados do perfil (Código ${profResp.code()}).")
-                    }
-                    val subResp = try {
-                        RetrofitClient.authService.getMySubscription().execute()
-                    } catch (_: Exception) {
-                        null
-                    }
-                    Pair(profResp.body(), if (subResp?.isSuccessful == true) subResp.body() else null)
+                val profile = withContext(Dispatchers.IO) {
+                    RetrofitClient.authService.getProfile().requireBody()
                 }
 
-                if (profile != null) {
-                    sessionManager.saveUserProfile(profile)
-                }
+                sessionManager.saveUserProfile(profile)
                 view?.let { rootView ->
                     preencherDadosSessao(rootView)
                     val tvNomePlano = rootView.findViewById<TextView>(R.id.tvNomePlanoPerfil)
                     val tvValidadePlano = rootView.findViewById<TextView>(R.id.tvValidadePlanoPerfil)
-                    if (subscription?.plan != null && subscription.status == "ACTIVE") {
-                        tvNomePlano?.text = "Plano ${subscription.plan.name ?: "Ativo"}"
-                        val validade = formatarDataIso(subscription.currentPeriodEnd)
-                        tvValidadePlano?.text = if (validade != null) "Válido até $validade" else "Assinatura ativa"
-                    } else {
-                        tvNomePlano?.text = "Plano Gratuito"
-                        tvValidadePlano?.text = "Sem assinatura paga ativa"
-                    }
+                    tvNomePlano?.text = "Assinatura indisponível"
+                    tvValidadePlano?.text = "Aguardando integração mobile"
                 }
             } catch (e: Exception) {
                 NetworkGuard.showBlockingError(activity, e.message) {
@@ -126,12 +109,6 @@ class PerfilFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun formatarDataIso(iso: String?): String? {
-        if (iso.isNullOrBlank() || iso.length < 10) return null
-        val parts = iso.substring(0, 10).split("-")
-        return if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else null
     }
 
     private fun abrirFragmento(fragmento: Fragment) {

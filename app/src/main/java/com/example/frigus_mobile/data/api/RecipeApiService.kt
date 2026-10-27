@@ -1,37 +1,42 @@
 package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.model.PageResponse
-import com.example.frigus_mobile.data.model.RecipeIngredientItem
 import com.example.frigus_mobile.data.model.RecipeResponse
-import com.google.gson.annotations.SerializedName
+import com.example.frigus_mobile.data.model.RecipeSuggestionResponse
 import retrofit2.Call
-import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Path
-
-data class AiRecipeChatRequest(
-    @SerializedName("message")
-    val message: String,
-
-    @SerializedName("stockId")
-    val stockId: Int,
-
-    @SerializedName("sessionId")
-    val sessionId: String? = null
-)
+import retrofit2.http.PUT
+import retrofit2.http.Query
 
 interface RecipeApiService {
 
-    @GET("ai/recipes/suggestions/stock/{stockId}")
+    @GET("mobile/recipes/ai/suggestions/{stockId}")
     fun getSuggestionsByStock(@Path("stockId") stockId: Int): Call<List<RecipeResponse>>
 
-    @GET("recipes")
-    fun getAllRecipes(): Call<PageResponse<RecipeResponse>>
+    @GET("mobile/recipes")
+    fun getAllRecipes(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20,
+        @Query("q") query: String? = null
+    ): Call<PageResponse<RecipeResponse>>
 
-    @GET("ingredients/recipe/{recipeId}")
-    fun getIngredientsByRecipeId(@Path("recipeId") recipeId: Int): Call<List<RecipeIngredientItem>>
+    @GET("mobile/recipes/favorites")
+    fun getFavorites(@Query("page") page: Int = 0, @Query("size") size: Int = 20): Call<PageResponse<RecipeResponse>>
 
-    @POST("ai/recipes/chat")
-    fun chat(@Body request: AiRecipeChatRequest): Call<RecipeResponse>
+    @GET("mobile/recipes/suggestions")
+    fun getSuggestions(
+        @Query("stockId") stockId: Int? = null,
+        @Query("limit") limit: Int = 10
+    ): Call<List<RecipeSuggestionResponse>>
+
+    @GET("mobile/recipes/{id}")
+    fun getRecipe(@Path("id") id: Int, @Query("stockId") stockId: Int? = null): Call<RecipeResponse>
+
+    @PUT("mobile/recipes/{id}/favorite")
+    fun addFavorite(@Path("id") id: Int): Call<Void>
+
+    @DELETE("mobile/recipes/{id}/favorite")
+    fun removeFavorite(@Path("id") id: Int): Call<Void>
 }

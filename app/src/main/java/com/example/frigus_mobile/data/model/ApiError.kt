@@ -9,10 +9,10 @@ data class ApiError(
     val code: String? = null,
     val message: String? = null,
     val displayMessage: String? = null,
-    val fields: List<ApiFieldError>? = null
+    val fields: List<ApiFieldError>? = null,
+    val timestamp: String? = null
 ) {
-    fun userMessage(fallback: String): String = displayMessage?.takeIf { it.isNotBlank() }
-        ?: message?.takeIf { it.isNotBlank() } ?: fallback
+    fun userMessage(fallback: String): String = displayMessage?.takeIf { it.isNotBlank() } ?: fallback
 
     companion object {
         fun parse(response: Response<*>): ApiError {

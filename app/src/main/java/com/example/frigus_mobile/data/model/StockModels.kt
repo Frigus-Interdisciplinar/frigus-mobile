@@ -14,14 +14,6 @@ data class StockResponse(
     val name: String? = null
 ) : Serializable
 
-data class StockCreateRequest(
-    @SerializedName("groupId")
-    val groupId: String,
-
-    @SerializedName("name")
-    val name: String
-)
-
 data class StockProductProductResponse(
     @SerializedName("id")
     val id: Int? = null,
@@ -45,7 +37,13 @@ data class StockProductProductResponse(
     val brand: String? = null,
 
     @SerializedName("imageUrl")
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+
+    @SerializedName("createdAt")
+    val createdAt: String? = null,
+
+    @SerializedName("ownerGroupId")
+    val ownerGroupId: String? = null
 ) : Serializable
 
 data class StockProductResponse(
@@ -64,6 +62,9 @@ data class StockProductResponse(
     @SerializedName("quantity")
     var quantity: Int? = null,
 
+    @SerializedName("initialQuantity")
+    val initialQuantity: Int? = null,
+
     @SerializedName("minimalQuantity")
     val minimalQuantity: Int? = null,
 
@@ -77,42 +78,34 @@ data class StockProductResponse(
     var productStatus: String? = null,
 
     @SerializedName("category")
-    var category: String? = null
+    var category: String? = null,
+
+    @SerializedName("batch")
+    val batch: String? = null
 ) : Serializable
 
-data class StockProductCreateRequest(
-    @SerializedName("productId")
-    val productId: Int,
-
-    @SerializedName("stockId")
-    val stockId: Int,
-
-    @SerializedName("quantity")
-    val quantity: Int,
-
-    @SerializedName("minimalQuantity")
-    val minimalQuantity: Int = 1,
-
-    @SerializedName("purchaseUnitPrice")
-    val purchaseUnitPrice: Double = 0.0,
-
-    @SerializedName("expireDate")
-    val expireDate: String? = null
-)
-
 data class StockProductUpdateRequest(
+    @SerializedName("name")
+    val name: String? = null,
+
+    @SerializedName("category")
+    val category: String? = null,
+
     @SerializedName("quantity")
     val quantity: Int? = null,
 
+    @SerializedName("initialQuantity")
+    val initialQuantity: Int? = null,
+
     @SerializedName("minimalQuantity")
     val minimalQuantity: Int? = null,
-
-    @SerializedName("purchaseUnitPrice")
-    val purchaseUnitPrice: Double? = null,
 
     @SerializedName("expireDate")
     val expireDate: String? = null,
 
     @SerializedName("storagePlace")
-    val storagePlace: String? = null
+    val storagePlace: String? = null,
+
+    @SerializedName("batch")
+    val batch: String? = null
 )
