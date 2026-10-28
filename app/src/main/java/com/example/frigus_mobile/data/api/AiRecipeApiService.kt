@@ -8,7 +8,7 @@ import retrofit2.http.POST
 
 interface AiRecipeApiService {
 
-    @POST("ai/recipes/chat")
+    @POST("mobile/recipes/ai/chat")
     fun chat(
         @Body request: AiRecipeChatRequest
     ): Call<AiRecipeChatResponse>

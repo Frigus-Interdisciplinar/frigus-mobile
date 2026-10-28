@@ -7,13 +7,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NotificationRoutesTest {
-    @Test fun mobileGatewayAllowsOnlyNotificationAndTokenRoutes() {
+    @Test fun mobileGatewayAllowsPublishedNotificationRoutesOnly() {
         val id = "123e4567-e89b-12d3-a456-426614174000"
         assertTrue(MobileHttp.allowed("GET", "/mobile/notifications"))
         assertTrue(MobileHttp.allowed("PATCH", "/mobile/notifications/$id/read"))
         assertTrue(MobileHttp.allowed("DELETE", "/mobile/notifications"))
-        assertTrue(MobileHttp.allowed("POST", "/mobile/push-tokens"))
-        assertTrue(MobileHttp.allowed("DELETE", "/mobile/push-tokens"))
+        assertTrue(MobileHttp.allowed("PATCH", "/mobile/notifications/read-all"))
+        assertFalse(MobileHttp.allowed("POST", "/mobile/push-tokens"))
+        assertFalse(MobileHttp.allowed("DELETE", "/mobile/push-tokens"))
         assertFalse(MobileHttp.allowed("PATCH", "/mobile/notifications/not-an-id/read"))
         assertFalse(MobileHttp.allowed("POST", "/mobile/notifications"))
         assertFalse(MobileHttp.public("/mobile/push-tokens"))

@@ -7,7 +7,7 @@ data class AiRecipeChatRequest(
     val message: String,
 
     @SerializedName("stockId")
-    val stockId: Int = 1,
+    val stockId: Int,
 
     @SerializedName("sessionId")
     val sessionId: String? = null
@@ -42,7 +42,13 @@ data class AiRecipeChatResponse(
     val missingIngredients: Int? = null,
 
     @SerializedName("score")
-    val score: Double? = null
+    val score: Double? = null,
+
+    @SerializedName("ingredients")
+    val ingredients: List<RecipeIngredientItem>? = null,
+
+    @SerializedName("nearestExpireDate")
+    val nearestExpireDate: String? = null
 )
 
 data class ChatUiMessage(

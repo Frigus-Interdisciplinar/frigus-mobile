@@ -34,6 +34,21 @@ data class RecipeResponse(
     @SerializedName("nearestExpireDate")
     val nearestExpireDate: String? = null,
 
+    @SerializedName("favorite")
+    val favorite: Boolean? = null,
+
+    @SerializedName("domesticOnly")
+    val domesticOnly: Boolean? = null,
+
+    @SerializedName("active")
+    val active: Boolean? = null,
+
+    @SerializedName("createdAt")
+    val createdAt: String? = null,
+
+    @SerializedName("availability")
+    val availability: List<RecipeAvailability>? = null,
+
     // Propriedades visuais adicionais
     var rating: Double = 4.8,
     var timeMinutes: Int = 35,
@@ -61,6 +76,24 @@ data class RecipeResponse(
     val availableIngredients: List<RecipeIngredientItem>
         get() = ingredients?.filter { it.inStock == true } ?: emptyList()
 }
+
+data class RecipeSuggestionResponse(
+    val recipe: RecipeResponse? = null,
+    val matchedIngredients: Int? = null,
+    val missingIngredients: Int? = null,
+    val score: Double? = null,
+    val availability: List<RecipeAvailability>? = null
+)
+
+data class RecipeAvailability(
+    val productId: Int? = null,
+    val productName: String? = null,
+    val requiredQuantity: Double? = null,
+    val availableQuantity: Double? = null,
+    val unit: String? = null,
+    val required: Boolean? = null,
+    val available: Boolean? = null
+)
 
 data class RecipeIngredientItem(
     @SerializedName("id")

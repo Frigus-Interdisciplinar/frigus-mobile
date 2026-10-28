@@ -5,83 +5,72 @@ import androidx.lifecycle.MutableLiveData
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.RecipeApiService
 import com.example.frigus_mobile.data.api.RetrofitClient
-import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.data.api.requireBody
+import com.example.frigus_mobile.data.api.requireNoContent
+import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.RecipeResponse
+import com.example.frigus_mobile.data.model.RecipeSuggestionResponse
 import com.example.frigus_mobile.data.model.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RecipeRepository(private val context: Context) {
-
-    private val sessionManager = SessionManager(context)
-    private val apiService: RecipeApiService = RetrofitClient.recipeService
-    private val stockRepository = StockRepository(context)
+    private val api: RecipeApiService = RetrofitClient.recipeService
 
     fun getRecipeSuggestions(
         stockId: Int? = null,
         liveData: MutableLiveData<Resource<List<RecipeResponse>>>
     ) {
         liveData.value = Resource.loading()
-
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Resolve o stockId real do grupo do usuário autenticado (sem usar stockId = 1 de outro usuário)
-                val resolvedStockId = stockId ?: stockRepository.resolveUserStockId()
-
-                if (resolvedStockId != null) {
-                    val suggResp = apiService.getSuggestionsByStock(resolvedStockId).execute()
-                    if (suggResp.isSuccessful) {
-                        val suggestions = suggResp.body().orEmpty()
-                        if (suggestions.isNotEmpty()) {
-                            val enriched = suggestions.mapIndexed { idx, r -> enrichRecipeWithUiDefaults(r, idx) }
-                            liveData.postValue(Resource.success(enriched))
-                            return@launch
-                        }
-                    }
-                }
-
-                // Caso o usuário ainda não tenha grupo/estoque ou não haja sugestões da IA para o estoque,
-                // consulta o catálogo geral de receitas da API (GET /recipes)
-                val generalResp = apiService.getAllRecipes().execute()
-                if (generalResp.isSuccessful) {
-                    val recipes = generalResp.body()?.content.orEmpty()
-                    val enriched = recipes.mapIndexed { idx, r ->
-                        val ingList = if (r.recipeId != null && r.ingredients.isNullOrEmpty()) {
-                            try {
-                                val ingResp = apiService.getIngredientsByRecipeId(r.recipeId).execute()
-                                if (ingResp.isSuccessful) ingResp.body().orEmpty() else emptyList()
-                            } catch (_: Exception) {
-                                emptyList()
-                            }
-                        } else {
-                            r.ingredients.orEmpty()
-                        }
-                        enrichRecipeWithUiDefaults(r.copy(ingredients = ingList), idx)
-                    }
-                    liveData.postValue(Resource.success(enriched))
-                } else {
-                    liveData.postValue(
-                        Resource.error("Servidor indisponível ao buscar receitas (Código ${generalResp.code()}).")
-                    )
-                }
+                val ai = stockId?.let { api.getSuggestionsByStock(it).requireBody() }.orEmpty()
+                val suggestions = if (ai.isNotEmpty()) ai else
+                    api.getSuggestions(stockId).requireBody().mapNotNull(::suggestedRecipe)
+                val recipes = if (suggestions.isNotEmpty()) suggestions else
+                    api.getAllRecipes().requireBody().content
+                liveData.postValue(Resource.success(recipes.mapIndexed(::withUiImage)))
             } catch (e: Exception) {
-                liveData.postValue(
-                    Resource.error("Não foi possível conectar ao servidor: ${e.message}")
-                )
+                liveData.postValue(Resource.error(e.message ?: "Não foi possível carregar receitas."))
             }
         }
     }
 
-    private fun enrichRecipeWithUiDefaults(recipe: RecipeResponse, index: Int): RecipeResponse {
-        val defaultImages = listOf(
+    suspend fun list(page: Int = 0, size: Int = 20, query: String? = null):
+        PageResponse<RecipeResponse> = withContext(Dispatchers.IO) {
+        api.getAllRecipes(page, size, query).requireBody()
+    }
+
+    suspend fun favorites(page: Int = 0, size: Int = 20):
+        PageResponse<RecipeResponse> = withContext(Dispatchers.IO) {
+        api.getFavorites(page, size).requireBody()
+    }
+
+    suspend fun detail(id: Int, stockId: Int? = null): RecipeResponse = withContext(Dispatchers.IO) {
+        api.getRecipe(id, stockId).requireBody()
+    }
+
+    suspend fun favorite(id: Int, enabled: Boolean) = withContext(Dispatchers.IO) {
+        if (enabled) api.addFavorite(id).requireNoContent() else api.removeFavorite(id).requireNoContent()
+    }
+
+    private fun suggestedRecipe(suggestion: RecipeSuggestionResponse): RecipeResponse? =
+        suggestion.recipe?.copy(
+            matchedIngredients = suggestion.matchedIngredients,
+            missingIngredients = suggestion.missingIngredients,
+            score = suggestion.score,
+            availability = suggestion.availability
+        )
+
+    private fun withUiImage(index: Int, recipe: RecipeResponse): RecipeResponse {
+        val images = listOf(
             R.drawable.img_frango_molho_cremoso,
             R.drawable.img_lasanha_frango,
             R.drawable.img_omelete_legumes
         )
-        recipe.imageDrawableRes = defaultImages.getOrElse(index % defaultImages.size) {
-            R.drawable.img_frango_molho_cremoso
-        }
+        recipe.imageDrawableRes = images[index % images.size]
         return recipe
     }
 }

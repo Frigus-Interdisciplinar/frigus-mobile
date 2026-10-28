@@ -16,6 +16,9 @@ object MobileHttp {
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
         "GET" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
+        "POST" to "/mobile/inventory/receipts/scan",
+        "GET" to "/mobile/inventory/receipts/$uuid",
+        "POST" to "/mobile/inventory/receipts/$uuid/confirm",
         "GET|PUT|DELETE" to "/mobile/inventory/stock-products/[1-9][0-9]*",
         "GET|POST" to "/mobile/inventory/stock-products/[1-9][0-9]*/movements",
         "GET" to "/mobile/recipes",
@@ -27,7 +30,6 @@ object MobileHttp {
         "GET|DELETE" to "/mobile/notifications",
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
-        "POST|DELETE" to "/mobile/push-tokens",
         "GET" to "/mobile/advertisements/active",
         "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
@@ -73,7 +75,10 @@ object MobileHttp {
                 if (!public && access == null) throw IOException("Authentication required")
                 val builder = request.newBuilder().tag(SendOnce::class.java, SendOnce()).removeHeader("Authorization").header("Accept", "application/json")
                 if (access != null) builder.header("Authorization", "Bearer $access")
-                val response = chain.proceed(builder.build())
+                val longRunning = url.encodedPath() == "/mobile/recipes/ai/chat" ||
+                    url.encodedPath() == "/mobile/inventory/receipts/scan"
+                val requestChain = if (longRunning) chain.withReadTimeout(135, TimeUnit.SECONDS) else chain
+                val response = requestChain.proceed(builder.build())
                 if (response.code() == 401 && access != null) unauthorized(active!!)
                 response
             }).build()
