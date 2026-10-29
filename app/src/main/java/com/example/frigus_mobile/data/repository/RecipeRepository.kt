@@ -3,15 +3,11 @@ package com.example.frigus_mobile.data.repository
 import android.content.Context
 import com.example.frigus_mobile.data.api.BffException
 import com.example.frigus_mobile.data.api.RetrofitClient
-import com.example.frigus_mobile.data.api.requireBody
-import com.example.frigus_mobile.data.api.requireNoContent
 import com.example.frigus_mobile.data.model.ApiError
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.RecipeResponse
 import com.example.frigus_mobile.data.model.RecipeSuggestionResponse
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,6 +20,11 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
     suspend fun list(page: Int = 0, size: Int = 20, query: String? = null):
         PageResponse<RecipeResponse> {
         val result = api.getAllRecipes(page, size, query).awaitGet()
+        validatePage(result, page)
+        return result
+    }
+
+    private fun validatePage(result: PageResponse<RecipeResponse>, page: Int) {
         val content: List<RecipeResponse?>? = result.content
         requireResponse(content != null && result.number == page && result.size > 0 &&
             result.totalPages >= 0 && result.totalElements >= (content?.size ?: 0) &&
@@ -31,7 +32,6 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
             (if (result.totalPages == 0) content?.isEmpty() == true && result.totalElements == 0L
                 else result.number < result.totalPages && (!content.isNullOrEmpty() || result.number == result.totalPages - 1)) &&
             content.all { it != null && (it.recipeId ?: 0) > 0 })
-        return result
     }
 
     /** M14 computes suggestions for the current group; no AI call or catalog fallback. */
@@ -54,11 +54,15 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
         return result
     }
 
-    suspend fun favorites(page: Int = 0, size: Int = 20): PageResponse<RecipeResponse> =
-        withContext(Dispatchers.IO) { api.getFavorites(page, size).requireBody() }
+    suspend fun favorites(page: Int = 0, size: Int = 20): PageResponse<RecipeResponse> {
+        val result = api.getFavorites(page, size).awaitGet()
+        validatePage(result, page)
+        return result
+    }
 
-    suspend fun favorite(id: Int, enabled: Boolean) = withContext(Dispatchers.IO) {
-        if (enabled) api.addFavorite(id).requireNoContent() else api.removeFavorite(id).requireNoContent()
+    suspend fun favorite(id: Int, enabled: Boolean) {
+        requireResponse(id > 0)
+        if (enabled) api.addFavorite(id).awaitNoContent() else api.removeFavorite(id).awaitNoContent()
     }
 
     private fun requireResponse(valid: Boolean) {
@@ -78,6 +82,23 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
                 }
             }
             override fun onFailure(call: Call<T>, failure: Throwable) {
+                if (continuation.isActive) continuation.resumeWithException(failure)
+            }
+        })
+    }
+
+    private suspend fun Call<Void>.awaitNoContent(): Unit = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (!continuation.isActive) return
+                when {
+                    response.code() == 204 -> continuation.resume(Unit)
+                    response.isSuccessful -> continuation.resumeWithException(BffException(ApiError(code = "INVALID_RESPONSE"), ""))
+                    else -> continuation.resumeWithException(BffException(ApiError.parse(response), ""))
+                }
+            }
+            override fun onFailure(call: Call<Void>, failure: Throwable) {
                 if (continuation.isActive) continuation.resumeWithException(failure)
             }
         })

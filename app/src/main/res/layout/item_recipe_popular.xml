@@ -40,4 +40,20 @@
         android:textSize="@dimen/recipe_browser_body"
         android:layout_marginTop="@dimen/recipe_browser_gap"
         android:visibility="gone" />
+    <TextView
+        android:id="@+id/recipeRowFavoriteStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/darkBlue"
+        android:textSize="@dimen/recipe_browser_body"
+        android:accessibilityLiveRegion="polite"
+        android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/recipeRowFavorite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/recipe_browser_touch"
+        android:visibility="gone"
+        android:text="@string/recipe_favorite_add" />
 </LinearLayout>
