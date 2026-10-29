@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.view.doOnPreDraw
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,9 +20,18 @@ import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
 import java.text.NumberFormat
 
 class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
+    private lateinit var model: InventoryViewModel
+    private var inventoryScroll: NestedScrollView? = null
+    private var restoredRevision: Long? = null
+    private var scheduledRevision: Long? = null
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val model = ViewModelProvider(requireActivity())[InventoryViewModel::class.java]
+        model = ViewModelProvider(requireActivity())[InventoryViewModel::class.java]
+        view.isSaveFromParentEnabled = false
+        val scroll = view.findViewById<NestedScrollView>(R.id.inventoryScroll)
+        inventoryScroll = scroll
+        restoredRevision = null
+        scheduledRevision = null
         val adapter = EstoqueProdutoAdapter(requireContext(), emptyList())
         view.findViewById<RecyclerView>(R.id.rvProximosVencimento).apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -67,6 +78,7 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
 
         model.state.observe(viewLifecycleOwner) { state ->
             rendering = true
+            if (search.text.toString() != state.filters.query) search.setText(state.filters.query)
             val stocks = state.home?.stocks.orEmpty().filterNotNull()
             val labels = listOf(getString(R.string.inventory_all_stocks)) + stocks.map {
                 getString(R.string.inventory_stock_option, it.name?.takeIf(String::isNotBlank)
@@ -84,8 +96,36 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
             rendering = false
             adapter.updateList(state.items)
             render(view, state)
+            if (!state.loading && restoredRevision != state.scrollRevision &&
+                scheduledRevision != state.scrollRevision) {
+                val revision = state.scrollRevision
+                val position = model.scrollPosition
+                scheduledRevision = revision
+                scroll.doOnPreDraw {
+                    if (inventoryScroll === scroll && model.state.value?.scrollRevision == revision) {
+                        scroll.scrollTo(0, position)
+                        restoredRevision = revision
+                    }
+                }
+            }
         }
         model.loadIfNeeded()
+    }
+
+    override fun onPause() {
+        rememberScroll()
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
+        rememberScroll()
+        inventoryScroll = null
+        super.onDestroyView()
+    }
+
+    private fun rememberScroll() {
+        val revision = restoredRevision ?: return
+        inventoryScroll?.let { model.saveScrollPosition(it.scrollY, revision) }
     }
 
     private fun choices(labels: List<String>) =
@@ -106,6 +146,8 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
             visibility = if (state.hasMore && state.error == null) View.VISIBLE else View.GONE
             isEnabled = !state.loading
         }
+        view.findViewById<View>(R.id.inventoryAllStatusesNotice).visibility =
+            if (state.showAllStatusesNotice) View.VISIBLE else View.GONE
         val home = state.home
         view.findViewById<View>(R.id.inventorySummary).visibility = if (home != null) View.VISIBLE else View.GONE
         if (home != null) {

@@ -1,6 +1,7 @@
 package com.example.frigus_mobile.ui.stock
 
 import android.app.Application
+import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -34,7 +35,9 @@ data class InventoryUiState(
     val nextPage: Int = 0,
     val totalPages: Int = 0,
     val totalElements: Long = 0,
-    val error: ApiError? = null
+    val error: ApiError? = null,
+    val showAllStatusesNotice: Boolean = false,
+    val scrollRevision: Long = 0
 ) {
     val hasMore: Boolean get() = nextPage < totalPages
 }
@@ -46,6 +49,54 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
     val state: LiveData<InventoryUiState> = mutableState
     private var request: Job? = null
     private var started = false
+    var scrollPosition: Int = 0
+        private set
+
+    fun saveScrollPosition(position: Int, revision: Long) {
+        if (mutableState.value?.scrollRevision == revision) scrollPosition = position.coerceAtLeast(0)
+    }
+
+    fun saveNavigationState(): Bundle = Bundle().apply {
+        val current = mutableState.value ?: return@apply
+        current.filters.stockId?.let { putInt("stock_id", it) }
+        putString("storage_place", current.filters.storagePlace)
+        putString("category", current.filters.category)
+        putString("query", current.filters.query)
+        putBoolean("all_statuses_notice", current.showAllStatusesNotice)
+    }
+
+    fun restoreNavigationState(saved: Bundle?) {
+        if (started || saved == null) return
+        val places = getApplication<Application>().resources.getStringArray(
+            com.example.frigus_mobile.R.array.inventory_place_codes
+        ).filter(String::isNotEmpty)
+        val categories = getApplication<Application>().resources.getStringArray(
+            com.example.frigus_mobile.R.array.inventory_category_codes
+        ).filter(String::isNotEmpty)
+        mutableState.value = InventoryUiState(
+            filters = InventoryFilters(
+                stockId = saved.getInt("stock_id", -1).takeIf { it > 0 },
+                storagePlace = saved.getString("storage_place")?.takeIf { it in places },
+                category = saved.getString("category")?.takeIf { it in categories },
+                query = saved.getString("query").orEmpty()
+            ),
+            showAllStatusesNotice = saved.getBoolean("all_statuses_notice")
+        )
+    }
+
+    fun openShortcut(storagePlace: String? = null, showAllStatusesNotice: Boolean = false) {
+        if (!session.isLoggedIn) return
+        val current = mutableState.value ?: return
+        val place = storagePlace?.takeIf { it in setOf("FRIDGE", "FREEZER", "PANTRY") }
+        started = true
+        scrollPosition = 0
+        mutableState.value = current.copy(
+            filters = InventoryFilters(storagePlace = place),
+            showAllStatusesNotice = showAllStatusesNotice,
+            scrollRevision = current.scrollRevision + 1
+        )
+        load(reset = true)
+    }
 
     fun loadIfNeeded() {
         if (!started) {
@@ -57,11 +108,20 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
     fun changeFilters(filters: InventoryFilters) {
         val current = mutableState.value ?: return
         if (filters == current.filters) return
-        mutableState.value = current.copy(filters = filters)
+        scrollPosition = 0
+        mutableState.value = current.copy(
+            filters = filters,
+            scrollRevision = current.scrollRevision + 1
+        )
         load(reset = true, debounce = filters.query != current.filters.query)
     }
 
-    fun refresh() = load(reset = true, refreshContext = true)
+    fun refresh() {
+        val current = mutableState.value ?: return
+        scrollPosition = 0
+        mutableState.value = current.copy(scrollRevision = current.scrollRevision + 1)
+        load(reset = true, refreshContext = true)
+    }
 
     fun loadMore() {
         val current = mutableState.value ?: return
