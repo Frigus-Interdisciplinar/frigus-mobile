@@ -14,12 +14,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.stock.EstoqueFragment
+import com.example.frigus_mobile.ui.stock.InventoryViewModel
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navigation: BottomNavigationView
     private var leaving = false
     private var unavailableTitle = 0
+    private var pendingNavigation: Bundle? = null
     private val backToHome = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() { showHome() }
     }
@@ -43,7 +46,11 @@ class MainActivity : AppCompatActivity() {
         // Restore only the safe navigation state, never legacy feature fragments.
         super.onCreate(null)
         session = SessionManager(this)
+        val navigationState = safeNavigationState(savedInstanceState ?: intent.getBundleExtra(EXTRA_RESTORE_NAVIGATION))
+        intent.removeExtra(EXTRA_RESTORE_NAVIGATION)
+        pendingNavigation = navigationState
         if (!session.isLoggedIn) { openLogin(); return }
+        pendingNavigation = null
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
         WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -80,10 +87,11 @@ class MainActivity : AppCompatActivity() {
         navigation = findViewById(R.id.bottom_navigation)
         navigation.setOnItemSelectedListener { openTab(it.itemId); true }
         navigation.setOnItemReselectedListener { openTab(it.itemId) }
-        val selected = savedInstanceState?.getInt(SELECTED_TAB) ?: R.id.nav_home
+        ViewModelProvider(this)[InventoryViewModel::class.java].restoreNavigationState(navigationState?.getBundle(INVENTORY_NAVIGATION))
+        val selected = navigationState?.getInt(SELECTED_TAB) ?: R.id.nav_home
         val validSelected = if (navigation.menu.findItem(selected) != null) selected else R.id.nav_home
         navigation.menu.findItem(validSelected).isChecked = true
-        val pendingTitle = savedInstanceState?.getInt(UNAVAILABLE_TITLE) ?: 0
+        val pendingTitle = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
         if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
 
         updatePermissionAction()
@@ -95,6 +103,12 @@ class MainActivity : AppCompatActivity() {
 
     fun selectTab(id: Int) { navigation.selectedItemId = id }
     fun showHome() { selectTab(R.id.nav_home) }
+
+    fun openInventory(storagePlace: String? = null, showAllStatusesNotice: Boolean = false) {
+        if (!session.isLoggedIn) return
+        ViewModelProvider(this)[InventoryViewModel::class.java].openShortcut(storagePlace, showAllStatusesNotice)
+        selectTab(R.id.nav_estoque)
+    }
 
     private fun openTab(id: Int) {
         val title = when (id) {
@@ -122,6 +136,7 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::navigation.isInitialized) outState.putInt(SELECTED_TAB, navigation.selectedItemId)
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
+        if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
         super.onSaveInstanceState(outState)
     }
 
@@ -147,16 +162,38 @@ class MainActivity : AppCompatActivity() {
             if (needsPermission) View.VISIBLE else View.GONE
     }
 
+    private fun safeNavigationState(source: Bundle?): Bundle? {
+        if (source == null) return null
+        return Bundle().apply {
+            val tab = source.getInt(SELECTED_TAB, R.id.nav_home)
+            val safeTabs = setOf(R.id.nav_home, R.id.nav_estoque, R.id.nav_receitas, R.id.nav_lista, R.id.nav_perfil)
+            putInt(SELECTED_TAB, tab.takeIf { it in safeTabs } ?: R.id.nav_home)
+            val title = source.getInt(UNAVAILABLE_TITLE)
+            val safeTitles = setOf(R.string.home_recipes, R.string.home_shopping_list, R.string.home_profile,
+                R.string.home_conversations, R.string.home_qr, R.string.home_ai)
+            putInt(UNAVAILABLE_TITLE, title.takeIf { it in safeTitles } ?: 0)
+            putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
+        }
+    }
+
     private fun openLogin() {
         if (leaving) return
         leaving = true
         startActivity(Intent(this, LoginActivity::class.java).apply {
+            if (PushNotifications.shouldOpenCenter(this@MainActivity.intent)) {
+                putExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS, true)
+            }
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            if (session.accessToken != null && !session.state.validated) {
+                pendingNavigation?.let { putExtra(EXTRA_RESTORE_NAVIGATION, it) }
+            }
         })
         finish()
     }
 
     companion object {
+        const val EXTRA_RESTORE_NAVIGATION = "restore_navigation"
+        private const val INVENTORY_NAVIGATION = "inventory_navigation"
         private const val SELECTED_TAB = "selected_tab"
         private const val UNAVAILABLE_TITLE = "unavailable_title"
     }

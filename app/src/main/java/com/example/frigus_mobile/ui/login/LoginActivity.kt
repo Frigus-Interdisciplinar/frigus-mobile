@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionCredential
+import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
@@ -30,10 +32,17 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var etSenha: TextInputEditText
     private var tvBanner: TextView? = null
     private var navigated = false
+    private lateinit var session: SessionManager
+    private var restoreCredential: SessionCredential? = null
+    private var pendingNavigation: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        session = SessionManager(this)
+        restoreCredential = session.state.credential()
+        pendingNavigation = if (restoreCredential != null)
+            intent.getBundleExtra(MainActivity.EXTRA_RESTORE_NAVIGATION) else null
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
         etEmail = findViewById(R.id.email)
         etSenha = findViewById(R.id.senha)
@@ -45,20 +54,32 @@ class LoginActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.btnEntrar).setOnClickListener { fazerLogin() }
         findViewById<View>(R.id.tvCriarConta).setOnClickListener {
+            discardPendingNavigation()
             startActivity(Intent(this, CreateAccountActivity::class.java))
         }
         findViewById<View>(R.id.tvEsqueciSenha).setOnClickListener {
+            discardPendingNavigation()
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
         findViewById<View>(R.id.btnRetrySession).setOnClickListener { viewModel.restore() }
-        findViewById<View>(R.id.btnChangeAccount).setOnClickListener { viewModel.signOut(); render(null) }
+        findViewById<View>(R.id.btnChangeAccount).setOnClickListener {
+            discardPendingNavigation()
+            viewModel.signOut()
+            render(null)
+        }
         intent.getStringExtra(EXTRA_NOTICE)?.let { findViewById<TextView>(R.id.authStatus).text = it }
         viewModel.result.observe(this) { result ->
+            if (restoreCredential == null || session.state.credential() != restoreCredential) {
+                discardPendingNavigation()
+            }
             if (result == AuthResult.Authenticated && viewModel.isAuthenticated) {
                 if (!navigated) {
                     navigated = true
                     startActivity(Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        if (restoreCredential != null && session.state.credential() == restoreCredential) {
+                            pendingNavigation?.let { putExtra(MainActivity.EXTRA_RESTORE_NAVIGATION, it) }
+                        }
                         if (PushNotifications.shouldOpenCenter(this@LoginActivity.intent)) {
                             putExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS, true)
                         }
@@ -98,7 +119,14 @@ class LoginActivity : AppCompatActivity() {
         else if (result == null && !intent.hasExtra(EXTRA_NOTICE)) status.text = ""
     }
 
+    private fun discardPendingNavigation() {
+        restoreCredential = null
+        pendingNavigation = null
+        intent.removeExtra(MainActivity.EXTRA_RESTORE_NAVIGATION)
+    }
+
     private fun fazerLogin() {
+        discardPendingNavigation()
         val email = etEmail.text?.toString()?.trim().orEmpty()
         val password = etSenha.text?.toString().orEmpty()
         if (!ValidationUtils.isEmailValido(email)) {
