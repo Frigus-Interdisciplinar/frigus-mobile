@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -43,20 +46,23 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
         lotId = intent.getIntExtra(EXTRA_LOT_ID, 0)
         model = ViewModelProvider(this)[StockLotViewModel::class.java]
-        findViewById<View>(R.id.lotBack).setOnClickListener { finish() }
+        findViewById<View>(R.id.btnVoltar).setOnClickListener { finish() }
         findViewById<View>(R.id.lotReload).setOnClickListener { model.load(lotId, reconcile = true) }
         findViewById<View>(R.id.btnEditarAlimento).setOnClickListener {
             editResult.launch(Intent(this, EditarAlimentoActivity::class.java).putExtra(EXTRA_LOT_ID, lotId))
         }
         findViewById<View>(R.id.btnRemoverEstoque).setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle(R.string.lot_remove_title).setMessage(R.string.lot_remove_confirmation)
-                .setPositiveButton(R.string.lot_remove) { _, _ -> model.delete(lotId) }
-                .setNegativeButton(R.string.account_cancel, null).show()
+                .setTitle(R.string.stock_remove_from_stock).setMessage(R.string.lot_remove_confirmation)
+                .setPositiveButton(R.string.stock_remove) { _, _ -> model.delete(lotId) }
+                .setNegativeButton(R.string.stock_cancel, null).show()
         }
         model.state.observe(this) { state ->
             if (model.changed) setResult(RESULT_OK)
-            if (state.deleted) { setResult(RESULT_OK); finish(); return@observe }
+            if (state.deleted) {
+                Toast.makeText(this, R.string.lot_removed, Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK); finish(); return@observe
+            }
             findViewById<View>(R.id.lotProgress).visibility = if (state.loading || state.busy) View.VISIBLE else View.GONE
             findViewById<View>(R.id.lotContent).visibility = if (state.lot != null) View.VISIBLE else View.GONE
             findViewById<View>(R.id.lotReload).isEnabled = !state.loading && !state.busy
@@ -75,16 +81,40 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
                 val category = label(lot.category ?: lot.product?.category, R.array.inventory_category_codes, R.array.inventory_category_labels)
                 val place = label(lot.product?.storagePlace, R.array.inventory_place_codes, R.array.inventory_place_labels)
                 findViewById<TextView>(R.id.tvDetalhesNome).text = text(lot.product?.name)
-                findViewById<TextView>(R.id.lotInformation).text = getString(R.string.lot_information,
-                    lot.id, lot.stockId, number(lot.quantity), number(lot.initialQuantity),
-                    number(lot.minimalQuantity), text(lot.expireDate), text(lot.batch),
-                    category, place, lotUnitLabel(lot.product?.unitOfMeasure), text(lot.product?.brand),
-                    getString(when (lot.productStatus) {
-                        "FRESH" -> R.string.inventory_fresh
-                        "NEAR_EXPIRATION" -> R.string.inventory_near_expiration
-                        "EXPIRED" -> R.string.inventory_expired
-                        else -> R.string.inventory_unclassified
-                    }))
+                findViewById<ImageView>(R.id.imgDetalhesAlimento).setImageResource(
+                    stockCategoryIcon(lot.category ?: lot.product?.category))
+                findViewById<TextView>(R.id.chipCategoria).text = category
+                findViewById<TextView>(R.id.chipLocal).text = place
+                findViewById<TextView>(R.id.tvInfoCategoria).text = category
+                findViewById<TextView>(R.id.tvInfoValidade).text = stockDisplayDate(lot.expireDate).ifBlank { unknown }
+                val unit = lotUnitLabel(lot.product?.unitOfMeasure)
+                findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = getString(
+                    R.string.inventory_quantity, number(lot.initialQuantity), unit)
+                findViewById<TextView>(R.id.tvFracaoQuantidade).text = getString(
+                    R.string.lot_quantity_fraction, number(lot.quantity), number(lot.initialQuantity), unit)
+                val currentQuantity = lot.quantity
+                val initialQuantity = lot.initialQuantity
+                val percent = if (currentQuantity != null && currentQuantity >= 0 && initialQuantity != null && initialQuantity > 0)
+                    currentQuantity.toLong() * 100 / initialQuantity else null
+                findViewById<TextView>(R.id.tvPercentualRestante).apply {
+                    visibility = if (percent != null) View.VISIBLE else View.GONE
+                    text = percent?.let { NumberFormat.getPercentInstance().format(it / 100.0) }.orEmpty()
+                }
+                findViewById<ProgressBar>(R.id.pbQuantidadeRestante).apply {
+                    visibility = if (percent != null) View.VISIBLE else View.GONE
+                    progress = percent?.coerceIn(0, 100)?.toInt() ?: 0
+                }
+                findViewById<TextView>(R.id.lotMinimumValue).text = number(lot.minimalQuantity)
+                findViewById<TextView>(R.id.lotBatchValue).text = text(lot.batch)
+                findViewById<TextView>(R.id.lotUnitValue).text = unit
+                findViewById<TextView>(R.id.lotBrandValue).text = text(lot.product?.brand)
+                findViewById<TextView>(R.id.lotIdentity).text = getString(R.string.inventory_lot_identity, lot.id, lot.stockId)
+                findViewById<TextView>(R.id.lotProductStatus).setText(when (lot.productStatus) {
+                    "FRESH" -> R.string.inventory_fresh
+                    "NEAR_EXPIRATION" -> R.string.inventory_near_expiration
+                    "EXPIRED" -> R.string.inventory_expired
+                    else -> R.string.inventory_unclassified
+                })
             }
         }
         model.loadIfNeeded(lotId)
@@ -106,6 +136,11 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         super.onResume()
         if (::session.isInitialized && !session.isLoggedIn) openLogin()
     }
+    override fun finish() {
+        if (::model.isInitialized && model.requiresRefreshOnExit) setResult(RESULT_OK)
+        super.finish()
+    }
+
     private fun openLogin() {
         if (leaving) return
         leaving = true
@@ -114,14 +149,3 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
     }
     companion object { const val EXTRA_LOT_ID = "stock_lot_id" }
 }
-
-internal fun android.content.Context.lotUnitLabel(code: String?): String = getString(when (code) {
-    "GRAM" -> R.string.inventory_unit_g
-    "KILOGRAM" -> R.string.inventory_unit_kg
-    "LITER" -> R.string.inventory_unit_l
-    "MILLILITER" -> R.string.inventory_unit_ml
-    "UNIT" -> R.string.inventory_unit_each
-    "DOZEN" -> R.string.inventory_unit_dozen
-    "PACKAGE" -> R.string.inventory_unit_package
-    else -> R.string.inventory_unit_unknown
-})

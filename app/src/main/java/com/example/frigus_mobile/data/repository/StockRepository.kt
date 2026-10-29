@@ -12,6 +12,7 @@ import retrofit2.Response
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.example.frigus_mobile.data.api.requireBody
+import com.example.frigus_mobile.data.api.requireNoContent
 import com.example.frigus_mobile.data.api.unavailableMobileContract
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.PageResponse
@@ -166,9 +167,7 @@ class StockRepository(context: Context? = null) {
     }
 
     suspend fun deleteStockProduct(id: Int): Boolean {
-        val response = api.deleteStockProduct(id).awaitLotResponse()
-        if (!response.isSuccessful) throw BffException(ApiError.parse(response), "")
-        if (response.code() != 204) throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        api.deleteStockProduct(id).awaitLotResponse().requireNoContent()
         return true
     }
 
@@ -188,12 +187,12 @@ class StockRepository(context: Context? = null) {
     suspend fun addStockProduct(@Suppress("UNUSED_PARAMETER") item: StockProductResponse): Unit =
         unavailableMobileContract()
 
-    private fun isoDate(value: String): String {
-        val trimmed = value.trim()
-        return if (trimmed.contains('/')) {
-            LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString()
-        } else {
-            LocalDate.parse(trimmed).toString()
+    companion object {
+        fun isoDate(value: String): String {
+            val trimmed = value.trim()
+            val format = if (trimmed.contains('/')) DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                .withResolverStyle(java.time.format.ResolverStyle.STRICT) else DateTimeFormatter.ISO_LOCAL_DATE
+            return LocalDate.parse(trimmed, format).toString()
         }
     }
 }

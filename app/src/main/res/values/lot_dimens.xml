@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="lot_padding">20dp</dimen>
-    <dimen name="lot_gap">12dp</dimen>
-    <dimen name="lot_touch">48dp</dimen>
-    <dimen name="lot_body">14sp</dimen>
-    <dimen name="lot_title">24sp</dimen>
-</resources>

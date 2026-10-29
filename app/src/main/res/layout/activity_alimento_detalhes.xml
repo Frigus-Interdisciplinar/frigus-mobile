@@ -1,102 +1,391 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/lotDetailRoot"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/pure_white">
+    android:background="@color/pure_white"
+    android:id="@+id/lotDetailRoot"
+    android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/lot_padding">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/lotBack"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
+        <!-- Top Bar -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="@dimen/lot_touch"
-            android:text="@string/lot_back" />
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/stock_back"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/stock_details"
+                android:textColor="@color/darkBlue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <ProgressBar android:id="@+id/lotProgress"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" android:visibility="gone"
+            android:contentDescription="@string/inventory_loading" />
+        <TextView android:id="@+id/lotStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size" android:accessibilityLiveRegion="polite" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/lotReload"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="end" android:text="@string/lot_reload" />
+        <LinearLayout android:id="@+id/lotContent"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:visibility="gone">
+        <!-- Imagem do Alimento -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgDetalhesAlimento"
+            android:layout_width="match_parent"
+            android:layout_height="218dp"
+            android:background="@drawable/bg_card_blue_tint"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/stock_product_image"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent" />
+
+        <!-- Título do Alimento -->
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/lot_detail_title"
-            android:textColor="@color/darkBlue"
-            android:textSize="@dimen/lot_title"
-            android:layout_marginTop="@dimen/lot_gap"
-            android:textStyle="bold"
-            android:accessibilityHeading="true" />
-        <ProgressBar
-            android:id="@+id/lotProgress"
+            android:id="@+id/tvDetalhesNome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone"
-            android:contentDescription="@string/inventory_loading" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/lotStatus"
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/sarabun"
-            android:text="@string/inventory_loading"
+            tools:text="Nome do alimento"
             android:textColor="@color/darkBlue"
-            android:textSize="@dimen/lot_body"
-            android:layout_marginTop="@dimen/lot_gap"
-            android:accessibilityLiveRegion="polite" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/lotReload"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/lot_touch"
-            android:text="@string/lot_reload" />
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- Chips de Categoria e Local -->
         <LinearLayout
-            android:id="@+id/lotContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/chipCategoria"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/tvDetalhesNome"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_chip_ingredient"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/inventory_unknown"
-                android:textColor="@color/darkBlue"
-                android:textSize="@dimen/lot_title"
-                android:layout_marginTop="@dimen/lot_gap"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                tools:text="Categoria"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
+
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/chipLocal"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/lotInformation"
+                android:background="@drawable/bg_chip_ingredient"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/inventory_unknown"
-                android:textColor="@color/darkBlue"
-                android:textSize="@dimen/lot_body"
-                android:layout_marginTop="@dimen/lot_gap" />
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                tools:text="Local"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Card de Progresso / Quantidade Restante -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_remaining_quantity"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPercentualRestante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="50%"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/pbQuantidadeRestante"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/color_green" />
+
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/tvFracaoQuantidade"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/lot_movements_pending"
-                android:textColor="@color/darkBlue"
-                android:textSize="@dimen/lot_body"
-                android:layout_marginTop="@dimen/lot_gap" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEditarAlimento"
+                tools:text="Quantidade restante de quantidade total"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Card Informações / Tabela -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Validade -->
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="@dimen/lot_touch"
-                android:text="@string/lot_edit" />
-            <com.google.android.material.button.MaterialButton
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_expiration"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoValidade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="DD/MM/AAAA"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Categoria -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_category"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoCategoria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="Categoria"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Quantidade original -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_original_quantity"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoQuantidadeOriginal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="Quantidade"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_minimum" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotMinimumValue" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_batch_label" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotBatchValue" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_unit_label" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotUnitValue" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_brand" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotBrandValue" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_status_label" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotProductStatus" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/color_divider" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:paddingVertical="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_identity_label" android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/lotIdentity" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:gravity="end" android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- Botões de Ação -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnRemoverEstoque"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="@dimen/lot_touch"
-                android:text="@string/lot_remove"
-                app:backgroundTint="@color/profile_red" />
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_btn_outlined_red"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/stock_remove_from_stock"
+                android:textAllCaps="false"
+                android:textColor="@color/color_red"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnEditarAlimento"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tab_selected"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/stock_edit"
+                android:textAllCaps="false"
+                android:textColor="@color/pure_white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</ScrollView>

@@ -16,9 +16,12 @@ fun <T> Call<T>.requireBody(): T {
 }
 
 fun Call<Void>.requireNoContent() {
-    val response = execute()
-    if (!response.isSuccessful) throw response.failure()
-    if (response.code() != 204) throw InvalidBffResponseException()
+    execute().requireNoContent()
+}
+
+fun Response<Void>.requireNoContent() {
+    if (!isSuccessful) throw failure()
+    if (code() != 204) throw InvalidBffResponseException()
 }
 
 private fun Response<*>.failure(): BffException = BffException(

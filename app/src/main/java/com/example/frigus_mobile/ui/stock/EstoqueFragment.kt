@@ -1,10 +1,6 @@
 package com.example.frigus_mobile.ui.stock
 
 import android.os.Bundle
-import android.content.Intent
-import android.app.Activity
-import androidx.activity.result.contract.ActivityResultContracts
-import com.example.frigus_mobile.ui.home.HomeViewModel
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -20,16 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.ui.home.MainActivity
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
 import java.text.NumberFormat
 
 class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
-    private val detailResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (::model.isInitialized) {
-            val pending = model.consumeLotDetailReturn()
-            if (pending && result.resultCode == Activity.RESULT_OK) refreshAfterLot()
-        }
-    }
     private lateinit var model: InventoryViewModel
     private var inventoryScroll: NestedScrollView? = null
     private var restoredRevision: Long? = null
@@ -43,11 +34,7 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
         restoredRevision = null
         scheduledRevision = null
         val adapter = EstoqueProdutoAdapter(requireContext(), emptyList()) { lot ->
-            lot.id?.let { id ->
-                model.expectLotDetailReturn()
-                detailResult.launch(Intent(requireContext(), AlimentoDetalhesActivity::class.java)
-                    .putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, id))
-            }
+            lot.id?.let { (requireActivity() as MainActivity).openStockLot(it) }
         }
         view.findViewById<RecyclerView>(R.id.rvProximosVencimento).apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -126,17 +113,6 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
             }
         }
         model.loadIfNeeded()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Main restores safe root fragments manually; a replaced Fragment can lose its result callback.
-        if (::model.isInitialized && model.consumeLotDetailReturn()) refreshAfterLot()
-    }
-
-    private fun refreshAfterLot() {
-        ViewModelProvider(requireActivity())[HomeViewModel::class.java].invalidate()
-        model.refresh()
     }
 
     override fun onPause() {

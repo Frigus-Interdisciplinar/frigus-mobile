@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -18,7 +20,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
 import com.example.frigus_mobile.ui.login.LoginActivity
-import java.time.LocalDate
+import com.example.frigus_mobile.data.repository.StockRepository
 import java.time.format.DateTimeParseException
 
 class EditarAlimentoActivity : AppCompatActivity() {
@@ -43,7 +45,7 @@ class EditarAlimentoActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_editar_alimento)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lotEditRoot)) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             WindowInsetsCompat.CONSUMED
         }
@@ -65,26 +67,33 @@ class EditarAlimentoActivity : AppCompatActivity() {
         place = findViewById(R.id.spinnerLocal)
         setupSpinner(category, R.array.inventory_category_labels, R.array.inventory_category_codes, "category")
         setupSpinner(place, R.array.inventory_place_labels, R.array.inventory_place_codes, "storagePlace")
-        findViewById<View>(R.id.lotBack).setOnClickListener { finish() }
+        findViewById<View>(R.id.btnVoltar).setOnClickListener { finish() }
         findViewById<View>(R.id.lotReload).setOnClickListener { model.load(lotId, reconcile = true) }
         findViewById<View>(R.id.btnSalvarAlteracoes).setOnClickListener { save() }
         model.state.observe(this) { state ->
             if (model.changed) setResult(RESULT_OK)
-            if (state.saved) { setResult(RESULT_OK); finish(); return@observe }
+            if (state.saved) {
+                Toast.makeText(this, R.string.lot_saved, Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK); finish(); return@observe
+            }
             if (state.error == null) inputs.values.forEach { it.error = null }
             rendering = true
             state.lot?.let { lot ->
+                findViewById<ImageView>(R.id.imgEditarAlimento).setImageResource(
+                    stockCategoryIcon(lot.category ?: lot.product?.category))
                 val values = mapOf("name" to lot.product?.name.orEmpty(), "quantity" to lot.quantity?.toString().orEmpty(),
                     "initialQuantity" to lot.initialQuantity?.toString().orEmpty(), "minimalQuantity" to lot.minimalQuantity?.toString().orEmpty(),
-                    "expireDate" to lot.expireDate.orEmpty(), "batch" to lot.batch.orEmpty())
+                    "expireDate" to stockDisplayDate(lot.expireDate), "batch" to lot.batch.orEmpty())
                 inputs.forEach { (key, input) ->
                     val value = model.draft(key, values.getValue(key))
                     if (input.text.toString() != value) input.setText(value)
                 }
                 select(category, R.array.inventory_category_codes, model.draft("category", lot.category ?: lot.product?.category.orEmpty()))
                 select(place, R.array.inventory_place_codes, model.draft("storagePlace", lot.product?.storagePlace.orEmpty()))
-                findViewById<TextView>(R.id.lotUnit).text = getString(R.string.lot_unit_read_only,
-                    lotUnitLabel(lot.product?.unitOfMeasure))
+                findViewById<TextView>(R.id.lotUnit).apply {
+                    text = lotUnitLabel(lot.product?.unitOfMeasure)
+                    contentDescription = getString(R.string.lot_unit_read_only, text)
+                }
             }
             rendering = false
             findViewById<View>(R.id.lotProgress).visibility = if (state.loading || state.busy) View.VISIBLE else View.GONE
@@ -154,13 +163,11 @@ class EditarAlimentoActivity : AppCompatActivity() {
         val initial = number("initialQuantity", original.initialQuantity)
         val minimum = number("minimalQuantity", original.minimalQuantity)
         val rawDate = inputs.getValue("expireDate").text.toString().trim()
-        val date = rawDate.takeIf { it != original.expireDate && !(it.isEmpty() && original.expireDate == null) }
-        if (date != null) {
-            try {
-                if (!Regex("\\d{4}-\\d{2}-\\d{2}").matches(date)) error("expireDate")
-                LocalDate.parse(date)
-            } catch (_: DateTimeParseException) { error("expireDate") }
-        }
+        val normalizedDate = if (rawDate.isEmpty()) null else try {
+            StockRepository.isoDate(rawDate)
+        } catch (_: DateTimeParseException) { error("expireDate"); null }
+        if (rawDate.isEmpty() && original.expireDate != null) error("expireDate")
+        val date = normalizedDate?.takeIf { it != original.expireDate }
         val rawBatch = inputs.getValue("batch").text.toString()
         val batch = rawBatch.takeIf { it != original.batch && !(it.isEmpty() && original.batch == null) }
         if (batch != null && batch.length > 120) error("batch")
@@ -185,6 +192,11 @@ class EditarAlimentoActivity : AppCompatActivity() {
         super.onResume()
         if (::session.isInitialized && !session.isLoggedIn) openLogin()
     }
+    override fun finish() {
+        if (::model.isInitialized && model.requiresRefreshOnExit) setResult(RESULT_OK)
+        super.finish()
+    }
+
     private fun openLogin() {
         if (leaving) return
         leaving = true

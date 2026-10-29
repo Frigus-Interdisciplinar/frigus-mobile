@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.frigus_mobile.data.api.BffException
+import com.example.frigus_mobile.data.api.InvalidBffResponseException
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.ApiError
 import com.example.frigus_mobile.data.model.StockProductResponse
@@ -40,6 +41,9 @@ class StockLotViewModel(application: Application, private val savedState: SavedS
     var changed: Boolean
         get() = savedState["changed"] ?: false
         private set(value) { savedState["changed"] = value }
+
+    val requiresRefreshOnExit: Boolean
+        get() = changed || savedState.get<String>("pending_action") != null
 
     fun draft(field: String, fallback: String) = savedState.get<String>("draft.$field") ?: fallback
     fun edit(field: String, value: String) { savedState["draft.$field"] = value }
@@ -86,7 +90,6 @@ class StockLotViewModel(application: Application, private val savedState: SavedS
         val current = mutableState.value ?: return
         if (!session.isLoggedIn || current.loading || current.busy || current.uncertain || current.lot?.id != id) return
         val generation = session.state.generation
-        changed = true
         savedState["pending_action"] = if (request == null) "DELETE" else "PUT"
         mutableState.value = current.copy(busy = true, error = null)
         operation = viewModelScope.launch {
@@ -103,7 +106,8 @@ class StockLotViewModel(application: Application, private val savedState: SavedS
                 if (session.isLoggedIn && session.state.generation == generation) {
                     val error = failureError(failure)
                     val uncertain = error.status == null || error.status == 408 || error.status!! >= 500
-                    if (uncertain) changed = true else savedState.remove<String>("pending_action")
+                    if (uncertain || error.status == 404) changed = true
+                    if (!uncertain) savedState.remove<String>("pending_action")
                     mutableState.value = current.copy(busy = false, error = error, uncertain = uncertain,
                         lot = if (error.status == 404) null else current.lot)
                 }
@@ -113,7 +117,7 @@ class StockLotViewModel(application: Application, private val savedState: SavedS
 
     private fun failureError(failure: Exception) = when (failure) {
         is BffException -> failure.error
-        is JsonParseException, is MalformedJsonException -> ApiError(code = "INVALID_RESPONSE")
+        is InvalidBffResponseException, is JsonParseException, is MalformedJsonException -> ApiError(code = "INVALID_RESPONSE")
         is IOException -> ApiError(code = "NETWORK_ERROR")
         else -> ApiError(code = "INVALID_RESPONSE")
     }

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.data.model.ApiError
 import com.example.frigus_mobile.data.model.RecipeResponse
 import com.example.frigus_mobile.ui.recipes.adapter.RecipePopularAdapter
@@ -20,6 +22,10 @@ import java.text.NumberFormat
 class ReceitasFragment : Fragment(R.layout.fragment_receitas) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<View>(R.id.btnBack).setOnClickListener { (requireActivity() as MainActivity).showHome() }
+        view.findViewById<View>(R.id.btnNotification).setOnClickListener {
+            startActivity(Intent(requireContext(), NotificacoesActivity::class.java))
+        }
         val model = ViewModelProvider(requireActivity())[RecipesViewModel::class.java]
         val catalogAdapter = RecipePopularAdapter(emptyList(), ::openDetail)
         val suggestionAdapter = RecipePopularAdapter(emptyList(), ::openDetail, showAvailability = true)

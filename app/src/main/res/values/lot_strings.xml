@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="lot_detail_title">Detalhes do lote</string>
-    <string name="lot_edit_title">Editar lote</string>
-    <string name="lot_back">Voltar</string>
     <string name="lot_reload">Recarregar dados</string>
-    <string name="lot_edit">Editar</string>
-    <string name="lot_save">Salvar alterações</string>
-    <string name="lot_remove">Remover lote</string>
-    <string name="lot_remove_title">Remover do estoque</string>
     <string name="lot_remove_confirmation">Deseja remover este lote do estoque? O produto do catálogo será preservado. Não há restauração pelo app.</string>
     <string name="lot_uncertain">Não foi possível confirmar o resultado da operação. Ela pode ter sido aplicada. Recarregue os dados e confira o estado real antes de tentar novamente. Nenhuma alteração será reenviada automaticamente.</string>
     <string name="lot_sending">Enviando alteração…</string>
@@ -17,16 +10,17 @@
     <string name="lot_invalid_field">Informe um valor válido. Campos numéricos exigem inteiro de zero até 2147483647; campos existentes não podem ser apagados aqui.</string>
     <string name="lot_no_changes">Altere pelo menos um campo antes de salvar.</string>
     <string name="lot_keep_value">Manter valor atual</string>
-    <string name="lot_name">Nome (até 255 caracteres)</string>
-    <string name="lot_quantity">Saldo atual (inteiro, zero permitido)</string>
-    <string name="lot_initial">Quantidade original</string>
     <string name="lot_minimum">Quantidade mínima</string>
-    <string name="lot_expiry">Validade (aaaa-mm-dd)</string>
     <string name="lot_batch">Lote / identificação (até 120 caracteres)</string>
-    <string name="lot_category">Categoria</string>
-    <string name="lot_place">Local do alimento</string>
     <string name="lot_unit_read_only">Unidade (somente leitura): %1$s</string>
     <string name="lot_form_note">O saldo é um valor absoluto; sua alteração gera um ajuste no estoque. Mínimo em branco não limpa um valor existente; informe zero se desejar mínimo zero. Unidade, marca e preço não podem ser alterados aqui. Recarregar descarta o formulário e consulta os dados atuais.</string>
-    <string name="lot_information">Lote #%1$d · Estoque #%2$d\nSaldo atual: %3$s\nQuantidade original: %4$s\nMínimo: %5$s\nValidade: %6$s\nIdentificação: %7$s\nCategoria: %8$s\nLocal: %9$s\nUnidade: %10$s\nMarca: %11$s\nStatus: %12$s</string>
     <string name="lot_movements_pending">Histórico e movimentos serão entregues na próxima parte.</string>
+    <string name="lot_removed">Alimento removido com sucesso!</string>
+    <string name="lot_saved">Alterações salvas com sucesso!</string>
+    <string name="lot_quantity_fraction">%1$s de %2$s %3$s</string>
+    <string name="lot_batch_label">Identificação do lote</string>
+    <string name="lot_unit_label">Unidade</string>
+    <string name="lot_brand">Marca</string>
+    <string name="lot_status_label">Status</string>
+    <string name="lot_identity_label">Lote e estoque</string>
 </resources>
