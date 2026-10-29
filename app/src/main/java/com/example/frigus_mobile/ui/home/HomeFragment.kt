@@ -22,9 +22,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             getString(R.string.home_greeting) else getString(R.string.home_named_greeting, name)
 
         val main = requireActivity() as MainActivity
-        listOf(R.id.cardQuickEstoque, R.id.cardAlertaVencendo, R.id.cardEstoqueGeladeira,
-            R.id.cardEstoqueFreezer, R.id.cardEstoqueDespensa).forEach { id ->
-            view.findViewById<View>(id).setOnClickListener { main.selectTab(R.id.nav_estoque) }
+        view.findViewById<View>(R.id.cardQuickEstoque).setOnClickListener { main.openInventory() }
+        mapOf(
+            R.id.cardEstoqueGeladeira to "FRIDGE",
+            R.id.cardEstoqueFreezer to "FREEZER",
+            R.id.cardEstoqueDespensa to "PANTRY"
+        ).forEach { (id, place) ->
+            view.findViewById<View>(id).setOnClickListener { main.openInventory(storagePlace = place) }
+        }
+        view.findViewById<View>(R.id.cardAlertaVencendo).setOnClickListener {
+            main.openInventory(showAllStatusesNotice = true)
         }
         view.findViewById<View>(R.id.cardQuickReceitas).setOnClickListener { main.selectTab(R.id.nav_receitas) }
         view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {

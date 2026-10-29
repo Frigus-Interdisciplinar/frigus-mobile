@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/inventoryScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
@@ -140,6 +141,17 @@
             android:textColor="@color/darkBlue"
             android:textSize="@dimen/inventory_body_size"
             android:layout_marginTop="@dimen/inventory_gap" />
+        <TextView
+            android:id="@+id/inventoryAllStatusesNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/inventory_gap"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/navigation_inventory_all_statuses"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:accessibilityLiveRegion="polite"
+            android:visibility="gone" />
         <ProgressBar
             android:id="@+id/inventoryProgress"
             android:layout_width="wrap_content"
