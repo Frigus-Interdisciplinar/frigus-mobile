@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen
+        name="recipe_browser_padding">20dp</dimen>
+    <dimen
+        name="recipe_browser_gap">8dp</dimen>
+    <dimen
+        name="recipe_browser_section_gap">16dp</dimen>
+    <dimen
+        name="recipe_browser_touch">48dp</dimen>
+    <dimen
+        name="recipe_browser_body">14sp</dimen>
+    <dimen
+        name="recipe_browser_heading">18sp</dimen>
+    <dimen
+        name="recipe_browser_title">24sp</dimen>
+</resources>
