@@ -55,7 +55,7 @@
 
         <activity
             android:name=".ui.recipes.ReceitaDetalhesActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity

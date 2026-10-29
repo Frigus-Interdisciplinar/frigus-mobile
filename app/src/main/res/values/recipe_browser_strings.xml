@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string
+        name="recipe_browser_title">Receitas</string>
+    <string
+        name="recipe_browser_catalog">Catálogo</string>
+    <string
+        name="recipe_browser_suggestions">Sugestões do seu grupo</string>
+    <string
+        name="recipe_browser_suggestions_note">Até 10 sugestões calculadas com o estoque do grupo atual.</string>
+    <string
+        name="recipe_browser_search">Buscar no catálogo por nome</string>
+    <string
+        name="recipe_browser_loading">Consultando receitas…</string>
+    <string
+        name="recipe_browser_refresh">Atualizar</string>
+    <string
+        name="recipe_browser_retry">Tentar novamente</string>
+    <string
+        name="recipe_browser_more">Carregar mais</string>
+    <string
+        name="recipe_browser_loaded">%1$s de %2$s receitas carregadas</string>
+    <string
+        name="recipe_browser_empty_catalog">Nenhuma receita encontrada. Altere a busca ou atualize o catálogo.</string>
+    <string
+        name="recipe_browser_empty_suggestions">Nenhuma sugestão disponível para o grupo atual.</string>
+    <string
+        name="recipe_browser_invalid_response">Não foi possível interpretar as receitas. Tente novamente.</string>
+    <string
+        name="recipe_browser_network_error">Não foi possível conectar. Verifique sua conexão e tente novamente.</string>
+    <string
+        name="recipe_browser_load_error">Não foi possível carregar as receitas. Tente novamente.</string>
+    <string
+        name="recipe_browser_forbidden">Você não tem permissão para consultar estas receitas.</string>
+    <string
+        name="recipe_browser_not_found">Esta receita não está mais disponível. Volte e atualize a listagem.</string>
+    <string
+        name="recipe_browser_unnamed">Receita sem nome</string>
+    <string
+        name="recipe_browser_no_description">Descrição não informada.</string>
+    <string
+        name="recipe_browser_unnamed_ingredient">Ingrediente não informado</string>
+    <string
+        name="recipe_browser_not_informed">Não informado</string>
+    <string
+        name="recipe_browser_quantity_unit">%1$s %2$s</string>
+    <string
+        name="recipe_browser_match_counts">Ingredientes disponíveis: %1$s · Faltantes: %2$s</string>
+    <string
+        name="recipe_browser_back">Voltar</string>
+    <string
+        name="recipe_browser_ingredients">Ingredientes</string>
+    <string
+        name="recipe_browser_no_ingredients">Ingredientes não informados.</string>
+    <string
+        name="recipe_browser_availability_unknown">A disponibilidade dos ingredientes não foi informada neste detalhe.</string>
+    <string
+        name="recipe_browser_read_only">O modo de preparo é somente leitura e não altera seu estoque. Favoritos estarão disponíveis em uma próxima entrega.</string>
+    <string
+        name="recipe_browser_preparation">Ver modo de preparo</string>
+    <string
+        name="recipe_browser_preparation_title">Preparo: %1$s</string>
+    <string
+        name="recipe_browser_no_instructions">Modo de preparo não informado para esta receita.</string>
+    <string
+        name="recipe_browser_close">Fechar</string>
+</resources>

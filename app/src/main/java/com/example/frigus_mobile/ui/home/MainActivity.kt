@@ -21,6 +21,7 @@ import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.stock.EstoqueFragment
+import com.example.frigus_mobile.ui.recipes.ReceitasFragment
 import com.example.frigus_mobile.ui.stock.InventoryViewModel
 import com.example.frigus_mobile.ui.profile.PerfilFragment
 import com.example.frigus_mobile.ui.login.LoginActivity
@@ -104,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openTab(id: Int) {
         val title = when (id) {
-            R.id.nav_receitas -> R.string.home_recipes
+
             R.id.nav_lista -> R.string.home_shopping_list
 
             else -> 0
@@ -112,9 +113,10 @@ class MainActivity : AppCompatActivity() {
         if (title != 0) showUnavailable(title)
         else {
             unavailableTitle = 0
-            backToHome.isEnabled = id == R.id.nav_estoque || id == R.id.nav_perfil
+            backToHome.isEnabled = id == R.id.nav_estoque || id == R.id.nav_receitas || id == R.id.nav_perfil
             val fragment = when (id) {
                 R.id.nav_estoque -> EstoqueFragment()
+                R.id.nav_receitas -> ReceitasFragment()
                 R.id.nav_perfil -> PerfilFragment()
                 else -> HomeFragment()
             }
