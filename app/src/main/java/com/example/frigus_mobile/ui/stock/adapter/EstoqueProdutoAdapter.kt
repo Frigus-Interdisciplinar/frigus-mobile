@@ -14,7 +14,8 @@ import java.text.NumberFormat
 
 class EstoqueProdutoAdapter(
     private val context: Context,
-    private var items: List<StockProductResponse>
+    private var items: List<StockProductResponse>,
+    private val onClick: ((StockProductResponse) -> Unit)? = null
 ) : RecyclerView.Adapter<EstoqueProdutoAdapter.ViewHolder>() {
 
     fun updateList(newList: List<StockProductResponse>) {
@@ -28,6 +29,10 @@ class EstoqueProdutoAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
+        holder.itemView.isClickable = onClick != null && (item.id ?: 0) > 0
+        holder.itemView.isFocusable = holder.itemView.isClickable
+        holder.itemView.setOnClickListener(if (onClick != null && (item.id ?: 0) > 0)
+            View.OnClickListener { onClick.invoke(item) } else null)
         holder.tvNome.text = item.product?.name?.takeIf(String::isNotBlank)
             ?: context.getString(R.string.inventory_unnamed_product)
         val quantity = item.quantity?.let { NumberFormat.getIntegerInstance().format(it) }

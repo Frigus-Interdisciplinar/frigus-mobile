@@ -49,6 +49,15 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
     val state: LiveData<InventoryUiState> = mutableState
     private var request: Job? = null
     private var started = false
+    private var awaitingLotDetail = false
+
+    fun expectLotDetailReturn() { awaitingLotDetail = true }
+
+    fun consumeLotDetailReturn(): Boolean {
+        val pending = awaitingLotDetail
+        awaitingLotDetail = false
+        return pending
+    }
     var scrollPosition: Int = 0
         private set
 

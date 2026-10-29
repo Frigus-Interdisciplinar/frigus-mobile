@@ -12,7 +12,6 @@ import retrofit2.Response
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.example.frigus_mobile.data.api.requireBody
-import com.example.frigus_mobile.data.api.requireNoContent
 import com.example.frigus_mobile.data.api.unavailableMobileContract
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.PageResponse
@@ -120,8 +119,27 @@ class StockRepository(context: Context? = null) {
         })
     }
 
-    suspend fun getStockProductById(id: Int): StockProductResponse = withContext(Dispatchers.IO) {
-        api.getStockProductById(id).requireBody()
+    suspend fun getStockProductById(id: Int): StockProductResponse =
+        requireLot(api.getStockProductById(id).awaitLotResponse(), id)
+
+    private fun requireLot(response: Response<StockProductResponse>, id: Int): StockProductResponse {
+        if (response.code() != 200) throw BffException(ApiError.parse(response), "")
+        val lot = response.body()
+        if (lot == null || lot.id != id || (lot.stockId ?: 0) <= 0)
+            throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return lot
+    }
+
+    private suspend fun <T> Call<T>.awaitLotResponse(): Response<T> = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback<T> {
+            override fun onResponse(call: Call<T>, response: Response<T>) {
+                if (continuation.isActive) continuation.resume(response)
+            }
+            override fun onFailure(call: Call<T>, failure: Throwable) {
+                if (continuation.isActive) continuation.resumeWithException(failure)
+            }
+        })
     }
 
     suspend fun updateStockProduct(
@@ -144,12 +162,14 @@ class StockRepository(context: Context? = null) {
             request.minimalQuantity, request.expireDate, request.storagePlace, request.batch).any { it != null }) {
             "Informe ao menos um campo para atualizar o alimento."
         }
-        return withContext(Dispatchers.IO) { api.updateStockProduct(id, request).requireBody() }
+        return requireLot(api.updateStockProduct(id, request).awaitLotResponse(), id)
     }
 
-    suspend fun deleteStockProduct(id: Int): Boolean = withContext(Dispatchers.IO) {
-        api.deleteStockProduct(id).requireNoContent()
-        true
+    suspend fun deleteStockProduct(id: Int): Boolean {
+        val response = api.deleteStockProduct(id).awaitLotResponse()
+        if (!response.isSuccessful) throw BffException(ApiError.parse(response), "")
+        if (response.code() != 204) throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return true
     }
 
     suspend fun getMovements(id: Int, page: Int? = null, size: Int? = null):
