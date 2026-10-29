@@ -22,6 +22,7 @@ import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.stock.EstoqueFragment
 import com.example.frigus_mobile.ui.stock.InventoryViewModel
+import com.example.frigus_mobile.ui.profile.PerfilFragment
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var session: SessionManager
     private lateinit var navigation: BottomNavigationView
     private var leaving = false
+    private var signingOut = false
     private var unavailableTitle = 0
     private var pendingNavigation: Bundle? = null
     private val backToHome = object : OnBackPressedCallback(false) {
@@ -70,17 +72,7 @@ class MainActivity : AppCompatActivity() {
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-        findViewById<View>(R.id.btnSessionLogout).setOnClickListener { button ->
-            button.isEnabled = false
-            lifecycleScope.launch {
-                try {
-                    PushRegistration.unregister(this@MainActivity)
-                } finally {
-                    session.clearSession()
-                    openLogin()
-                }
-            }
-        }
+        findViewById<View>(R.id.btnSessionLogout).setOnClickListener { signOut() }
         SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
         onBackPressedDispatcher.addCallback(this, backToHome)
 
@@ -114,14 +106,18 @@ class MainActivity : AppCompatActivity() {
         val title = when (id) {
             R.id.nav_receitas -> R.string.home_recipes
             R.id.nav_lista -> R.string.home_shopping_list
-            R.id.nav_perfil -> R.string.home_profile
+
             else -> 0
         }
         if (title != 0) showUnavailable(title)
         else {
             unavailableTitle = 0
-            backToHome.isEnabled = id == R.id.nav_estoque
-            val fragment = if (id == R.id.nav_estoque) EstoqueFragment() else HomeFragment()
+            backToHome.isEnabled = id == R.id.nav_estoque || id == R.id.nav_perfil
+            val fragment = when (id) {
+                R.id.nav_estoque -> EstoqueFragment()
+                R.id.nav_perfil -> PerfilFragment()
+                else -> HomeFragment()
+            }
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
         }
     }
@@ -146,6 +142,25 @@ class MainActivity : AppCompatActivity() {
         else if (::session.isInitialized) {
             PushRegistration.sync(this)
             updatePermissionAction()
+        }
+    }
+
+    fun refreshSessionIdentity() {
+        if (!session.isLoggedIn || leaving) return
+        findViewById<TextView>(R.id.sessionIdentity).text = session.userName ?: session.userEmail.orEmpty()
+    }
+
+    fun signOut() {
+        if (signingOut || leaving || !session.isLoggedIn) return
+        signingOut = true
+        findViewById<View>(R.id.btnSessionLogout).isEnabled = false
+        lifecycleScope.launch {
+            try {
+                PushRegistration.unregister(this@MainActivity)
+            } finally {
+                session.clearSession()
+                openLogin()
+            }
         }
     }
 
