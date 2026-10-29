@@ -19,6 +19,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.push.PushRegistration
+import com.example.frigus_mobile.ui.stock.EstoqueFragment
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -97,7 +98,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun openTab(id: Int) {
         val title = when (id) {
-            R.id.nav_estoque -> R.string.home_stock
             R.id.nav_receitas -> R.string.home_recipes
             R.id.nav_lista -> R.string.home_shopping_list
             R.id.nav_perfil -> R.string.home_profile
@@ -106,8 +106,9 @@ class MainActivity : AppCompatActivity() {
         if (title != 0) showUnavailable(title)
         else {
             unavailableTitle = 0
-            backToHome.isEnabled = false
-            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment()).commit()
+            backToHome.isEnabled = id == R.id.nav_estoque
+            val fragment = if (id == R.id.nav_estoque) EstoqueFragment() else HomeFragment()
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
         }
     }
 

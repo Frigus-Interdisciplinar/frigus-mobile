@@ -1,7 +1,16 @@
 package com.example.frigus_mobile.data.repository
 
 import android.content.Context
+import com.example.frigus_mobile.data.api.BffException
 import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.model.ApiError
+import com.example.frigus_mobile.data.model.InventoryHomeResponse
+import kotlinx.coroutines.suspendCancellableCoroutine
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import com.example.frigus_mobile.data.api.requireBody
 import com.example.frigus_mobile.data.api.requireNoContent
 import com.example.frigus_mobile.data.api.unavailableMobileContract
@@ -43,16 +52,29 @@ class StockRepository(context: Context? = null) {
         items
     }
 
+    /** Reuse the M04 validation used by Home, without choosing or creating a stock. */
+    suspend fun getInventoryContext(): InventoryHomeResponse = suspendCancellableCoroutine { continuation ->
+        val call = InventoryHomeRepository().load { home, error ->
+            if (continuation.isActive) {
+                if (home != null) continuation.resume(home)
+                else continuation.resumeWithException(BffException(
+                    error ?: ApiError(code = "INVALID_RESPONSE"), ""
+                ))
+            }
+        }
+        continuation.invokeOnCancellation { call.cancel() }
+    }
+
     suspend fun getProductsPage(
         page: Int = 0,
         size: Int = 30,
         category: String? = null,
         storagePlace: String? = null,
-        query: String? = null
-    ): PageResponse<StockProductResponse> = withContext(Dispatchers.IO) {
-        api.getProducts(page = page, size = size, category = category,
-            storagePlace = storagePlace, query = query).requireBody()
-    }
+        query: String? = null,
+        groupId: String? = null
+    ): PageResponse<StockProductResponse> =
+        api.getProducts(groupId = groupId, page = page, size = size, category = category,
+            storagePlace = storagePlace, query = query).awaitPage(page)
 
     suspend fun getStockProductsPage(
         stockId: Int,
@@ -61,8 +83,41 @@ class StockRepository(context: Context? = null) {
         category: String? = null,
         storagePlace: String? = null,
         query: String? = null
-    ): PageResponse<StockProductResponse> = withContext(Dispatchers.IO) {
-        api.getStockProducts(stockId, page, size, category, storagePlace, query).requireBody()
+    ): PageResponse<StockProductResponse> =
+        api.getStockProducts(stockId, page, size, category, storagePlace, query).awaitPage(page, stockId)
+
+    /** Cancel obsolete GETs and reject invalid pages instead of rendering them as empty stock. */
+    private suspend fun Call<PageResponse<StockProductResponse>>.awaitPage(
+        requestedPage: Int,
+        stockId: Int? = null
+    ): PageResponse<StockProductResponse> = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback<PageResponse<StockProductResponse>> {
+            override fun onResponse(
+                call: Call<PageResponse<StockProductResponse>>,
+                response: Response<PageResponse<StockProductResponse>>
+            ) {
+                if (!continuation.isActive) return
+                val body = response.body()
+                val items: List<StockProductResponse?>? = body?.content
+                val valid = body != null && items != null && body.number == requestedPage &&
+                    body.size > 0 && body.totalElements >= items.size && body.totalPages >= 0 &&
+                    items.size <= body.size &&
+                    (if (body.totalPages == 0) items.isEmpty() && body.totalElements == 0L
+                        else body.number < body.totalPages && (items.isNotEmpty() || body.number == body.totalPages - 1)) &&
+                    items.all { it != null && (it.id ?: 0) > 0 && (it.stockId ?: 0) > 0 &&
+                        (stockId == null || it.stockId == stockId) }
+                when {
+                    response.code() != 200 -> continuation.resumeWithException(BffException(ApiError.parse(response), ""))
+                    !valid -> continuation.resumeWithException(BffException(ApiError(code = "INVALID_RESPONSE"), ""))
+                    else -> continuation.resume(body!!)
+                }
+            }
+
+            override fun onFailure(call: Call<PageResponse<StockProductResponse>>, failure: Throwable) {
+                if (continuation.isActive) continuation.resumeWithException(failure)
+            }
+        })
     }
 
     suspend fun getStockProductById(id: Int): StockProductResponse = withContext(Dispatchers.IO) {
@@ -122,4 +177,3 @@ class StockRepository(context: Context? = null) {
         }
     }
 }
-
