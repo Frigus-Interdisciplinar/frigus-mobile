@@ -104,7 +104,6 @@
 
         <activity
             android:name=".ui.ai.ChatIaActivity"
-            android:enabled="false"
             android:exported="false" />
 
     </application>
