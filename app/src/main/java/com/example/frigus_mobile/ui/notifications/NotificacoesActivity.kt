@@ -3,6 +3,7 @@ package com.example.frigus_mobile.ui.notifications
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +29,8 @@ class NotificacoesActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, NotificacoesViewModel.Factory())[NotificacoesViewModel::class.java]
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener { finish() }
-        findViewById<View>(R.id.btnLimparTodas).setOnClickListener { viewModel.clearAll() }
+        findViewById<View>(R.id.btnMarcarTodasLidas).setOnClickListener { viewModel.markAllAsRead() }
+        findViewById<View>(R.id.btnLimparTodas).setOnClickListener { confirmarLimpeza() }
         findViewById<View>(R.id.btnCarregarMais).setOnClickListener { viewModel.loadNext() }
         findViewById<View>(R.id.btnRetryNotifications).setOnClickListener { viewModel.loadFirst() }
 
@@ -67,6 +69,21 @@ class NotificacoesActivity : AppCompatActivity() {
             isEnabled = !state.loading
         }
         findViewById<View>(R.id.btnLimparTodas).isEnabled = !state.loading && state.items.isNotEmpty()
+        findViewById<View>(R.id.btnMarcarTodasLidas).apply {
+            val hasUnread = state.unreadCount > 0 || state.items.any { it.readAt == null }
+            visibility = if (hasUnread) View.VISIBLE else View.GONE
+            isEnabled = !state.loading
+        }
+    }
+
+    private fun confirmarLimpeza() {
+        if (viewModel.state.value?.items.isNullOrEmpty()) return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.notifications_clear_all_confirm_title)
+            .setMessage(R.string.notifications_clear_all_confirm_message)
+            .setNegativeButton(R.string.notifications_cancel, null)
+            .setPositiveButton(R.string.notifications_clear_all_confirm_action) { _, _ -> viewModel.clearAll() }
+            .show()
     }
 }
 
