@@ -22,6 +22,7 @@ import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
 import com.example.frigus_mobile.ui.shopping.AddShoppingListItemFragment
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductNameTracker
 import com.example.frigus_mobile.utils.launchSafeNetwork
 
 class EstoqueFragment : Fragment() {
@@ -220,7 +221,8 @@ class EstoqueFragment : Fragment() {
         val query = etBuscar.text.toString().trim().lowercase()
         val filtered = allProducts.filter { item ->
             val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
-            val nameMatches = query.isEmpty() || (item.product?.name ?: "").lowercase().contains(query)
+            val name = (item.id?.let { id -> ProductNameTracker.getName(requireContext(), id) } ?: item.product?.name ?: "").lowercase()
+            val nameMatches = query.isEmpty() || name.contains(query)
             placeMatches && nameMatches
         }
         adapter.updateList(filtered)
@@ -230,7 +232,8 @@ class EstoqueFragment : Fragment() {
         val q = query.trim().lowercase()
         val filtered = allProducts.filter { item ->
             val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
-            val nameMatches = q.isEmpty() || (item.product?.name ?: "").lowercase().contains(q)
+            val name = (item.id?.let { id -> ProductNameTracker.getName(requireContext(), id) } ?: item.product?.name ?: "").lowercase()
+            val nameMatches = q.isEmpty() || name.contains(q)
             placeMatches && nameMatches
         }
         adapter.updateList(filtered)

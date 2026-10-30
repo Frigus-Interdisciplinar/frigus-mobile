@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +25,7 @@ import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ProductCategoryHelper
 import com.example.frigus_mobile.utils.ProductImageTracker
+import com.example.frigus_mobile.utils.ProductNameTracker
 import com.example.frigus_mobile.utils.StockObservationsTracker
 import com.example.frigus_mobile.utils.StockQuantityTracker
 import kotlinx.coroutines.launch
@@ -43,6 +46,8 @@ class EditarAlimentoActivity : AppCompatActivity() {
     private lateinit var spinnerLocal: Spinner
     private lateinit var spinnerCategoria: Spinner
     private lateinit var spinnerUnidade: Spinner
+    private lateinit var btnSalvar: Button
+    private lateinit var progressSalvar: ProgressBar
 
     private var customImageUri: Uri? = null
 
@@ -84,6 +89,8 @@ class EditarAlimentoActivity : AppCompatActivity() {
         spinnerLocal = findViewById(R.id.spinnerLocal)
         spinnerCategoria = findViewById(R.id.spinnerCategoria)
         spinnerUnidade = findViewById(R.id.spinnerUnidade)
+        btnSalvar = findViewById(R.id.btnSalvarAlteracoes)
+        progressSalvar = findViewById(R.id.progressSalvarAlteracoes)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()
@@ -105,7 +112,7 @@ class EditarAlimentoActivity : AppCompatActivity() {
         configurarSpinners()
         preencherDados()
 
-        findViewById<View>(R.id.btnSalvarAlteracoes).setOnClickListener {
+        btnSalvar.setOnClickListener {
             salvarAlteracoes()
         }
     }
@@ -196,7 +203,8 @@ class EditarAlimentoActivity : AppCompatActivity() {
             StockQuantityTracker.getOrSetInitialQuantity(this, prodId, currentQty)
         }
 
-        etNome.setText(prod.product?.name ?: "")
+        val trackedName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
+        etNome.setText(trackedName ?: prod.product?.name ?: "")
         etValidade.setText(formatarDataBr(prod.expireDate))
         etQuantidade.setText(currentQty.takeIf { it > 0 }?.toString() ?: "1")
 
@@ -253,7 +261,11 @@ class EditarAlimentoActivity : AppCompatActivity() {
             } catch (_: Exception) {}
         }
 
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        val displayName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(
+            displayName ?: prod.product?.name,
+            prod.category ?: prod.product?.category
+        )
         imgEditarAlimento.setPadding(0, 0, 0, 0)
         imgEditarAlimento.clearColorFilter()
         if (imgRes == R.drawable.img_frango) {
@@ -278,9 +290,17 @@ class EditarAlimentoActivity : AppCompatActivity() {
         val prodId = item?.id ?: return
         if (!NetworkGuard.ensureConnected(this) { salvarAlteracoes() }) return
 
+        val novoNome = etNome.text.toString().trim()
+        if (novoNome.isEmpty()) {
+            etNome.error = "Informe o nome do alimento"
+            etNome.requestFocus()
+            return
+        }
+
         val novaQtd = etQuantidade.text.toString().toIntOrNull()
         if (novaQtd == null || novaQtd <= 0) {
             etQuantidade.error = "Informe uma quantidade válida"
+            etQuantidade.requestFocus()
             return
         }
 
@@ -291,7 +311,21 @@ class EditarAlimentoActivity : AppCompatActivity() {
             else -> "FRIDGE"
         }
 
+        val categoriaCodigo = when (spinnerCategoria.selectedItem?.toString()) {
+            "Carnes" -> "MEAT"
+            "Laticínios" -> "DAIRY"
+            "Hortifruti" -> "VEGETABLE"
+            "Bebidas" -> "BEVERAGE"
+            "Grãos" -> "GRAIN"
+            else -> null
+        }
+
         val observacoes = etObservacoes.text.toString().trim()
+
+        // Ativa estado de carregamento no botão
+        btnSalvar.isEnabled = false
+        btnSalvar.text = ""
+        progressSalvar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             try {
@@ -299,8 +333,13 @@ class EditarAlimentoActivity : AppCompatActivity() {
                     id = prodId,
                     quantity = novaQtd,
                     expireDate = novaValidade,
-                    storagePlace = localSelecionado
+                    storagePlace = localSelecionado,
+                    name = novoNome,
+                    category = categoriaCodigo
                 )
+
+                // Salva nome rastreado localmente para persistência imediata
+                ProductNameTracker.setName(this@EditarAlimentoActivity, prodId, novoNome)
 
                 // Salva observações localmente
                 StockObservationsTracker.setObservation(this@EditarAlimentoActivity, prodId, observacoes)
@@ -313,6 +352,10 @@ class EditarAlimentoActivity : AppCompatActivity() {
                 Toast.makeText(this@EditarAlimentoActivity, "Alimento atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                 finish()
             } catch (e: Exception) {
+                btnSalvar.isEnabled = true
+                btnSalvar.text = getString(R.string.stock_save_changes)
+                progressSalvar.visibility = View.GONE
+
                 NetworkGuard.showBlockingError(this@EditarAlimentoActivity, e.message) {
                     salvarAlteracoes()
                 }

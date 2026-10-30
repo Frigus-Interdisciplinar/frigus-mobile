@@ -306,19 +306,33 @@
         </LinearLayout>
     </ScrollView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSalvarAlteracoes"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="54dp"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="28dp"
-        android:fontFamily="@font/sarabun"
-        android:text="@string/stock_save_changes"
-        android:textAllCaps="false"
-        android:textColor="@color/pure_white"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/blue_primary"
-        app:cornerRadius="10dp" />
+        android:layout_marginBottom="28dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSalvarAlteracoes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/stock_save_changes"
+            android:textAllCaps="false"
+            android:textColor="@color/pure_white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/blue_primary"
+            app:cornerRadius="10dp" />
+
+        <ProgressBar
+            android:id="@+id/progressSalvarAlteracoes"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/pure_white"
+            android:visibility="gone" />
+    </FrameLayout>
 </FrameLayout>

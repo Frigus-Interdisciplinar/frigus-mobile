@@ -13,6 +13,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.ui.stock.AlimentoDetalhesActivity
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductNameTracker
 
 class EstoqueProdutoAdapter(
     private val context: Context,
@@ -31,7 +32,8 @@ class EstoqueProdutoAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        val productName = item.product?.name?.takeIf(String::isNotBlank)
+        val productName = item.id?.let { ProductNameTracker.getName(context, it) }
+            ?: item.product?.name?.takeIf(String::isNotBlank)
             ?: context.getString(R.string.inventory_unnamed_product)
         val qty = item.quantity?.toString() ?: "-"
         val unit = when (item.product?.unitOfMeasure) {

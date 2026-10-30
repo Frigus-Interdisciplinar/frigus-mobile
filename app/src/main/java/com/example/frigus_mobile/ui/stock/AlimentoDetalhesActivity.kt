@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import com.example.frigus_mobile.utils.StockQuantityTracker
 import com.example.frigus_mobile.utils.ProductImageTracker
 import com.example.frigus_mobile.utils.StockObservationsTracker
+import com.example.frigus_mobile.utils.ProductNameTracker
 import android.net.Uri
 import kotlinx.coroutines.launch
 
@@ -84,7 +85,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
     private fun preencherDados() {
         val prod = item ?: return
-        val productName = prod.product?.name ?: "Alimento"
+        val productName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
         val categoryName = when (prod.category ?: prod.product?.category) {
             "MEAT" -> "Carnes"
             "DAIRY" -> "Laticínios"
@@ -157,7 +158,8 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
 
     private fun carregarImagemPadrao(img: ImageView, prod: StockProductResponse) {
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        val displayName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(displayName, prod.category ?: prod.product?.category)
         img.clearColorFilter()
         img.setImageResource(imgRes)
     }
@@ -177,12 +179,13 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             else -> "un"
         }
 
-        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = prod.product?.name ?: "Alimento"
+        val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
+        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName
         dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
         dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = "Validade: ${prod.expireDate ?: "-"}"
 
         val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(dialogProdName, prod.category ?: prod.product?.category)
         imgRem?.clearColorFilter()
         imgRem?.setImageResource(imgRes)
 
@@ -208,6 +211,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
                     StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
                     ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
                     StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductNameTracker.remove(this@AlimentoDetalhesActivity, it)
                 }
                 repository.deleteStockProduct(id)
                 Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductNameTracker
 import com.example.frigus_mobile.utils.ProductImageTracker
 import android.net.Uri
 
@@ -36,8 +37,9 @@ class EstoqueLocalAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         val product = item.product
+        val displayName = item.id?.let { ProductNameTracker.getName(context, it) } ?: product?.name ?: "Alimento"
 
-        holder.tvNome.text = product?.name ?: "Alimento"
+        holder.tvNome.text = displayName
 
         val qtd = item.quantity ?: 1
         val unit = product?.unitOfMeasure?.takeIf { it.isNotBlank() } ?: "un"
@@ -63,10 +65,10 @@ class EstoqueLocalAdapter(
                 holder.imgProduto.scaleType = ImageView.ScaleType.CENTER_CROP
                 holder.imgProduto.setImageURI(Uri.parse(customUri))
             } catch (_: Exception) {
-                aplicarImagemPadrao(holder, product?.name, item.category ?: product?.category, context)
+                aplicarImagemPadrao(holder, displayName, item.category ?: product?.category, context)
             }
         } else {
-            aplicarImagemPadrao(holder, product?.name, item.category ?: product?.category, context)
+            aplicarImagemPadrao(holder, displayName, item.category ?: product?.category, context)
         }
 
         holder.itemView.setOnClickListener {

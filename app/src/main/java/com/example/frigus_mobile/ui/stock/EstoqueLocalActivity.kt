@@ -27,6 +27,7 @@ import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueLocalAdapter
 import com.example.frigus_mobile.utils.launchSafeNetwork
+import com.example.frigus_mobile.utils.ProductNameTracker
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
@@ -253,7 +254,7 @@ class EstoqueLocalActivity : AppCompatActivity() {
             val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
             val categoryMatches = isProductInCategory(item, selectedCategoryLabel)
 
-            val name = (item.product?.name ?: "").lowercase()
+            val name = (item.id?.let { id -> ProductNameTracker.getName(this, id) } ?: item.product?.name ?: "").lowercase()
             val nameMatches = query.isEmpty() || name.contains(query)
 
             placeMatches && categoryMatches && nameMatches
@@ -293,7 +294,7 @@ class EstoqueLocalActivity : AppCompatActivity() {
         }
 
         val catAlimento = (item.category ?: item.product?.category ?: "").uppercase().trim()
-        val nameAlimento = (item.product?.name ?: "").lowercase().trim()
+        val nameAlimento = (item.id?.let { id -> ProductNameTracker.getName(this, id) } ?: item.product?.name ?: "").lowercase().trim()
 
         return when (selectedCategory) {
             "Carnes" -> {

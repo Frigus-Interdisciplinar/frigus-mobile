@@ -1,4 +1,4 @@
-package com.example.frigus_mobile.data.repository
+﻿package com.example.frigus_mobile.data.repository
 
 import android.content.Context
 import com.example.frigus_mobile.data.api.BffException
@@ -69,7 +69,7 @@ class StockRepository(context: Context? = null) {
             }
             page++
         }
-        // Inicializa o rastreador de quantidade original para cálculo da barra de progresso
+        // Inicializa o rastreador de quantidade original para cÃ¡lculo da barra de progresso
         if (appContext != null) {
             allItems.forEach { prod ->
                 prod.id?.let { id ->
@@ -157,13 +157,17 @@ class StockRepository(context: Context? = null) {
 
     suspend fun updateStockProduct(
         id: Int,
-        quantity: Int?,
-        expireDate: String?,
-        storagePlace: String?
+        quantity: Int? = null,
+        expireDate: String? = null,
+        storagePlace: String? = null,
+        name: String? = null,
+        category: String? = null
     ): Boolean {
         val request = StockProductUpdateRequest(
+            name = name?.trim()?.takeIf { it.isNotEmpty() },
+            category = category,
             quantity = quantity,
-            expireDate = expireDate?.let(::isoDate),
+            expireDate = expireDate?.let { try { isoDate(it) } catch (_: Exception) { it } },
             storagePlace = storagePlace
         )
         updateStockProduct(id, request)
