@@ -55,6 +55,15 @@
         <com.google.android.material.button.MaterialButton android:id="@+id/lotReload"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_gravity="end" android:text="@string/lot_reload" />
+        <TextView android:id="@+id/movementGlobalStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun" android:accessibilityLiveRegion="polite"
+            android:textColor="@color/darkBlue" android:textSize="13sp"
+            android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/movementGlobalVerify"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:text="@string/movement_verify"
+            android:visibility="gone" />
         <LinearLayout android:id="@+id/lotContent"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical" android:visibility="gone">
@@ -344,6 +353,72 @@
                     android:gravity="end" android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
             </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun" android:text="@string/movement_history"
+                android:textColor="@color/darkBlue" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:id="@+id/movementHistoryStatus"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
+                android:accessibilityLiveRegion="polite" android:textColor="@color/darkBlue"
+                android:textSize="13sp" />
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/movementHistoryList"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:nestedScrollingEnabled="false" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/movementHistoryRetry"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:text="@string/movement_retry" android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/movementHistoryMore"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:text="@string/movement_more" android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" android:fontFamily="@font/sarabun"
+                android:text="@string/movement_form_title" android:textColor="@color/darkBlue"
+                android:textSize="18sp" android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
+                android:text="@string/movement_type_label" android:textColor="@color/darkBlue"
+                android:textSize="13sp" />
+            <Spinner android:id="@+id/movementType"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:entries="@array/movement_type_labels" />
+            <EditText android:id="@+id/movementQuantity"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:minHeight="48dp"
+                android:hint="@string/movement_quantity_hint" android:inputType="number"
+                android:singleLine="true" />
+            <EditText android:id="@+id/movementObservation"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:minHeight="48dp"
+                android:hint="@string/movement_observation_hint"
+                android:inputType="textCapSentences|textMultiLine" android:maxLength="2000" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/movementSubmit"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:minHeight="48dp"
+                android:text="@string/movement_submit" />
+            <TextView android:id="@+id/movementMutationStatus"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun" android:accessibilityLiveRegion="polite"
+                android:textColor="@color/darkBlue" android:textSize="13sp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/movementVerify"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:text="@string/movement_verify"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/movementAcknowledge"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="48dp" android:text="@string/movement_acknowledge"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Spacer -->

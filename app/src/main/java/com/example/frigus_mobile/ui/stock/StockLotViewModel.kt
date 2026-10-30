@@ -86,6 +86,12 @@ class StockLotViewModel(application: Application, private val savedState: SavedS
     fun save(id: Int, request: StockProductUpdateRequest) = mutate(id, request)
     fun delete(id: Int) = mutate(id, null)
 
+    fun showVerifiedLot(lot: StockProductResponse) {
+        val current = mutableState.value ?: return
+        if (!current.busy && (current.lot == null || current.lot.id == lot.id))
+            mutableState.value = current.copy(lot = lot, loading = false, error = null)
+    }
+
     private fun mutate(id: Int, request: StockProductUpdateRequest?) {
         val current = mutableState.value ?: return
         if (!session.isLoggedIn || current.loading || current.busy || current.uncertain || current.lot?.id != id) return
