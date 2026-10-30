@@ -6,13 +6,12 @@
     android:background="#0E1E40"
     android:fitsSystemWindows="true"
     android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingHorizontal="20dp">
 
-    <!-- Top Bar -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="12dp">
 
@@ -21,9 +20,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Voltar"
+            android:contentDescription="@string/profile_back"
             android:src="@drawable/ic_chevron_left"
             app:tint="@color/pure_white" />
     </RelativeLayout>
@@ -31,38 +29,57 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/sarabun"
-        android:text="Escanear Nota Fiscal"
+        android:text="@string/receipt_scanner_title"
         android:textColor="@color/pure_white"
         android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/sarabun"
-        android:text="Aponte a câmera para o QR Code\nda nota fiscal"
-        android:textAlignment="center"
+        android:gravity="center"
+        android:text="@string/receipt_scanner_help"
         android:textColor="#93C5FD"
         android:textSize="13sp" />
 
-    <!-- QR Code Viewfinder Box -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/sarabun"
+        android:text="@string/receipt_stock_label"
+        android:textColor="@color/pure_white"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <Spinner
+        android:id="@+id/receiptStockSelector"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_card_white_rounded"
+        android:contentDescription="@string/receipt_stock_label"
+        android:paddingHorizontal="12dp" />
+
     <FrameLayout
-        android:id="@+id/btnSimularLeitura"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
-        android:layout_marginTop="60dp"
+        android:id="@+id/btnScanReceipt"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginTop="28dp"
         android:background="@drawable/bg_qr_frame"
         android:clickable="true"
+        android:contentDescription="@string/receipt_scan_button"
         android:focusable="true">
 
         <ImageView
-            android:layout_width="140dp"
-            android:layout_height="140dp"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:layout_gravity="center"
-            android:alpha="0.8"
+            android:alpha="0.85"
             android:src="@drawable/ic_qr_code_scanner"
             app:tint="#60A5FA" />
     </FrameLayout>
@@ -70,10 +87,29 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/sarabun"
-        android:text="Toque no quadro para simular a leitura"
+        android:text="@string/receipt_scan_tap"
         android:textColor="#94A3B8"
         android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/receiptScannerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/sarabun"
+        android:gravity="center"
+        android:textColor="@color/pure_white"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/receiptStockRetry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/receipt_stock_retry"
+        android:visibility="gone" />
 
 </LinearLayout>

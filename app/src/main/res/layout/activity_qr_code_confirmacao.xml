@@ -60,6 +60,7 @@
             </FrameLayout>
 
             <TextView
+                android:id="@+id/tvQrConfirmacaoTitulo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="54dp"
@@ -71,12 +72,23 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvQrConfirmacaoDescricao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/sarabun"
                 android:gravity="center"
                 android:text="@string/qr_confirm_subtitle"
+                android:textColor="@color/qr_confirmation_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvQrConfirmacaoContagem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/sarabun"
+                android:gravity="center"
                 android:textColor="@color/qr_confirmation_secondary"
                 android:textSize="13sp" />
 

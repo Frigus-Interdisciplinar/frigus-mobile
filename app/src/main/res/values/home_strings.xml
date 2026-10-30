@@ -13,6 +13,7 @@
     <string name="home_notifications_pending">Notificações — indisponível nesta versão</string>
     <string name="home_conversations">Conversas</string>
     <string name="home_qr">Leitor de QR Code</string>
+    <string name="home_qr_description">Leia NFC-e da SEFAZ-SP e revise os produtos antes de importar.</string>
     <string name="home_ai">Assistente IA</string>
     <string name="home_feature_pending">Indisponível nesta versão</string>
     <string name="home_feature_unavailable">%1$s\n\nEsta função ainda não está disponível nesta versão.</string>

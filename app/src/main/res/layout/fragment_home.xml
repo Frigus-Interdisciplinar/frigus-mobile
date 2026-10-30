@@ -482,10 +482,11 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
                 <TextView
+                    android:id="@+id/tvHomeQrSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/home_feature_pending"
+                    android:text="@string/home_qr_description"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="@dimen/home_body_size" />
             </LinearLayout>
