@@ -43,6 +43,7 @@ class ReceitaDetalhesActivity : AppCompatActivity() {
             adapter = ingredients
         }
         model.state.observe(this) { state ->
+            findViewById<View>(R.id.btnVerModoPreparo).isEnabled = state.recipe != null && !state.loading
             findViewById<View>(R.id.recipeDetailProgress).visibility = if (state.loading) View.VISIBLE else View.GONE
             findViewById<View>(R.id.recipeDetailRetry).visibility = if (state.error != null) View.VISIBLE else View.GONE
             findViewById<View>(R.id.recipeDetailContent).visibility = if (state.recipe != null) View.VISIBLE else View.GONE
@@ -66,6 +67,8 @@ class ReceitaDetalhesActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.txtDetailRecipeTitle).text = name
                 findViewById<TextView>(R.id.txtDetailRecipeDescription).text =
                     recipe.recipeDescription?.takeIf(String::isNotBlank) ?: getString(R.string.recipe_browser_no_description)
+                findViewById<TextView>(R.id.txtDetailRecipeInstructions).text =
+                    recipe.recipeInstructions?.takeIf(String::isNotBlank) ?: getString(R.string.recipe_browser_no_instructions)
                 val items = recipe.ingredients.orEmpty().filterNotNull()
                 ingredients.updateList(items)
                 findViewById<TextView>(R.id.recipeIngredientsState).apply {

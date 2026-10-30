@@ -11,7 +11,7 @@
     <string name="inventory_group_counts">%1$s lotes no total\nEm dia: %2$s · Próximos de vencer: %3$s · Vencidos: %4$s</string>
     <string name="inventory_summary_note">O resumo inclui todos os estoques e locais do grupo. Os filtros abaixo se aplicam à lista.</string>
     <string name="inventory_results">Lotes encontrados</string>
-    <string name="inventory_read_only">Consulta de lotes existentes. Detalhes, edição, remoção e movimentos estarão disponíveis em uma próxima entrega.</string>
+    <string name="inventory_read_only">Selecione um lote para consultar, editar ou remover. Movimentos estarão disponíveis em uma próxima entrega.</string>
     <string name="inventory_loading">Consultando estoque…</string>
     <string name="inventory_invalid_response">Não foi possível interpretar o estoque. Tente novamente.</string>
     <string name="inventory_network_error">Não foi possível conectar ao estoque. Verifique sua conexão e tente novamente.</string>

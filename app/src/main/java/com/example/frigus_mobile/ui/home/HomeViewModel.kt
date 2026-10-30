@@ -22,13 +22,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val mutableState = MutableLiveData<HomeUiState>()
     val state: LiveData<HomeUiState> = mutableState
     private var pending: Call<InventoryHomeResponse>? = null
+    private var needsRefresh = false
 
     fun loadIfNeeded() {
-        if (mutableState.value == null) reload()
+        if (mutableState.value == null || needsRefresh) reload()
+    }
+
+    fun invalidate() {
+        pending?.cancel()
+        needsRefresh = true
+        mutableState.value = HomeUiState()
     }
 
     fun reload() {
         if (!session.isLoggedIn || mutableState.value?.loading == true) return
+        needsRefresh = false
         val generation = session.state.generation
         mutableState.value = HomeUiState(loading = true)
         pending = repository.load { home, error ->

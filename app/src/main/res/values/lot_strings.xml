@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lot_reload">Recarregar dados</string>
+    <string name="lot_remove_confirmation">Deseja remover este lote do estoque? O produto do catálogo será preservado. Não há restauração pelo app.</string>
+    <string name="lot_uncertain">Não foi possível confirmar o resultado da operação. Ela pode ter sido aplicada. Recarregue os dados e confira o estado real antes de tentar novamente. Nenhuma alteração será reenviada automaticamente.</string>
+    <string name="lot_sending">Enviando alteração…</string>
+    <string name="lot_error">Não foi possível concluir a operação. Confira sua conexão e recarregue os dados.</string>
+    <string name="lot_forbidden">Você não tem permissão para esta operação neste estoque.</string>
+    <string name="lot_not_found">Este lote não foi encontrado ou não está mais disponível.</string>
+    <string name="lot_invalid_field">Informe um valor válido. Campos numéricos exigem inteiro de zero até 2147483647; campos existentes não podem ser apagados aqui.</string>
+    <string name="lot_no_changes">Altere pelo menos um campo antes de salvar.</string>
+    <string name="lot_keep_value">Manter valor atual</string>
+    <string name="lot_minimum">Quantidade mínima</string>
+    <string name="lot_batch">Lote / identificação (até 120 caracteres)</string>
+    <string name="lot_unit_read_only">Unidade (somente leitura): %1$s</string>
+    <string name="lot_form_note">O saldo é um valor absoluto; sua alteração gera um ajuste no estoque. Mínimo em branco não limpa um valor existente; informe zero se desejar mínimo zero. Unidade, marca e preço não podem ser alterados aqui. Recarregar descarta o formulário e consulta os dados atuais.</string>
+    <string name="lot_movements_pending">Histórico e movimentos serão entregues na próxima parte.</string>
+    <string name="lot_removed">Alimento removido com sucesso!</string>
+    <string name="lot_saved">Alterações salvas com sucesso!</string>
+    <string name="lot_quantity_fraction">%1$s de %2$s %3$s</string>
+    <string name="lot_batch_label">Identificação do lote</string>
+    <string name="lot_unit_label">Unidade</string>
+    <string name="lot_brand">Marca</string>
+    <string name="lot_status_label">Status</string>
+    <string name="lot_identity_label">Lote e estoque</string>
+</resources>

@@ -1,44 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:clipToPadding="false">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/account_page_padding">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp">
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/darkBlue"
+            android:text="@string/profile_perfil"
             android:id="@+id/tvTituloPerfil"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_title"
-            android:textSize="@dimen/account_title_size"
-            android:textColor="@color/darkBlue"
-            android:accessibilityHeading="true"
-            android:textStyle="bold" />
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:accessibilityHeading="true" />
         <ImageView
-            android:layout_width="@dimen/account_avatar_size"
-            android:layout_height="@dimen/account_avatar_size"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/account_section_gap"
-            android:padding="@dimen/account_avatar_padding"
-            android:background="@drawable/bg_avatar_circle"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:src="@drawable/ic_person"
-            android:contentDescription="@null"
+            android:contentDescription="@string/profile_avatar"
+            android:id="@+id/ivAvatar"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_avatar_circle"
+            android:padding="20dp"
             app:tint="@color/profile_primary" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_read_only"
-            android:textSize="@dimen/account_body_size"
-            android:textColor="@color/darkBlue"
-            android:layout_marginTop="@dimen/account_section_gap" />
         <ProgressBar
             android:id="@+id/accountProgress"
             android:layout_width="wrap_content"
@@ -75,111 +70,133 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/account_name"
-                android:textSize="@dimen/account_label_size"
                 android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_section_gap"
-                android:labelFor="@id/tvNomeUsuario" />
-            <TextView
                 android:id="@+id/tvNomeUsuario"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_not_informed"
-                android:textSize="@dimen/account_body_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_gap"
-                android:textStyle="bold" />
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:text="@string/account_not_informed" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/account_email"
-                android:textSize="@dimen/account_label_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_section_gap"
-                android:labelFor="@id/tvEmailUsuario" />
-            <TextView
+                android:textColor="@color/gray"
                 android:id="@+id/tvEmailUsuario"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:text="@string/account_not_informed" />
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_not_informed"
-                android:textSize="@dimen/account_body_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_gap"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_birth_date"
-                android:textSize="@dimen/account_label_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_section_gap"
-                android:labelFor="@id/accountBirthDate" />
-            <TextView
-                android:id="@+id/accountBirthDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_not_informed"
-                android:textSize="@dimen/account_body_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_gap"
-                android:textStyle="bold" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_type"
-                android:textSize="@dimen/account_label_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_section_gap"
-                android:labelFor="@id/accountType" />
-            <TextView
-                android:id="@+id/accountType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/account_not_informed"
-                android:textSize="@dimen/account_body_size"
-                android:textColor="@color/darkBlue"
-                android:layout_marginTop="@dimen/account_gap"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:layout_marginTop="24dp"
+                android:padding="20dp"
+                android:background="@drawable/bg_card_white_rounded">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_birth_date"
+                    android:textSize="@dimen/account_label_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_section_gap"
+                    android:labelFor="@id/accountBirthDate" />
+                <TextView
+                    android:id="@+id/accountBirthDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_not_informed"
+                    android:textSize="@dimen/account_body_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_gap"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_type"
+                    android:textSize="@dimen/account_label_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_section_gap"
+                    android:labelFor="@id/accountType" />
+                <TextView
+                    android:id="@+id/accountType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_not_informed"
+                    android:textSize="@dimen/account_body_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_gap"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_security_title"
-            android:textSize="@dimen/account_heading_size"
-            android:textColor="@color/darkBlue"
-            android:layout_marginTop="@dimen/account_section_gap"
-            android:accessibilityHeading="true"
-            android:textStyle="bold" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_security_unavailable"
-            android:textSize="@dimen/account_body_size"
-            android:textColor="@color/darkBlue"
-            android:layout_marginTop="@dimen/account_gap" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_other_unavailable"
-            android:textSize="@dimen/account_body_size"
-            android:textColor="@color/darkBlue"
-            android:layout_marginTop="@dimen/account_gap" />
-        <com.google.android.material.button.MaterialButton
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:padding="20dp"
+            android:background="@drawable/bg_card_white_rounded">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_read_only"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_section_gap" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_security_unavailable"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_gap" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_other_unavailable"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_gap" />
+        </LinearLayout>
+        <LinearLayout
             android:id="@+id/btnSair"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/account_section_gap"
-            android:minHeight="@dimen/account_touch_target"
-            android:text="@string/account_logout" />
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="48dp"
+            android:layout_marginTop="24dp"
+            android:contentDescription="@string/account_logout">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile_figma_logout"
+                android:contentDescription="@null"
+                android:layout_marginStart="6dp" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/profile_red"
+                android:text="@string/profile_sign_out"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="2" />
+        </LinearLayout>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</ScrollView>

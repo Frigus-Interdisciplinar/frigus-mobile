@@ -120,8 +120,27 @@ class StockRepository(context: Context? = null) {
         })
     }
 
-    suspend fun getStockProductById(id: Int): StockProductResponse = withContext(Dispatchers.IO) {
-        api.getStockProductById(id).requireBody()
+    suspend fun getStockProductById(id: Int): StockProductResponse =
+        requireLot(api.getStockProductById(id).awaitLotResponse(), id)
+
+    private fun requireLot(response: Response<StockProductResponse>, id: Int): StockProductResponse {
+        if (response.code() != 200) throw BffException(ApiError.parse(response), "")
+        val lot = response.body()
+        if (lot == null || lot.id != id || (lot.stockId ?: 0) <= 0)
+            throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return lot
+    }
+
+    private suspend fun <T> Call<T>.awaitLotResponse(): Response<T> = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback<T> {
+            override fun onResponse(call: Call<T>, response: Response<T>) {
+                if (continuation.isActive) continuation.resume(response)
+            }
+            override fun onFailure(call: Call<T>, failure: Throwable) {
+                if (continuation.isActive) continuation.resumeWithException(failure)
+            }
+        })
     }
 
     suspend fun updateStockProduct(
@@ -144,12 +163,12 @@ class StockRepository(context: Context? = null) {
             request.minimalQuantity, request.expireDate, request.storagePlace, request.batch).any { it != null }) {
             "Informe ao menos um campo para atualizar o alimento."
         }
-        return withContext(Dispatchers.IO) { api.updateStockProduct(id, request).requireBody() }
+        return requireLot(api.updateStockProduct(id, request).awaitLotResponse(), id)
     }
 
-    suspend fun deleteStockProduct(id: Int): Boolean = withContext(Dispatchers.IO) {
-        api.deleteStockProduct(id).requireNoContent()
-        true
+    suspend fun deleteStockProduct(id: Int): Boolean {
+        api.deleteStockProduct(id).awaitLotResponse().requireNoContent()
+        return true
     }
 
     suspend fun getMovements(id: Int, page: Int? = null, size: Int? = null):
@@ -168,12 +187,12 @@ class StockRepository(context: Context? = null) {
     suspend fun addStockProduct(@Suppress("UNUSED_PARAMETER") item: StockProductResponse): Unit =
         unavailableMobileContract()
 
-    private fun isoDate(value: String): String {
-        val trimmed = value.trim()
-        return if (trimmed.contains('/')) {
-            LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString()
-        } else {
-            LocalDate.parse(trimmed).toString()
+    companion object {
+        fun isoDate(value: String): String {
+            val trimmed = value.trim()
+            val format = if (trimmed.contains('/')) DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                .withResolverStyle(java.time.format.ResolverStyle.STRICT) else DateTimeFormatter.ISO_LOCAL_DATE
+            return LocalDate.parse(trimmed, format).toString()
         }
     }
 }

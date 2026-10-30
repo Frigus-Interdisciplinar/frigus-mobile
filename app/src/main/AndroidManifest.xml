@@ -74,12 +74,12 @@
 
         <activity
             android:name=".ui.stock.AlimentoDetalhesActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.stock.EditarAlimentoActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
