@@ -5,6 +5,13 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 object NetworkGuard {
 
@@ -78,6 +85,47 @@ object NetworkGuard {
             false
         } else {
             true
+        }
+    }
+}
+
+/**
+ * Extensão para Activity que encapsula verificação de rede, escopo de corrotina e tratamento de erros.
+ */
+fun AppCompatActivity.launchSafeNetwork(
+    onRetry: () -> Unit,
+    block: suspend CoroutineScope.() -> Unit
+): Job? {
+    if (!NetworkGuard.ensureConnected(this, onRetry)) return null
+    return lifecycleScope.launch {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            // Cancelamento normal quando a tela é destruída ou encerrada
+            throw e
+        } catch (e: Exception) {
+            NetworkGuard.showBlockingError(this@launchSafeNetwork, e.message, onRetry)
+        }
+    }
+}
+
+/**
+ * Extensão para Fragment que encapsula verificação de rede, escopo de corrotina e tratamento de erros.
+ */
+fun Fragment.launchSafeNetwork(
+    onRetry: () -> Unit,
+    block: suspend CoroutineScope.() -> Unit
+): Job? {
+    val act = activity ?: return null
+    if (!NetworkGuard.ensureConnected(act, onRetry)) return null
+    return viewLifecycleOwner.lifecycleScope.launch {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            // Cancelamento normal quando o usuário troca de aba ou navega para outra tela
+            throw e
+        } catch (e: Exception) {
+            NetworkGuard.showBlockingError(activity, e.message, onRetry)
         }
     }
 }

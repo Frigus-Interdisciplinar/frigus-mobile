@@ -137,7 +137,6 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/senha"
-                android:saveEnabled="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
@@ -292,39 +291,5 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layoutBtnGoogle" />
 
-        <TextView
-            android:id="@+id/authStatus"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            android:accessibilityLiveRegion="polite"
-            android:textColor="@color/color_text_primary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCriarConta" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRetrySession"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:text="@string/auth_retry_session"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/authStatus" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnChangeAccount"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:text="@string/auth_change_account"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnRetrySession" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

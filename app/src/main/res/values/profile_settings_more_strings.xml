@@ -1,6 +1,4 @@
 <resources>
-    <string name="settings_privacy_profile_section">Privacidade do perfil</string>
-    <string name="settings_privacy_visibility">Quem pode ver meu perfil</string>
     <string name="settings_privacy_data_section">Dados e personalização</string>
     <string name="settings_privacy_usage">Permitir coleta de dados de uso</string>
     <string name="settings_privacy_usage_detail">Melhora sua experiência no app</string>
@@ -21,13 +19,18 @@
     <string name="settings_verification_title">Verificação de e-mail</string>
     <string name="settings_verification_heading">Verifique seu e-mail</string>
     <string name="settings_verification_sent">Enviamos um link de redefinição para</string>
-    <string name="settings_verification_missing">Não recebeu o e-mail?</string>
-    <string name="settings_verification_resend">Reenviar e-mail</string>
-    <string name="settings_verification_change">Alterar e-mail</string>
     <string name="settings_account_title">Informações da Conta</string>
     <string name="settings_account_name">Nome completo</string>
     <string name="settings_account_email">E-mail</string>
     <string name="settings_account_birthdate">Data de nascimento</string>
     <string name="settings_account_type">Tipo de conta</string>
     <string name="settings_toggle_password_visibility">Alternar visibilidade da senha</string>
+    <string name="settings_two_factor_off">Desativada - adicione uma etapa extra ao entrar</string>
+    <string name="settings_two_factor_on">Ativada - etapa extra ao entrar habilitada</string>
+    <string name="settings_devices_count">3 dispositivos</string>
+    <string name="settings_coming_soon">Em breve</string>
+    <string name="settings_password_current_required">Informe sua senha atual</string>
+    <string name="settings_password_new_invalid">A nova senha não atende aos requisitos</string>
+    <string name="settings_password_mismatch">As senhas não coincidem</string>
+    <string name="settings_password_same">A nova senha deve ser diferente da atual</string>
 </resources>

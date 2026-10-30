@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.utils.NetworkGuard
 import kotlinx.coroutines.launch
@@ -29,6 +30,12 @@ class MoneySavingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // MoneySaving só está disponível para contas do tipo Doméstico
+        if (!SessionManager(requireContext()).isDomestic) {
+            voltarTela()
+            return
+        }
 
         stockRepository = StockRepository(requireContext())
 

@@ -16,6 +16,8 @@ import com.example.frigus_mobile.ui.ai.ChatIaActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
 import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.launchSafeNetwork
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -108,26 +110,22 @@ class HomeFragment : Fragment() {
         tvGreeting?.text = if (nomeUsuario != null) "Olá, $nomeUsuario!" else "Olá!"
     }
 
-    private fun formatarQtdItens(qtd: Int): String {
-        return if (qtd == 1) "1 item" else "$qtd itens"
-    }
 
     private fun carregarDadosEstoque() {
-        if (!NetworkGuard.ensureConnected(activity) { carregarDadosEstoque() }) return
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
+        launchSafeNetwork(::carregarDadosEstoque) {
                 // Sincroniza o perfil do usuário autenticado caso ainda não tenha nome/email salvos
-                withContext(Dispatchers.IO) {
-                    try {
-                        val profileResp = RetrofitClient.authService.getProfile().execute()
-                        if (profileResp.isSuccessful && profileResp.body() != null) {
-                            sessionManager.saveUserProfile(profileResp.body())
+                if (sessionManager.userName.isNullOrBlank()) {
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val profileResp = RetrofitClient.authService.getProfile().execute()
+                            if (profileResp.isSuccessful && profileResp.body() != null) {
+                                sessionManager.saveUserProfile(profileResp.body())
+                            }
+                        } catch (_: Exception) {
                         }
-                    } catch (_: Exception) {
                     }
+                    view?.let { atualizarSaudacao(it) }
                 }
-                view?.let { atualizarSaudacao(it) }
 
                 val produtos = stockRepository.getStockProducts()
 
@@ -148,21 +146,16 @@ class HomeFragment : Fragment() {
                     cardAlerta?.visibility = View.GONE
                 }
 
-                view?.findViewById<TextView>(R.id.tvQuickEstoqueQtd)?.text = formatarQtdItens(produtos.size)
+                view?.findViewById<TextView>(R.id.tvQuickEstoqueQtd)?.text = ProductCategoryHelper.formatarQtdItens(produtos.size)
 
                 val qtdGeladeira = produtos.count { (it.product?.storagePlace ?: "FRIDGE").equals("FRIDGE", ignoreCase = true) }
                 val qtdFreezer = produtos.count { (it.product?.storagePlace ?: "").equals("FREEZER", ignoreCase = true) }
                 val qtdDespensa = produtos.count { (it.product?.storagePlace ?: "").equals("PANTRY", ignoreCase = true) }
 
-                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = formatarQtdItens(qtdGeladeira)
-                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = formatarQtdItens(qtdFreezer)
-                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = formatarQtdItens(qtdDespensa)
-            } catch (e: Exception) {
-                NetworkGuard.showBlockingError(activity, e.message) {
-                    carregarDadosEstoque()
-                }
+                view?.findViewById<TextView>(R.id.tvQtdGeladeira)?.text = ProductCategoryHelper.formatarQtdItens(qtdGeladeira)
+                view?.findViewById<TextView>(R.id.tvQtdFreezer)?.text = ProductCategoryHelper.formatarQtdItens(qtdFreezer)
+                view?.findViewById<TextView>(R.id.tvQtdDespensa)?.text = ProductCategoryHelper.formatarQtdItens(qtdDespensa)
             }
-        }
     }
 
     private fun navigateToBottomNav(menuItemId: Int) {
@@ -170,3 +163,4 @@ class HomeFragment : Fragment() {
         bottomNav?.selectedItemId = menuItemId
     }
 }
+

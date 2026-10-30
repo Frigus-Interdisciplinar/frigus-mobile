@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.ui.stock.AlimentoDetalhesActivity
+import com.example.frigus_mobile.utils.ProductCategoryHelper
 
 class EstoqueProdutoAdapter(
     private val context: Context,
@@ -46,14 +47,10 @@ class EstoqueProdutoAdapter(
         holder.tvNome.text = productName
         holder.tvSubtitulo.text = "$qty$unit • Vence $expireDate"
 
-        // Ícone baseado na categoria
-        when (item.category ?: item.product?.category) {
-            "MEAT" -> holder.imgProduto.setImageResource(R.drawable.ic_cat_meat)
-            "DAIRY" -> holder.imgProduto.setImageResource(R.drawable.ic_cat_dairy)
-            "FRUIT", "VEGETABLE" -> holder.imgProduto.setImageResource(R.drawable.ic_cat_hortifruti)
-            "BEVERAGE" -> holder.imgProduto.setImageResource(R.drawable.ic_cat_beverages)
-            else -> holder.imgProduto.setImageResource(R.drawable.ic_food_package)
-        }
+        // Ícone unificado baseado na categoria
+        holder.imgProduto.setImageResource(
+            ProductCategoryHelper.getIconeCategoria(item.category ?: item.product?.category)
+        )
 
         // Status badge
         when (item.productStatus) {

@@ -13,10 +13,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val isAuthenticated: Boolean get() = repository.session.validated
     init {
         if (isAuthenticated) result.value = AuthResult.Authenticated
-        else if (hasStoredSession) restore()
     }
     fun login(email: String, password: String) {
         if (result.value != AuthResult.Loading) repository.login(email, password) { result.value = it }
+    }
+    fun loginWithGoogle(idToken: String) {
+        if (result.value != AuthResult.Loading) repository.loginWithGoogle(idToken) { result.value = it }
     }
     fun restore() {
         if (result.value != AuthResult.Loading) repository.restore { result.value = it }

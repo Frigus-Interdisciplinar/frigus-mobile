@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
@@ -38,50 +39,47 @@
         </RelativeLayout>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="126dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:orientation="horizontal"
             android:padding="18dp"
             android:background="@drawable/bg_profile_plan">
             <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:src="@drawable/ic_profile_figma_gift"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_crown"
                 android:contentDescription="@null"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="2dp"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
+                android:layout_marginStart="14dp"
                 android:orientation="vertical">
                 <TextView
+                    android:id="@+id/tvPlanoNome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:id="@+id/tvPlanoAtualNome"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:text="Free"/>
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
                 <TextView
+                    android:id="@+id/tvPlanoPreco"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:id="@+id/tvPlanoAtualPreco"
-                    android:layout_marginTop="6dp"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    tools:text="R$ 0,00/mês"/>
+                    android:layout_marginTop="4dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
                 <TextView
+                    android:id="@+id/tvPlanoValidade"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/gray"
-                    android:id="@+id/tvPlanoAtualValidade"
                     android:layout_marginTop="6dp"
-                    android:textSize="11sp"
-                    tools:text="Válido até 25/10/2026"/>
+                    android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>
         <TextView
@@ -89,36 +87,31 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
             android:textColor="@color/darkBlue"
-            android:text="@string/profile_plan_payments"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="8dp"
-            android:textSize="14sp"
+            android:text="@string/profile_manage_section"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="13sp"
             android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_white_rounded"
-            android:paddingHorizontal="12dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="8dp">
+            android:background="@drawable/bg_card_white_rounded">
             <LinearLayout
                 android:id="@+id/btnGerenciarPlano"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
+                android:focusable="true">
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_profile_figma_subscription"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
+                    android:contentDescription="@null"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -126,22 +119,19 @@
                     android:textColor="@color/darkBlue"
                     android:text="@string/profile_manage_plan"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
+                    android:layout_marginStart="14dp"
+                    android:textSize="12sp"
                     android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
+                    app:tint="@color/darkBlue"/>
             </LinearLayout>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
                 android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnFormaPagamento"
@@ -149,17 +139,15 @@
                 android:layout_height="54dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
+                android:focusable="true">
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_profile_figma_creditcard"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
+                    android:contentDescription="@null"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -167,137 +155,35 @@
                     android:textColor="@color/darkBlue"
                     android:text="@string/profile_payment_method"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
+                    android:layout_marginStart="14dp"
+                    android:textSize="12sp"
                     android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
+                    app:tint="@color/darkBlue"/>
             </LinearLayout>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
-                android:id="@+id/btnHistoricoCobrancas"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_history"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_billing_history"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
-                android:id="@+id/btnBeneficiosPlano"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_benefit"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_plan_benefits"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/darkBlue"
-                android:text="@string/profile_family"
-                android:layout_marginStart="0dp"
-                android:layout_marginTop="10dp"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="0dp"
                 android:background="@color/profile_divider"/>
             <LinearLayout
                 android:id="@+id/btnConvidarMembro"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="54dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
+                android:focusable="true">
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_profile_figma_invite"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
+                    android:contentDescription="@null"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -305,69 +191,85 @@
                     android:textColor="@color/darkBlue"
                     android:text="@string/profile_invite_member"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
+                    android:layout_marginStart="14dp"
+                    android:textSize="12sp"
                     android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
+                    app:tint="@color/darkBlue"/>
             </LinearLayout>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
                 android:background="@color/profile_divider"/>
             <LinearLayout
-                android:id="@+id/btnMinhaFamilia"
+                android:id="@+id/btnMeuGrupo"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="54dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
+                android:focusable="true">
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_profile_figma_family"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
+                    android:contentDescription="@null"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:text="@string/profile_my_family"
+                    android:text="@string/profile_my_group"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
+                    android:layout_marginStart="14dp"
+                    android:textSize="12sp"
                     android:maxLines="2"/>
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_chevron_right"
                     android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
+                    app:tint="@color/darkBlue"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <View
-                android:id="@+id/btnCancelarAssinatura"
+            android:id="@+id/btnCancelarAssinatura"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="28dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_profile_figma_cancel"
+                android:contentDescription="@null"/>
+            <TextView
                 android:layout_width="0dp"
-                android:layout_height="0dp"/>
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/color_red"
+                android:text="@string/profile_cancel_subscription"
+                android:layout_weight="1"
+                android:layout_marginStart="14dp"
+                android:textSize="12sp"
+                android:maxLines="2"/>
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="@null"
+                app:tint="@color/color_red"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

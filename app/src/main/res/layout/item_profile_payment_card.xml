@@ -1,7 +1,53 @@
-<?xml version='1.0' encoding='utf-8'?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="74dp" android:paddingHorizontal="18dp" android:background="@drawable/bg_card_white_rounded" android:layout_marginBottom="12dp">
-    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile_figma_creditcard" android:contentDescription="@null" android:id="@+id/ivCartaoBandeira" />
-    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvCartaoNumero" android:textStyle="bold" android:layout_weight="1" android:layout_marginStart="14dp" />
-    <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/color_green" android:textSize="12sp" android:id="@+id/tvCartaoProximaCobranca" android:gravity="end" android:visibility="gone" />
-    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_chevron_right" android:contentDescription="@null" android:id="@+id/ivCartaoSeta" />
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:paddingHorizontal="16dp"
+    android:background="@drawable/bg_card_white_rounded"
+    android:layout_marginBottom="12dp">
+    <ImageView
+        android:id="@+id/ivCartaoBandeira"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_card_mastercard"
+        android:contentDescription="@null"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/tvCartaoBandeira"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/gray"
+        android:textSize="11sp"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/tvCartaoNumero"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/darkBlue"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"/>
+    <TextView
+        android:id="@+id/tvCartaoPadrao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/color_green"
+        android:textSize="11sp"
+        android:text="@string/profile_default_badge"
+        android:visibility="gone"/>
+    <ImageView
+        android:id="@+id/ivCartaoSeta"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_chevron_right"
+        android:contentDescription="@null"
+        app:tint="@color/darkBlue"/>
 </LinearLayout>

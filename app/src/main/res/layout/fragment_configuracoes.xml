@@ -53,47 +53,6 @@
             android:background="@drawable/bg_card_white_rounded"
             android:paddingHorizontal="12dp">
             <LinearLayout
-                android:id="@+id/btnNotificacoes"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_bell"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_notifications"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
                 android:id="@+id/btnPreferenciasAlimentos"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -210,7 +169,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sarabun"
                         android:textColor="@color/gray"
-                        android:text="@string/profile_two_factor_detail"
+                        android:text="@string/settings_two_factor_off"
                         android:id="@+id/tvStatus2FA"
                         android:layout_marginTop="2dp"
                         android:textSize="12sp"/>
@@ -219,7 +178,7 @@
                     android:id="@+id/checkTwoFactor"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:buttonTint="@color/profile_primary"
+                    android:buttonTint="@color/profile_checkbox_tint"
                     android:contentDescription="@string/profile_two_factor"
                     android:checked="false"/>
             </LinearLayout>
@@ -258,7 +217,7 @@
                         android:id="@+id/tvDispositivosConectados"
                         android:layout_marginTop="2dp"
                         android:textSize="12sp"
-                        tools:text="3 dispositivos"/>
+                        android:text="@string/settings_devices_count"/>
                 </LinearLayout>
                 <ImageView
                     android:layout_width="20dp"
@@ -348,6 +307,47 @@
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
                     android:text="@string/profile_change_password"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
+                    android:maxLines="2"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/profile_divider"/>
+            <LinearLayout
+                android:id="@+id/btnInformacoesConta"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_settings_account"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="6dp"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/settings_account_title"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
                     android:textSize="13sp"

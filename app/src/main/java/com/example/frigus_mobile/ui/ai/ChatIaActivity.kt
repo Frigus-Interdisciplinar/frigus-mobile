@@ -10,16 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.model.AiRecipeChatRequest
 import com.example.frigus_mobile.data.model.ChatUiMessage
-import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.data.repository.AiChatRepository
 import com.example.frigus_mobile.utils.NetworkGuard
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
 
 class ChatIaActivity : AppCompatActivity() {
 
@@ -28,7 +23,7 @@ class ChatIaActivity : AppCompatActivity() {
     private lateinit var rvMessages: RecyclerView
     private lateinit var scrollView: NestedScrollView
     private lateinit var sessionManager: SessionManager
-    private lateinit var stockRepository: StockRepository
+    private lateinit var aiChatRepository: AiChatRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +31,7 @@ class ChatIaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chat_ia)
 
         sessionManager = SessionManager(this)
-        stockRepository = StockRepository(this)
+        aiChatRepository = AiChatRepository(this)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()
@@ -53,7 +48,7 @@ class ChatIaActivity : AppCompatActivity() {
         val primeiroNome = sessionManager.userName?.split(" ")?.firstOrNull() ?: "usuário"
         adapter.addMessage(
             ChatUiMessage(
-                text = "Olá, $primeiroNome! 👋\nComo posso te ajudar hoje?",
+                text = "Olá, $primeiroNome! 👋\nComo posso te ajudar hoje com seus alimentos e receitas?",
                 isUser = false
             )
         )
@@ -68,19 +63,19 @@ class ChatIaActivity : AppCompatActivity() {
 
         // Sugestões Rápidas
         findViewById<View>(R.id.sugestaoCozinhar).setOnClickListener {
-            enviarMensagem("O que posso cozinhar hoje?")
+            enviarMensagem("O que posso cozinhar hoje com os alimentos do meu estoque?")
         }
 
         findViewById<View>(R.id.sugestaoVencimento).setOnClickListener {
-            enviarMensagem("Quais alimentos estão próximos de vencer?")
+            enviarMensagem("Quais alimentos estão próximos de vencer no meu estoque?")
         }
 
         findViewById<View>(R.id.sugestaoListaCompras).setOnClickListener {
-            enviarMensagem("Monte uma lista de compras para a semana")
+            enviarMensagem("Monte uma lista de compras para a semana com base no meu estoque")
         }
 
         findViewById<View>(R.id.sugestaoEconomia).setOnClickListener {
-            enviarMensagem("Quanto economizei esse mês?")
+            enviarMensagem("Quanto economizei evitando desperdício este mês?")
         }
     }
 
@@ -88,65 +83,19 @@ class ChatIaActivity : AppCompatActivity() {
         if (!NetworkGuard.ensureConnected(this) { enviarMensagem(mensagemUsuario) }) return
 
         adapter.addMessage(ChatUiMessage(text = mensagemUsuario, isUser = true))
+        adapter.addMessage(ChatUiMessage(text = "Pensando...", isUser = false, isLoading = true))
         scrollDown()
 
         lifecycleScope.launch {
             try {
-                val respostaBot = obterRespostaAi(mensagemUsuario)
-                adapter.addMessage(ChatUiMessage(text = respostaBot, isUser = false))
+                val respostaBot = aiChatRepository.sendChatMessage(mensagemUsuario)
+                adapter.updateLastMessage(respostaBot, isLoading = false)
                 scrollDown()
             } catch (e: Exception) {
+                adapter.removeLastMessage()
                 NetworkGuard.showBlockingError(this@ChatIaActivity, e.message) {
                     enviarMensagem(mensagemUsuario)
                 }
-            }
-        }
-    }
-
-    private suspend fun obterRespostaAi(pergunta: String): String = withContext(Dispatchers.IO) {
-        val stockId = stockRepository.resolveUserStockId()
-            ?: return@withContext "Você ainda não possui um estoque ativo vinculado à sua conta. Adicione produtos ou crie um grupo para usar o assistente com seus alimentos!"
-
-        val req = AiRecipeChatRequest(message = pergunta, stockId = stockId)
-        val resp = RetrofitClient.aiRecipeService.chat(req).execute()
-        if (resp.isSuccessful && resp.body() != null) {
-            val body = resp.body()!!
-            if (!body.chatMessage.isNullOrEmpty()) {
-                return@withContext body.chatMessage
-            }
-            if (!body.recipeName.isNullOrEmpty()) {
-                return@withContext "Sugestão de receita: ${body.recipeName}!\n${body.recipeDescription ?: ""}"
-            }
-            return@withContext "Receita processada com sucesso."
-        } else if (resp.code() == 403) {
-            sessionManager.saveActiveGroupAndStock(null, null)
-            return@withContext "Sua conta não possui permissão para acessar este estoque ou recurso de IA no momento."
-        } else if (resp.code() == 503 || resp.code() == 502 || resp.code() == 500) {
-            return@withContext gerarRespostaComDadosDoEstoque(pergunta)
-        } else {
-            throw IOException("Não foi possível obter resposta da IA no servidor (Código ${resp.code()}).")
-        }
-    }
-
-    private suspend fun gerarRespostaComDadosDoEstoque(pergunta: String): String {
-        val produtos = stockRepository.getStockProducts()
-        if (produtos.isEmpty()) {
-            return "Seu estoque está vazio no momento. Adicione alimentos ao estoque para receber sugestões personalizadas!"
-        }
-        val p = pergunta.lowercase()
-        val vencendo = produtos.filter { it.productStatus == "NEAR_EXPIRATION" || it.productStatus == "EXPIRED" }
-        return when {
-            p.contains("venc") -> {
-                if (vencendo.isEmpty()) {
-                    "Nenhum alimento do seu estoque está próximo do vencimento! Seus ${produtos.size} itens estão em dia."
-                } else {
-                    val nomes = vencendo.joinToString(", ") { "${it.product?.name ?: "Item"} (${it.expireDate ?: "-"})" }
-                    "Atenção: você tem ${vencendo.size} alimento(s) vencendo ou vencido(s): $nomes."
-                }
-            }
-            else -> {
-                val nomes = produtos.take(5).joinToString(", ") { it.product?.name ?: "Item" }
-                "No momento seu estoque possui ${produtos.size} item(ns), incluindo: $nomes. Consulte a aba Receitas para ver pratos sugeridos!"
             }
         }
     }
@@ -157,4 +106,3 @@ class ChatIaActivity : AppCompatActivity() {
         }
     }
 }
-

@@ -2,6 +2,7 @@ package com.example.frigus_mobile.ui.stock
 
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageView
@@ -13,6 +14,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.utils.ProductCategoryHelper
 import kotlinx.coroutines.launch
 
 class EditarAlimentoActivity : AppCompatActivity() {
@@ -27,8 +29,10 @@ class EditarAlimentoActivity : AppCompatActivity() {
     private lateinit var spinnerLocal: Spinner
     private lateinit var spinnerUnidade: Spinner
 
-    private val categorias = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas", "Outros")
     private val locais = listOf("Geladeira", "Freezer", "Despensa")
+    private val categoriasGeladeira = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
+    private val categoriasFreezer = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
+    private val categoriasDespensa = listOf("Grãos", "Hortifruti", "Laticínios", "Bebidas")
     private val unidades = listOf("Gramas", "Quilos", "Litros", "Mililitros", "Unidades")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,9 +63,33 @@ class EditarAlimentoActivity : AppCompatActivity() {
     }
 
     private fun configurarSpinners() {
-        spinnerCategoria.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categorias)
         spinnerLocal.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, locais)
         spinnerUnidade.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, unidades)
+
+        spinnerLocal.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                atualizarCategoriasPorLocal(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun atualizarCategoriasPorLocal(localIndex: Int, categoriaSelecionada: String? = null) {
+        val cats = when (localIndex) {
+            2 -> categoriasDespensa
+            1 -> categoriasFreezer
+            else -> categoriasGeladeira
+        }
+        val currentCategory = categoriaSelecionada ?: spinnerCategoria.selectedItem?.toString()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, cats)
+        spinnerCategoria.adapter = adapter
+
+        val index = if (currentCategory != null && cats.contains(currentCategory)) {
+            cats.indexOf(currentCategory)
+        } else {
+            0
+        }
+        spinnerCategoria.setSelection(index)
     }
 
     private fun preencherDados() {
@@ -70,21 +98,23 @@ class EditarAlimentoActivity : AppCompatActivity() {
         etValidade.setText(prod.expireDate ?: "")
         etQuantidade.setText(prod.quantity?.toString() ?: "")
 
-        val catIndex = when (prod.category ?: prod.product?.category) {
-            "MEAT" -> 0
-            "DAIRY" -> 1
-            "FRUIT", "VEGETABLE" -> 2
-            "BEVERAGE" -> 3
-            else -> 4
-        }
-        spinnerCategoria.setSelection(catIndex)
-
-        val localIndex = when (prod.product?.storagePlace) {
+        val rawPlace = (prod.storagePlace ?: prod.product?.storagePlace ?: "").uppercase()
+        val localIndex = when (rawPlace) {
             "FREEZER" -> 1
-            "PANTRY" -> 2
+            "PANTRY", "DESPENSA" -> 2
             else -> 0
         }
         spinnerLocal.setSelection(localIndex)
+
+        val catName = when (prod.category ?: prod.product?.category) {
+            "MEAT" -> "Carnes"
+            "DAIRY" -> "Laticínios"
+            "FRUIT", "VEGETABLE" -> "Hortifruti"
+            "BEVERAGE" -> "Bebidas"
+            "GRAIN" -> "Grãos"
+            else -> "Carnes"
+        }
+        atualizarCategoriasPorLocal(localIndex, catName)
 
         val unitIndex = when (prod.product?.unitOfMeasure) {
             "GRAM" -> 0
@@ -96,12 +126,12 @@ class EditarAlimentoActivity : AppCompatActivity() {
         spinnerUnidade.setSelection(unitIndex)
 
         val img = findViewById<ImageView>(R.id.imgEditarAlimento)
-        when (prod.category ?: prod.product?.category) {
-            "MEAT" -> img.setImageResource(R.drawable.ic_cat_meat)
-            "DAIRY" -> img.setImageResource(R.drawable.ic_cat_dairy)
-            "FRUIT", "VEGETABLE" -> img.setImageResource(R.drawable.ic_cat_hortifruti)
-            "BEVERAGE" -> img.setImageResource(R.drawable.ic_cat_beverages)
-            else -> img.setImageResource(R.drawable.ic_food_package)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        if (imgRes == R.drawable.img_frango) {
+            img.clearColorFilter()
+            img.setImageResource(imgRes)
+        } else {
+            img.setImageResource(imgRes)
         }
     }
 

@@ -1,25 +1,14 @@
 package com.example.frigus_mobile.data.api
 
+import com.example.frigus_mobile.data.model.AiRecipeChatRequest
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.RecipeIngredientItem
 import com.example.frigus_mobile.data.model.RecipeResponse
-import com.google.gson.annotations.SerializedName
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-
-data class AiRecipeChatRequest(
-    @SerializedName("message")
-    val message: String,
-
-    @SerializedName("stockId")
-    val stockId: Int,
-
-    @SerializedName("sessionId")
-    val sessionId: String? = null
-)
 
 interface RecipeApiService {
 

@@ -14,6 +14,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.utils.ProductCategoryHelper
 import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
@@ -76,11 +77,12 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             "DAIRY" -> "Laticínios"
             "FRUIT", "VEGETABLE" -> "Hortifruti"
             "BEVERAGE" -> "Bebidas"
+            "GRAIN" -> "Grãos"
             else -> "Outros"
         }
-        val storagePlaceName = when (prod.product?.storagePlace) {
+        val storagePlaceName = when (prod.storagePlace ?: prod.product?.storagePlace) {
             "FREEZER" -> "Freezer"
-            "PANTRY" -> "Despensa"
+            "PANTRY", "DESPENSA" -> "Despensa"
             else -> "Geladeira"
         }
         val unit = when (prod.product?.unitOfMeasure) {
@@ -106,24 +108,53 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = "$originalQty$unit"
 
         val img = findViewById<ImageView>(R.id.imgDetalhesAlimento)
-        when (prod.category ?: prod.product?.category) {
-            "MEAT" -> img.setImageResource(R.drawable.ic_cat_meat)
-            "DAIRY" -> img.setImageResource(R.drawable.ic_cat_dairy)
-            "FRUIT", "VEGETABLE" -> img.setImageResource(R.drawable.ic_cat_hortifruti)
-            "BEVERAGE" -> img.setImageResource(R.drawable.ic_cat_beverages)
-            else -> img.setImageResource(R.drawable.ic_food_package)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        if (imgRes == R.drawable.img_frango) {
+            img.clearColorFilter()
+            img.setImageResource(imgRes)
+        } else {
+            img.setImageResource(imgRes)
         }
     }
 
     private fun confirmarRemocao() {
-        AlertDialog.Builder(this)
-            .setTitle("Remover do estoque")
-            .setMessage("Deseja realmente remover este alimento do seu estoque?")
-            .setPositiveButton("Remover") { _, _ ->
-                removerAlimento()
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
+        val prod = item ?: return
+        val dialogView = layoutInflater.inflate(R.layout.activity_stock_removal_confirmation, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val unit = when (prod.product?.unitOfMeasure) {
+            "GRAM" -> "g"
+            "KILOGRAM" -> "kg"
+            "LITER" -> "L"
+            "MILLILITER" -> "ml"
+            else -> "un"
+        }
+
+        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = prod.product?.name ?: "Alimento"
+        dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
+        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = "Validade: ${prod.expireDate ?: "-"}"
+
+        val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        if (imgRes == R.drawable.img_frango) {
+            imgRem?.clearColorFilter()
+            imgRem?.setImageResource(imgRes)
+        } else {
+            imgRem?.setImageResource(imgRes)
+        }
+
+        dialogView.findViewById<View>(R.id.btnCancelarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<View>(R.id.btnConfirmarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+            removerAlimento()
+        }
+
+        dialog.show()
     }
 
     private fun removerAlimento() {

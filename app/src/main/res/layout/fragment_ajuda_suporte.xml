@@ -40,41 +40,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
-            android:textColor="@color/darkBlue"
-            android:text="@string/profile_how_help"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="8dp"
-            android:textSize="14sp"
-            android:textStyle="bold"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="16dp"
-            android:background="@drawable/bg_card_white_rounded">
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_profile_figma_faqhelp"
-                android:contentDescription="@null"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/darkBlue"
-                android:text="@string/profile_faq_below"
-                android:layout_marginStart="18dp"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
             android:textColor="@color/profile_primary"
             android:text="@string/profile_faq_title"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="8dp"
             android:textSize="14sp"
             android:textStyle="bold"/>
@@ -192,6 +160,45 @@
                     android:layout_marginEnd="4dp"/>
             </LinearLayout>
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/groupFaqMoneySaving"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_white_rounded"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="12dp"
+            android:visibility="gone">
+            <LinearLayout
+                android:id="@+id/btnFaqMoneySaving"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:minHeight="48dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:text="@string/profile_faq_money_saving"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:textSize="13sp"
+                    android:maxLines="2"/>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="@null"
+                    app:tint="@color/darkBlue"
+                    android:layout_marginEnd="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -234,16 +241,6 @@
                 android:fontFamily="@font/sarabun"
                 app:backgroundTint="@color/profile_primary"
                 app:cornerRadius="10dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <View
-                android:id="@+id/btnFaqMoneySaving"
-                android:layout_width="0dp"
-                android:layout_height="0dp"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

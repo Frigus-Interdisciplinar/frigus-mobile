@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/shopping_screen_background"
@@ -9,7 +10,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="36dp"
         android:paddingHorizontal="16dp">
 
         <ImageButton
@@ -28,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="@font/sarabun"
-            android:text="@string/lista_editar_item"
+            android:text="@string/lista_editar_alimento"
             android:textColor="@color/darkBlue"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -45,62 +46,55 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="0dp"
+            android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_marginBottom="42dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+            <!-- Caixa de foto do produto com botão de câmera -->
+            <FrameLayout
+                android:layout_width="189dp"
+                android:layout_height="144dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:background="@drawable/bg_shopping_product_photo"
+                android:importantForAccessibility="no">
 
-                <com.google.android.material.imageview.ShapeableImageView
+                <ImageView
                     android:id="@+id/imgProdutoEditarLista"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:background="@drawable/bg_stock_product_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:contentDescription="@string/lista_imagem_produto"
-                    android:scaleType="centerCrop"
+                    android:padding="20dp"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_food_package"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent" />
+                    app:tint="@color/blue_primary"
+                    tools:ignore="ContentDescription" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="18dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/btnCameraEditarItemLista"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="-10dp"
+                    android:background="@drawable/bg_stock_add_button"
+                    android:contentDescription="@string/lista_adicionar_foto"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_shopping_camera"
+                    app:tint="@color/pure_white" />
+            </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/tvNomeProdutoEditarLista"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:textColor="@color/darkBlue"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvDescricaoProdutoEditarLista"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/sarabun"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="12sp"
-                        android:visibility="gone" />
-                </LinearLayout>
-            </LinearLayout>
-
+            <!-- Campo: Nome do alimento -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/lista_nome"
+                android:text="@string/lista_nome_alimento"
                 android:textColor="@color/darkBlue"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -109,6 +103,7 @@
                 android:id="@+id/etNomeItemLista"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
+                android:layout_marginBottom="14dp"
                 android:background="@drawable/bg_shopping_list_field"
                 android:fontFamily="@font/sarabun"
                 android:hint="@string/lista_nome_hint"
@@ -119,55 +114,94 @@
                 android:textColorHint="@color/color_text_secondary"
                 android:textSize="13sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="4dp"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/lista_quantidade"
-                android:textColor="@color/darkBlue"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
+            <!-- Linha lado a lado: Quantidade total + Unidade de medida -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_shopping_list_field"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:baselineAligned="false"
                 android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/etQuantidadeLista"
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:background="@null"
-                    android:fontFamily="@font/sarabun"
-                    android:hint="@string/lista_quantidade_hint"
-                    android:inputType="numberDecimal"
-                    android:paddingHorizontal="14dp"
-                    android:textColor="@color/darkBlue"
-                    android:textColorHint="@color/color_text_secondary"
-                    android:textSize="13sp" />
+                    android:orientation="vertical">
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/shopping_field_outline" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/lista_quantidade_total"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
-                <Spinner
-                    android:id="@+id/spinnerUnidadeLista"
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/lista_unidade"
-                    android:paddingHorizontal="8dp" />
+                    <EditText
+                        android:id="@+id/etQuantidadeLista"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_shopping_list_field"
+                        android:fontFamily="@font/sarabun"
+                        android:hint="@string/lista_quantidade_hint"
+                        android:inputType="numberDecimal"
+                        android:paddingHorizontal="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/darkBlue"
+                        android:textColorHint="@color/color_text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/lista_unidade_medida"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_shopping_list_field">
+
+                        <Spinner
+                            android:id="@+id/spinnerUnidadeLista"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:contentDescription="@string/lista_unidade_medida"
+                            android:dropDownVerticalOffset="4dp"
+                            android:paddingHorizontal="14dp"
+                            android:popupBackground="@color/pure_white" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="end|center_vertical"
+                            android:layout_marginEnd="14dp"
+                            android:clickable="false"
+                            android:src="@drawable/ic_chevron_down"
+                            app:tint="@color/darkBlue" />
+                    </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
 
+            <!-- Campo: Categoria -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sarabun"
                 android:text="@string/lista_categoria"
@@ -175,18 +209,36 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/spinnerCategoriaLista"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="@drawable/bg_shopping_list_field"
-                android:contentDescription="@string/lista_categoria"
-                android:paddingHorizontal="14dp" />
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_shopping_list_field">
 
+                <Spinner
+                    android:id="@+id/spinnerCategoriaLista"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:contentDescription="@string/lista_categoria"
+                    android:dropDownVerticalOffset="4dp"
+                    android:paddingHorizontal="14dp"
+                    android:popupBackground="@color/pure_white" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="14dp"
+                    android:clickable="false"
+                    android:src="@drawable/ic_chevron_down"
+                    app:tint="@color/darkBlue" />
+            </FrameLayout>
+
+            <!-- Campo: Observações (opcional) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sarabun"
                 android:text="@string/lista_observacoes_opcional"
@@ -208,6 +260,7 @@
                 android:textColorHint="@color/color_text_secondary"
                 android:textSize="13sp" />
 
+            <!-- Botão: Remover item -->
             <LinearLayout
                 android:id="@+id/btnRemoverItemLista"
                 android:layout_width="wrap_content"
@@ -237,13 +290,14 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
+            <!-- Botão: Salvar alterações -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSalvarItemLista"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="24dp"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/lista_salvar"
+                android:text="@string/lista_salvar_alteracoes"
                 android:textAllCaps="false"
                 android:textColor="@color/pure_white"
                 android:textSize="15sp"

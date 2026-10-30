@@ -1,65 +1,70 @@
 package com.example.frigus_mobile.data.api
 
-import com.example.frigus_mobile.data.model.GroupResponse
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.StockCreateRequest
 import com.example.frigus_mobile.data.model.StockProductCreateRequest
 import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
-import com.example.frigus_mobile.data.model.StockResponse
-import retrofit2.Call
+import com.google.gson.JsonElement
+import retrofit2.Response
 import retrofit2.http.*
 
 interface StockApiService {
 
     @GET("groups")
-    fun getMyGroups(): Call<List<GroupResponse>>
+    suspend fun getMyGroups(): Response<JsonElement>
 
     @POST("groups")
-    fun createGroup(
+    suspend fun createGroup(
         @Body request: Map<String, String>
-    ): Call<GroupResponse>
+    ): Response<JsonElement>
 
     @GET("stocks")
-    fun getStocksByGroup(
+    suspend fun getStocksByGroup(
         @Query("groupId") groupId: String
-    ): Call<PageResponse<StockResponse>>
+    ): Response<JsonElement>
 
     @POST("stocks")
-    fun createStock(
+    suspend fun createStock(
         @Body request: StockCreateRequest
-    ): Call<StockResponse>
+    ): Response<JsonElement>
 
     @GET("products")
-    fun getCatalogProducts(
+    suspend fun getCatalogProducts(
         @Query("page") page: Int = 0,
-        @Query("size") size: Int = 50
-    ): Call<PageResponse<StockProductProductResponse>>
+        @Query("size") size: Int = 100,
+        @Query("groupId") groupId: String? = null
+    ): Response<PageResponse<StockProductProductResponse>>
+
+    @POST("products")
+    suspend fun createProduct(
+        @Body request: com.example.frigus_mobile.data.model.ProductCreateRequest
+    ): Response<StockProductProductResponse>
 
     @GET("stock-products")
-    fun getStockProducts(
+    suspend fun getStockProducts(
         @Query("stockId") stockId: Int
-    ): Call<PageResponse<StockProductResponse>>
+    ): Response<PageResponse<StockProductResponse>>
 
     @GET("stock-products/{id}")
-    fun getStockProductById(
+    suspend fun getStockProductById(
         @Path("id") id: Int
-    ): Call<StockProductResponse>
+    ): Response<StockProductResponse>
 
     @POST("stock-products")
-    fun createStockProduct(
+    suspend fun createStockProduct(
         @Body request: StockProductCreateRequest
-    ): Call<StockProductResponse>
+    ): Response<StockProductResponse>
 
     @PUT("stock-products/{id}")
-    fun updateStockProduct(
+    suspend fun updateStockProduct(
         @Path("id") id: Int,
         @Body request: StockProductUpdateRequest
-    ): Call<StockProductResponse>
+    ): Response<StockProductResponse>
 
     @DELETE("stock-products/{id}")
-    fun deleteStockProduct(
+    suspend fun deleteStockProduct(
         @Path("id") id: Int
-    ): Call<Void>
+    ): Response<Unit>
 }

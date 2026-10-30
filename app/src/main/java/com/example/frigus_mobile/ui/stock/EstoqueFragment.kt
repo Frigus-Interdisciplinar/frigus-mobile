@@ -8,19 +8,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
+import com.example.frigus_mobile.ui.shopping.AddShoppingListItemFragment
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
-import com.example.frigus_mobile.utils.NetworkGuard
-import kotlinx.coroutines.launch
+import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.launchSafeNetwork
 
 class EstoqueFragment : Fragment() {
 
@@ -52,6 +53,17 @@ class EstoqueFragment : Fragment() {
             startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))
         }
 
+        // Botão Adicionar Alimento Manualmente no Estoque
+        view.findViewById<View>(R.id.btnAdicionarAlimentoEstoque)?.setOnClickListener {
+            val fragment = AddShoppingListItemFragment.newInstance(
+                initialDestination = AddShoppingListItemFragment.DESTINATION_STOCK
+            )
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
         // Tabs
         tabGeladeira = view.findViewById(R.id.tabGeladeira)
         tabFreezer = view.findViewById(R.id.tabFreezer)
@@ -63,20 +75,22 @@ class EstoqueFragment : Fragment() {
 
         // Categorias Clicks
         view.findViewById<View>(R.id.catCarnes).setOnClickListener {
-            abrirCategoria("MEAT", "Carnes")
+            val code = if (currentStoragePlace == "PANTRY") "GRAIN" else "MEAT"
+            abrirLocalArmazenamento(code)
         }
         view.findViewById<View>(R.id.catLaticinios).setOnClickListener {
-            abrirCategoria("DAIRY", "Laticínios")
+            abrirLocalArmazenamento("DAIRY")
         }
         view.findViewById<View>(R.id.catHortifruti).setOnClickListener {
-            abrirCategoria("VEGETABLE", "Hortifruti")
+            abrirLocalArmazenamento("VEGETABLE")
         }
         view.findViewById<View>(R.id.catBebidas).setOnClickListener {
-            abrirCategoria("BEVERAGE", "Bebidas")
+            abrirLocalArmazenamento("BEVERAGE")
         }
 
+        // Botão "Ver mais >"
         view.findViewById<View>(R.id.btnVerTodasCategorias).setOnClickListener {
-            startActivity(Intent(requireContext(), TodasCategoriasActivity::class.java))
+            abrirLocalArmazenamento()
         }
 
         // RecyclerView
@@ -105,52 +119,68 @@ class EstoqueFragment : Fragment() {
 
     private fun carregarDados() {
         if (!::repository.isInitialized) return
-        if (!NetworkGuard.ensureConnected(activity) { carregarDados() }) return
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                allProducts = repository.getStockProducts()
-                atualizarResumo()
-                aplicarFiltroAtual()
-            } catch (e: Exception) {
-                NetworkGuard.showBlockingError(activity, e.message) {
-                    carregarDados()
-                }
-            }
+        launchSafeNetwork(::carregarDados) {
+            allProducts = repository.getStockProducts()
+            atualizarResumo()
+            aplicarFiltroAtual()
         }
     }
 
-    private fun formatarQtdItens(qtd: Int): String {
-        return if (qtd == 1) "1 item" else "$qtd itens"
+    private fun isProductInStoragePlace(item: StockProductResponse, targetPlace: String): Boolean {
+        val rawPlace = (item.storagePlace ?: item.product?.storagePlace ?: "").uppercase().trim()
+        val target = targetPlace.uppercase().trim()
+
+        return when (target) {
+            "FREEZER" -> rawPlace == "FREEZER"
+            "PANTRY" -> rawPlace == "PANTRY" || rawPlace == "DESPENSA"
+            else -> rawPlace == "FRIDGE" || rawPlace == "GELADEIRA" || rawPlace.isEmpty()
+        }
     }
 
     private fun atualizarResumo() {
-        val emDia = allProducts.count { it.productStatus == "FRESH" }
-        val atencao = allProducts.count { it.productStatus == "NEAR_EXPIRATION" }
-        val vencendo = allProducts.count { it.productStatus == "EXPIRED" }
+        val produtosDoLocal = allProducts.filter { isProductInStoragePlace(it, currentStoragePlace) }
+
+        val emDia = produtosDoLocal.count { it.productStatus == "FRESH" }
+        val atencao = produtosDoLocal.count { it.productStatus == "NEAR_EXPIRATION" }
+        val vencendo = produtosDoLocal.count { it.productStatus == "EXPIRED" }
 
         view?.findViewById<TextView>(R.id.tvCountEmDia)?.text = emDia.toString()
         view?.findViewById<TextView>(R.id.tvCountAtencao)?.text = atencao.toString()
         view?.findViewById<TextView>(R.id.tvCountVencendo)?.text = vencendo.toString()
 
-        val qtdCarnes = allProducts.count {
-            (it.category ?: it.product?.category ?: "").equals("MEAT", ignoreCase = true)
-        }
-        val qtdLaticinios = allProducts.count {
-            (it.category ?: it.product?.category ?: "").equals("DAIRY", ignoreCase = true)
-        }
-        val qtdHortifruti = allProducts.count {
-            val cat = (it.category ?: it.product?.category ?: "")
-            cat.equals("VEGETABLE", ignoreCase = true) || cat.equals("FRUIT", ignoreCase = true)
-        }
-        val qtdBebidas = allProducts.count {
-            (it.category ?: it.product?.category ?: "").equals("BEVERAGE", ignoreCase = true)
-        }
+        val isDespensa = currentStoragePlace == "PANTRY"
+        val tvNomePrimeiraCat = view?.findViewById<TextView>(R.id.tvNomeCatCarnes)
+        val imgPrimeiraCat = view?.findViewById<ImageView>(R.id.imgCatCarnes)
 
-        view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = formatarQtdItens(qtdCarnes)
-        view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = formatarQtdItens(qtdLaticinios)
-        view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = formatarQtdItens(qtdHortifruti)
-        view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = formatarQtdItens(qtdBebidas)
+        if (isDespensa) {
+            tvNomePrimeiraCat?.text = "Grãos"
+            imgPrimeiraCat?.setImageResource(R.drawable.ic_food_package)
+            imgPrimeiraCat?.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
+
+            val qtdGraos = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "GRAIN")
+            val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")
+            val qtdHortifruti = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "HORTIFRUTI")
+            val qtdBebidas = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "BEVERAGE")
+
+            view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = ProductCategoryHelper.formatarQtdItens(qtdGraos)
+            view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = ProductCategoryHelper.formatarQtdItens(qtdLaticinios)
+            view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = ProductCategoryHelper.formatarQtdItens(qtdHortifruti)
+            view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = ProductCategoryHelper.formatarQtdItens(qtdBebidas)
+        } else {
+            tvNomePrimeiraCat?.text = "Carnes"
+            imgPrimeiraCat?.setImageResource(R.drawable.ic_cat_meat)
+            imgPrimeiraCat?.setColorFilter(android.graphics.Color.parseColor("#EF4444"))
+
+            val qtdCarnes = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "MEAT")
+            val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")
+            val qtdHortifruti = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "HORTIFRUTI")
+            val qtdBebidas = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "BEVERAGE")
+
+            view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = ProductCategoryHelper.formatarQtdItens(qtdCarnes)
+            view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = ProductCategoryHelper.formatarQtdItens(qtdLaticinios)
+            view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = ProductCategoryHelper.formatarQtdItens(qtdHortifruti)
+            view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = ProductCategoryHelper.formatarQtdItens(qtdBebidas)
+        }
     }
 
     private fun selectTab(place: String) {
@@ -167,13 +197,14 @@ class EstoqueFragment : Fragment() {
         tabDespensa.setBackgroundResource(if (place == "PANTRY") R.drawable.bg_tab_selected else 0)
         tabDespensa.setTextColor(if (place == "PANTRY") white else gray)
 
+        atualizarResumo()
         aplicarFiltroAtual()
     }
 
     private fun aplicarFiltroAtual() {
         val query = etBuscar.text.toString().trim().lowercase()
         val filtered = allProducts.filter { item ->
-            val placeMatches = (item.product?.storagePlace ?: "FRIDGE").equals(currentStoragePlace, ignoreCase = true)
+            val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
             val nameMatches = query.isEmpty() || (item.product?.name ?: "").lowercase().contains(query)
             placeMatches && nameMatches
         }
@@ -183,15 +214,19 @@ class EstoqueFragment : Fragment() {
     private fun filtrarProdutos(query: String) {
         val q = query.trim().lowercase()
         val filtered = allProducts.filter { item ->
-            q.isEmpty() || (item.product?.name ?: "").lowercase().contains(q)
+            val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
+            val nameMatches = q.isEmpty() || (item.product?.name ?: "").lowercase().contains(q)
+            placeMatches && nameMatches
         }
         adapter.updateList(filtered)
     }
 
-    private fun abrirCategoria(categoryCode: String, categoryName: String) {
-        val intent = Intent(requireContext(), CategoriaItensActivity::class.java).apply {
-            putExtra("CATEGORY_CODE", categoryCode)
-            putExtra("CATEGORY_NAME", categoryName)
+    private fun abrirLocalArmazenamento(categoryCode: String? = null) {
+        val intent = Intent(requireContext(), EstoqueLocalActivity::class.java).apply {
+            putExtra(EstoqueLocalActivity.EXTRA_STORAGE_PLACE, currentStoragePlace)
+            if (categoryCode != null) {
+                putExtra(EstoqueLocalActivity.EXTRA_CATEGORY_CODE, categoryCode)
+            }
         }
         startActivity(intent)
     }
