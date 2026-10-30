@@ -5,8 +5,13 @@
     <string name="qr_confirm_subtitle">Os itens foram adicionados ao seu estoque.</string>
     <string name="qr_confirm_back_home">Voltar para o início</string>
     <string name="notifications_title">Notificações</string>
-    <string name="notifications_empty">Sem notificações novas</string>
+    <string name="notifications_empty">Você ainda não tem notificações.</string>
     <string name="notifications_clear_all">Limpar todas</string>
+    <string name="notifications_mark_all_read">Marcar todas como lidas</string>
+    <string name="notifications_clear_all_confirm_title">Limpar notificações?</string>
+    <string name="notifications_clear_all_confirm_message">Esta ação remove todas as suas notificações e não pode ser desfeita.</string>
+    <string name="notifications_clear_all_confirm_action">Limpar todas</string>
+    <string name="notifications_cancel">Cancelar</string>
     <string name="notifications_error">Não foi possível atualizar as notificações. Tente novamente.</string>
     <string name="notifications_load_more">Carregar mais</string>
     <string name="notifications_channel_name">Lembretes de alimentos e compras</string>

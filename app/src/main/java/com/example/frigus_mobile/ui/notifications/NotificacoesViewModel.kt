@@ -13,6 +13,7 @@ data class NotificationUiState(
     val items: List<NotificationResponse> = emptyList(),
     val page: Int = -1,
     val hasMore: Boolean = false,
+    val unreadCount: Long = 0,
     val loading: Boolean = false,
     val error: Boolean = false
 )
@@ -26,7 +27,8 @@ class NotificacoesViewModel(private val repository: NotificationRepository) : Vi
         state.value = state.value!!.copy(
             items = result.content,
             page = result.number,
-            hasMore = result.number + 1 < result.totalPages
+            hasMore = result.number + 1 < result.totalPages,
+            unreadCount = result.unreadCount
         )
     }
 
@@ -38,7 +40,8 @@ class NotificacoesViewModel(private val repository: NotificationRepository) : Vi
             state.value = state.value!!.copy(
                 items = current.items + result.content,
                 page = result.number,
-                hasMore = result.number + 1 < result.totalPages
+                hasMore = result.number + 1 < result.totalPages,
+                unreadCount = result.unreadCount
             )
         }
     }
@@ -48,8 +51,27 @@ class NotificacoesViewModel(private val repository: NotificationRepository) : Vi
         if (item.readAt != null) return
         runRequest {
             val updated = repository.markAsRead(id)
+            val current = state.value!!
+            state.value = current.copy(
+                items = current.items.map { if (it.id == id) updated else it },
+                unreadCount = if (item.readAt == null && updated.readAt != null) {
+                    (current.unreadCount - 1).coerceAtLeast(0)
+                } else current.unreadCount
+            )
+        }
+    }
+
+    fun markAllAsRead() {
+        val current = state.value ?: return
+        if (current.unreadCount <= 0 && current.items.none { it.readAt == null }) return
+        runRequest {
+            repository.markAllAsRead()
+            val result = repository.getNotifications(0, PAGE_SIZE)
             state.value = state.value!!.copy(
-                items = state.value!!.items.map { if (it.id == id) updated else it }
+                items = result.content,
+                page = result.number,
+                hasMore = result.number + 1 < result.totalPages,
+                unreadCount = result.unreadCount
             )
         }
     }
@@ -58,7 +80,7 @@ class NotificacoesViewModel(private val repository: NotificationRepository) : Vi
         if (state.value?.items.isNullOrEmpty()) return
         runRequest {
             repository.clearAll()
-            state.value = state.value!!.copy(items = emptyList(), page = -1, hasMore = false)
+            state.value = state.value!!.copy(items = emptyList(), page = -1, hasMore = false, unreadCount = 0)
         }
     }
 
