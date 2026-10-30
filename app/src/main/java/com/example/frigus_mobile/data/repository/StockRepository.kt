@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.*
+import com.example.frigus_mobile.utils.StockQuantityTracker
 import com.google.gson.JsonElement
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -13,6 +14,7 @@ import java.io.IOException
 class StockRepository(context: Context? = null) {
 
     private val api = RetrofitClient.stockService
+    private val appContext = context?.applicationContext
     private val sessionManager = context?.let { SessionManager(it) }
 
     /**
@@ -40,6 +42,10 @@ class StockRepository(context: Context? = null) {
         Log.d("StockRepository", "Consultando grupos em GET /groups...")
         val groupsResponse = api.getMyGroups()
         if (!groupsResponse.isSuccessful) {
+            if (groupsResponse.code() == 401 || groupsResponse.code() == 403) {
+                sessionManager?.saveActiveGroupAndStock(null, null)
+                sessionManager?.clearSession()
+            }
             val errBody = groupsResponse.errorBody()?.string()
             val msg = parseDisplayMessage(errBody)
                 ?: "Não foi possível consultar os grupos do usuário (Código ${groupsResponse.code()})."
@@ -59,11 +65,14 @@ class StockRepository(context: Context? = null) {
                 groupId = extractGroupId(createGroupResp.body())
                 Log.d("StockRepository", "Grupo criado com sucesso: $groupId")
             } else {
+                if (createGroupResp.code() == 401 || createGroupResp.code() == 403) {
+                    sessionManager?.clearSession()
+                }
+                sessionManager?.saveActiveGroupAndStock(null, null)
                 val errBody = createGroupResp.errorBody()?.string()
                 val displayMsg = parseDisplayMessage(errBody)
                     ?: "Nenhum grupo doméstico encontrado para sua conta (Código ${createGroupResp.code()})."
                 Log.w("StockRepository", "Não foi possível criar grupo: $displayMsg")
-                sessionManager?.saveActiveGroupAndStock(null, null)
                 throw IOException(displayMsg)
             }
         }
@@ -80,6 +89,10 @@ class StockRepository(context: Context? = null) {
             stockId = extractStockId(stockResponse.body())
             Log.d("StockRepository", "Estoque retornado para o grupo $finalGroupId: $stockId")
         } else if (stockResponse.code() != 404) {
+            if (stockResponse.code() == 401 || stockResponse.code() == 403) {
+                sessionManager?.saveActiveGroupAndStock(null, null)
+                sessionManager?.clearSession()
+            }
             val errBody = stockResponse.errorBody()?.string()
             val msg = parseDisplayMessage(errBody)
                 ?: "Falha ao consultar estoque do grupo (Código ${stockResponse.code()})."
@@ -99,6 +112,10 @@ class StockRepository(context: Context? = null) {
                 val retryStock = api.getStocksByGroup(finalGroupId)
                 stockId = extractStockId(retryStock.body())
             } else {
+                if (createStockResp.code() == 401 || createStockResp.code() == 403) {
+                    sessionManager?.saveActiveGroupAndStock(null, null)
+                    sessionManager?.clearSession()
+                }
                 val errBody = createStockResp.errorBody()?.string()
                 val displayMsg = parseDisplayMessage(errBody)
                     ?: "Falha ao criar estoque do grupo (Código ${createStockResp.code()})."
@@ -134,7 +151,10 @@ class StockRepository(context: Context? = null) {
             Log.d("StockRepository", "Sucesso! ${apiProducts.size} alimentos carregados da API para o estoque $stockId")
             return apiProducts
         } else {
-            if (response.code() == 403) {
+            if (response.code() == 401 || response.code() == 403) {
+                sessionManager?.saveActiveGroupAndStock(null, null)
+                sessionManager?.clearSession()
+            } else if (response.code() == 404) {
                 sessionManager?.saveActiveGroupAndStock(null, null)
             }
             val err = parseDisplayMessage(response.errorBody()?.string())
@@ -148,6 +168,9 @@ class StockRepository(context: Context? = null) {
         if (response.isSuccessful) {
             return response.body()
         } else {
+            if (response.code() == 401 || response.code() == 403) {
+                sessionManager?.clearSession()
+            }
             throw IOException("Falha ao buscar detalhes do alimento na API (Código ${response.code()}).")
         }
     }
@@ -176,6 +199,9 @@ class StockRepository(context: Context? = null) {
         if (response.isSuccessful && response.body() != null) {
             return response.body()!!
         }
+        if (response.code() == 401 || response.code() == 403) {
+            sessionManager?.clearSession()
+        }
         val errBody = response.errorBody()?.string()
         val displayMsg = parseDisplayMessage(errBody)
             ?: "Falha ao cadastrar novo produto (Código ${response.code()})."
@@ -188,6 +214,9 @@ class StockRepository(context: Context? = null) {
             val response = api.getCatalogProducts(page = 0, size = 100, groupId = groupId)
             if (response.isSuccessful) {
                 return response.body()?.content ?: emptyList()
+            }
+            if (response.code() == 401 || response.code() == 403) {
+                sessionManager?.clearSession()
             }
         } catch (e: Exception) {
             Log.w("StockRepository", "Erro ao buscar catálogo: ${e.message}")
@@ -212,6 +241,9 @@ class StockRepository(context: Context? = null) {
             Log.d("StockRepository", "Alimento atualizado na API: ID $id")
             return true
         } else {
+            if (response.code() == 401 || response.code() == 403) {
+                sessionManager?.clearSession()
+            }
             val err = parseDisplayMessage(response.errorBody()?.string())
                 ?: "Falha ao atualizar alimento na API (Código ${response.code()})."
             throw IOException(err)
@@ -224,6 +256,9 @@ class StockRepository(context: Context? = null) {
             Log.d("StockRepository", "Alimento excluído da API: ID $id")
             return true
         } else {
+            if (response.code() == 401 || response.code() == 403) {
+                sessionManager?.clearSession()
+            }
             val err = parseDisplayMessage(response.errorBody()?.string())
                 ?: "Falha ao excluir alimento na API (Código ${response.code()})."
             throw IOException(err)
@@ -254,6 +289,9 @@ class StockRepository(context: Context? = null) {
 
         if (resp.isSuccessful) {
             val createdId = resp.body()?.id
+            if (createdId != null && appContext != null) {
+                StockQuantityTracker.setInitialQuantity(appContext, createdId, item.quantity ?: 1)
+            }
             if (createdId != null && !item.storagePlace.isNullOrBlank()) {
                 try {
                     api.updateStockProduct(createdId, StockProductUpdateRequest(storagePlace = item.storagePlace))
@@ -291,8 +329,9 @@ class StockRepository(context: Context? = null) {
             }
         }
 
-        if (resp.code() == 403) {
+        if (resp.code() == 401 || resp.code() == 403) {
             sessionManager?.saveActiveGroupAndStock(null, null)
+            sessionManager?.clearSession()
         }
 
         val errorBodyStr = resp.errorBody()?.string()

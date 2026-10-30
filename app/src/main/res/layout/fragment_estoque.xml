@@ -312,8 +312,7 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:id="@+id/imgCatCarnes"
-                        android:src="@drawable/ic_cat_meat"
-                        app:tint="#EF4444" />
+                        android:src="@drawable/ic_cat_meat" />
                 </FrameLayout>
 
                 <TextView
@@ -358,8 +357,7 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:id="@+id/imgCatLaticinios"
-                        android:src="@drawable/ic_cat_dairy"
-                        app:tint="@color/blue_primary" />
+                        android:src="@drawable/ic_cat_dairy" />
                 </FrameLayout>
 
                 <TextView
@@ -404,8 +402,7 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:id="@+id/imgCatHortifruti"
-                        android:src="@drawable/ic_cat_hortifruti"
-                        app:tint="@color/color_green" />
+                        android:src="@drawable/ic_cat_hortifruti" />
                 </FrameLayout>
 
                 <TextView
@@ -450,8 +447,7 @@
                         android:layout_height="26dp"
                         android:layout_gravity="center"
                         android:id="@+id/imgCatBebidas"
-                        android:src="@drawable/ic_cat_beverages"
-                        app:tint="#C946D3" />
+                        android:src="@drawable/ic_cat_beverages" />
                 </FrameLayout>
 
                 <TextView

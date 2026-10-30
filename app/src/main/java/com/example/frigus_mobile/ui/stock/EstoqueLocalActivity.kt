@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
+import java.text.SimpleDateFormat
+import java.util.Locale
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueLocalAdapter
@@ -45,6 +47,8 @@ class EstoqueLocalActivity : AppCompatActivity() {
     private lateinit var rvProdutos: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var tvVazio: TextView
+    private lateinit var btnFiltro: ImageView
+    private var isSortByExpirationActive = false
 
     private var currentStoragePlace = "FRIDGE" // FRIDGE, FREEZER, PANTRY
     private var allProducts = listOf<StockProductResponse>()
@@ -66,6 +70,14 @@ class EstoqueLocalActivity : AppCompatActivity() {
         rvProdutos = findViewById(R.id.rvProdutosLocal)
         progressBar = findViewById(R.id.progressLocal)
         tvVazio = findViewById(R.id.tvLocalVazio)
+        btnFiltro = findViewById(R.id.btnFiltroLocal)
+
+        btnFiltro.setOnClickListener {
+            isSortByExpirationActive = !isSortByExpirationActive
+            val tintColor = if (isSortByExpirationActive) R.color.blue_primary else R.color.color_text_secondary
+            btnFiltro.setColorFilter(ContextCompat.getColor(this, tintColor))
+            aplicarFiltros()
+        }
 
         findViewById<View>(R.id.btnVoltarLocal).setOnClickListener {
             finish()
@@ -247,8 +259,21 @@ class EstoqueLocalActivity : AppCompatActivity() {
             placeMatches && categoryMatches && nameMatches
         }
 
-        adapter.updateList(filtered)
-        tvVazio.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val finalList = if (isSortByExpirationActive) {
+            filtered.sortedBy { item ->
+                try {
+                    item.expireDate?.let { dateFormat.parse(it)?.time } ?: Long.MAX_VALUE
+                } catch (_: Exception) {
+                    Long.MAX_VALUE
+                }
+            }
+        } else {
+            filtered
+        }
+
+        adapter.updateList(finalList)
+        tvVazio.visibility = if (finalList.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun isProductInStoragePlace(item: StockProductResponse, targetPlace: String): Boolean {

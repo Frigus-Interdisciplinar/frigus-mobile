@@ -81,6 +81,7 @@ object ProductCategoryHelper {
             cat.contains("DAIRY") || cat.contains("LATICINIO") -> R.drawable.ic_cat_dairy
             cat.contains("VEGETABLE") || cat.contains("FRUIT") || cat.contains("HORTIFRUTI") -> R.drawable.ic_cat_hortifruti
             cat.contains("BEVERAGE") || cat.contains("BEBIDA") -> R.drawable.ic_cat_beverages
+            cat.contains("GRAIN") || cat.contains("GRAO") || cat.contains("GRÃO") || cat.contains("CEREAL") -> R.drawable.ic_cat_grains
             cat.contains("FREEZER") || cat.contains("CONGELADO") -> R.drawable.ic_freezer
             cat.contains("TEMPERO") || cat.contains("SEASONING") -> R.drawable.ic_food_garlic
             else -> R.drawable.ic_food_package

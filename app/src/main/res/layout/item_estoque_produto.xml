@@ -25,7 +25,7 @@
             android:layout_height="32dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_food_package"
-            app:tint="@color/blue_primary" />
+             />
     </FrameLayout>
 
     <!-- Nome e Detalhes -->

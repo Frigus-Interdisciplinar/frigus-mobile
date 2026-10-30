@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductImageTracker
+import android.net.Uri
 
 class EstoqueLocalAdapter(
     private val context: Context,
@@ -53,22 +55,36 @@ class EstoqueLocalAdapter(
             holder.tvValidadeStatus.visibility = View.GONE
         }
 
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(product?.name, item.category ?: product?.category)
-        if (imgRes == R.drawable.img_frango) {
-            holder.imgProduto.setPadding(0, 0, 0, 0)
-            holder.imgProduto.clearColorFilter()
-            holder.imgProduto.scaleType = ImageView.ScaleType.CENTER_CROP
-            holder.imgProduto.setImageResource(imgRes)
+        val customUri = item.id?.let { ProductImageTracker.getImageUri(context, it) }
+        if (!customUri.isNullOrBlank()) {
+            try {
+                holder.imgProduto.setPadding(0, 0, 0, 0)
+                holder.imgProduto.clearColorFilter()
+                holder.imgProduto.scaleType = ImageView.ScaleType.CENTER_CROP
+                holder.imgProduto.setImageURI(Uri.parse(customUri))
+            } catch (_: Exception) {
+                aplicarImagemPadrao(holder, product?.name, item.category ?: product?.category, context)
+            }
         } else {
-            holder.imgProduto.setPadding(0, 0, 0, 0)
-            holder.imgProduto.setColorFilter(ContextCompat.getColor(context, R.color.blue_primary))
-            holder.imgProduto.scaleType = ImageView.ScaleType.FIT_CENTER
-            holder.imgProduto.setImageResource(imgRes)
+            aplicarImagemPadrao(holder, product?.name, item.category ?: product?.category, context)
         }
 
         holder.itemView.setOnClickListener {
             onItemClick(item)
         }
+    }
+
+
+    private fun aplicarImagemPadrao(holder: ViewHolder, nome: String?, categoria: String?, context: android.content.Context) {
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(nome, categoria)
+        holder.imgProduto.setPadding(0, 0, 0, 0)
+        holder.imgProduto.clearColorFilter()
+        if (imgRes == R.drawable.img_frango) {
+            holder.imgProduto.scaleType = ImageView.ScaleType.CENTER_CROP
+        } else {
+            holder.imgProduto.scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        holder.imgProduto.setImageResource(imgRes)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -15,6 +15,12 @@ import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
+import com.example.frigus_mobile.utils.StockQuantityTracker
+import com.example.frigus_mobile.utils.ProductImageTracker
+import com.example.frigus_mobile.utils.StockObservationsTracker
+import android.net.Uri
 import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
@@ -93,28 +99,60 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             else -> "un"
         }
         val currentQty = prod.quantity ?: 0
-        val originalQty = prod.minimalQuantity ?: (currentQty * 2)
+        val originalQty = StockQuantityTracker.getOrSetInitialQuantity(this, prod.id ?: 0, currentQty)
+        val minQty = prod.minimalQuantity ?: 0
         val percent = if (originalQty > 0) ((currentQty.toFloat() / originalQty) * 100).toInt().coerceIn(0, 100) else 100
 
         findViewById<TextView>(R.id.tvDetalhesNome).text = productName
         findViewById<TextView>(R.id.chipCategoria).text = categoryName
         findViewById<TextView>(R.id.chipLocal).text = storagePlaceName
         findViewById<TextView>(R.id.tvPercentualRestante).text = "$percent%"
-        findViewById<ProgressBar>(R.id.pbQuantidadeRestante).progress = percent
+
+        val pbRestante = findViewById<ProgressBar>(R.id.pbQuantidadeRestante)
+        pbRestante.progress = percent
+        if (minQty > 0 && currentQty <= minQty) {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_red))
+        } else if (percent <= 25) {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_gold))
+        } else {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_green))
+        }
+
         findViewById<TextView>(R.id.tvFracaoQuantidade).text = "$currentQty$unit de $originalQty$unit"
 
         findViewById<TextView>(R.id.tvInfoValidade).text = prod.expireDate ?: "-"
         findViewById<TextView>(R.id.tvInfoCategoria).text = categoryName
         findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = "$originalQty$unit"
 
-        val img = findViewById<ImageView>(R.id.imgDetalhesAlimento)
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
-        if (imgRes == R.drawable.img_frango) {
-            img.clearColorFilter()
-            img.setImageResource(imgRes)
+        val obs = prod.id?.let { StockObservationsTracker.getObservation(this, it) }
+        val layoutObs = findViewById<View>(R.id.layoutInfoObservacoes)
+        val tvObs = findViewById<TextView>(R.id.tvInfoObservacoes)
+        if (!obs.isNullOrBlank()) {
+            layoutObs?.visibility = View.VISIBLE
+            tvObs?.text = obs
         } else {
-            img.setImageResource(imgRes)
+            layoutObs?.visibility = View.GONE
         }
+
+        val img = findViewById<ImageView>(R.id.imgDetalhesAlimento)
+        val customUriStr = prod.id?.let { ProductImageTracker.getImageUri(this, it) }
+        if (!customUriStr.isNullOrBlank()) {
+            try {
+                img.clearColorFilter()
+                img.setImageURI(Uri.parse(customUriStr))
+            } catch (_: Exception) {
+                carregarImagemPadrao(img, prod)
+            }
+        } else {
+            carregarImagemPadrao(img, prod)
+        }
+    }
+
+
+    private fun carregarImagemPadrao(img: ImageView, prod: StockProductResponse) {
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
+        img.clearColorFilter()
+        img.setImageResource(imgRes)
     }
 
     private fun confirmarRemocao() {
@@ -138,12 +176,8 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
         val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
         val imgRes = ProductCategoryHelper.getImagemParaProduto(prod.product?.name, prod.category ?: prod.product?.category)
-        if (imgRes == R.drawable.img_frango) {
-            imgRem?.clearColorFilter()
-            imgRem?.setImageResource(imgRes)
-        } else {
-            imgRem?.setImageResource(imgRes)
-        }
+        imgRem?.clearColorFilter()
+        imgRem?.setImageResource(imgRes)
 
         dialogView.findViewById<View>(R.id.btnCancelarRemocao)?.setOnClickListener {
             dialog.dismiss()
@@ -163,6 +197,11 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                item?.id?.let {
+                    StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
+                    StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
+                }
                 repository.deleteStockProduct(id)
                 Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
                 finish()

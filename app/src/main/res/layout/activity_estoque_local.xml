@@ -96,6 +96,15 @@
                 android:textColor="@color/color_text_primary"
                 android:textColorHint="@color/color_text_secondary"
                 android:textSize="13sp" />
+
+            <ImageView
+                android:id="@+id/btnFiltroLocal"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="@string/stock_filter"
+                android:padding="12dp"
+                android:src="@drawable/ic_sliders"
+                app:tint="@color/color_text_secondary" />
         </LinearLayout>
 
         <!-- Chips Horizontais -->

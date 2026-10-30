@@ -40,6 +40,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var etSenha: TextInputEditText
     private var tvBanner: TextView? = null
     private var navigated = false
+    private var isAutoRevalidating = false
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -59,7 +60,6 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, "Não foi possível obter o token do Google", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
-                Log.e("LoginActivity", "Falha no Google Sign-In: ${e.statusCode}", e)
                 val msg = when (e.statusCode) {
                     10 -> "Erro 10 (Developer Error): SHA-1 ou Client ID não configurados no console."
                     12501 -> "Login com Google cancelado pelo usuário."
@@ -73,14 +73,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sessionManager = com.example.frigus_mobile.data.local.SessionManager(this)
-        if (sessionManager.isLoggedIn) {
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
-            finish()
-            return
-        }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
@@ -103,6 +95,7 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.result.observe(this) { result ->
             if (result == AuthResult.Authenticated && viewModel.isAuthenticated) {
+                isAutoRevalidating = false
                 if (!navigated) {
                     navigated = true
                     startActivity(Intent(this, MainActivity::class.java).apply {
@@ -110,16 +103,76 @@ class LoginActivity : AppCompatActivity() {
                     })
                     finish()
                 }
-            } else render(result)
+            } else if (result is AuthResult.Failure && isAutoRevalidating) {
+                Log.d("LoginActivity", "Auto-login com token expirado/inválido. Limpando sessão silenciosamente...")
+                isAutoRevalidating = false
+                SessionManager(this).clearSession()
+                render(null)
+            } else {
+                render(result)
+            }
         }
-        render(viewModel.result.value)
+
+        val sessionManager = SessionManager(this)
+        if (!sessionManager.accessToken.isNullOrBlank()) {
+            tentarAutoLogin(sessionManager)
+        } else {
+            render(viewModel.result.value)
+        }
+    }
+
+    private fun tentarAutoLogin(sessionManager: SessionManager) {
+        isAutoRevalidating = true
+        render(AuthResult.Loading)
+
+        val lastAccount = GoogleSignIn.getLastSignedInAccount(this)
+        val hasGooglePhoto = !sessionManager.googlePhotoUrl.isNullOrBlank()
+
+        if (lastAccount != null || hasGooglePhoto) {
+            Log.d("LoginActivity", "Conta Google detectada. Tentando silentSignIn transparente...")
+            try {
+                googleSignInClient.silentSignIn().addOnCompleteListener(this) { task ->
+                    if (!isAutoRevalidating) return@addOnCompleteListener
+                    if (task.isSuccessful) {
+                        val account = task.result
+                        val idToken = account?.idToken
+                        val photoUrl = account?.photoUrl?.toString()
+                        if (!photoUrl.isNullOrBlank()) {
+                            sessionManager.saveGooglePhotoUrl(photoUrl)
+                        }
+                        if (!idToken.isNullOrBlank()) {
+                            Log.d("LoginActivity", "silentSignIn renovou o idToken com sucesso. Reautenticando no backend...")
+                            viewModel.loginWithGoogle(idToken)
+                            return@addOnCompleteListener
+                        }
+                    }
+                    Log.d("LoginActivity", "silentSignIn não completou. Validando token existente com getProfile...")
+                    revalidarSessaoServidor(sessionManager)
+                }
+            } catch (e: Exception) {
+                Log.w("LoginActivity", "Exceção em silentSignIn: ${e.message}. Validando com getProfile...")
+                revalidarSessaoServidor(sessionManager)
+            }
+        } else {
+            Log.d("LoginActivity", "Conta padrão. Validando token existente com getProfile...")
+            revalidarSessaoServidor(sessionManager)
+        }
+    }
+
+    private fun revalidarSessaoServidor(sessionManager: SessionManager) {
+        if (!isAutoRevalidating) return
+        if (sessionManager.accessToken.isNullOrBlank()) {
+            isAutoRevalidating = false
+            sessionManager.clearSession()
+            render(null)
+            return
+        }
+        viewModel.restore()
     }
 
     private fun setupGoogleSignIn() {
-        val webClientId = if (BuildConfig.GOOGLE_CLIENT_ID.isNotBlank()) {
-            BuildConfig.GOOGLE_CLIENT_ID
-        } else {
-            "414213788789-62jm64drbgc7v1s7trlu7dathe0vsb2d.apps.googleusercontent.com"
+        val webClientId = BuildConfig.GOOGLE_CLIENT_ID.ifBlank {
+            getString(R.string.default_web_client_id)
         }
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

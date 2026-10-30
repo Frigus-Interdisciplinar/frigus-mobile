@@ -52,8 +52,22 @@ class SessionManager(context: Context) {
                             .putString("profile", Gson().toJson(profile))
                             .commit()) { "Session persistence failed" }
                     },
-                    erase = { preferences.edit().clear().apply() },
+                    erase = {
+                        preferences.edit()
+                            .remove("group")
+                            .remove("stock")
+                            .remove("google_photo_url")
+                            .remove("origin")
+                            .remove("access")
+                            .remove("iv")
+                            .remove("profile")
+                            .clear()
+                            .apply()
+                    },
                     changed = { authenticated.postValue(it) })
+                if (!token.isNullOrBlank()) {
+                    authenticated.postValue(true)
+                }
             }
             state = sharedState!!
         }
@@ -80,16 +94,39 @@ class SessionManager(context: Context) {
     }
 
     fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
-    fun clearSession() = state.clear()
+
+    fun clearSession() {
+        state.clear()
+        preferences.edit()
+            .remove("group")
+            .remove("stock")
+            .remove("google_photo_url")
+            .remove("origin")
+            .remove("access")
+            .remove("iv")
+            .remove("profile")
+            .clear()
+            .apply()
+    }
+
     fun saveActiveGroupAndStock(groupId: String?, stockId: Int?) {
-        preferences.edit().putString("group", groupId).apply {
-            if (stockId != null) putInt("stock", stockId) else remove("stock")
-        }.apply()
+        val editor = preferences.edit()
+        if (!groupId.isNullOrBlank()) {
+            editor.putString("group", groupId)
+        } else {
+            editor.remove("group")
+        }
+        if (stockId != null && stockId > 0) {
+            editor.putInt("stock", stockId)
+        } else {
+            editor.remove("stock")
+        }
+        editor.apply()
     }
 
     companion object {
         const val PREF_NAME = "mobile_bff_session"
-        val authenticated = MutableLiveData(false)
+        val authenticated = MutableLiveData<Boolean>()
         private var sharedState: SessionState? = null
         private const val KEY_ALIAS = "frigus_mobile_bff_access_v1"
 

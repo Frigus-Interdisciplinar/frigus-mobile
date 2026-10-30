@@ -118,8 +118,8 @@ class AuthRepository(
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 if (call.isCanceled) return
                 if (generation != session.generation) {
-                    // The interceptor may already have cleared this very session for a 401.
-                    if (response.code() == 401 && session.generation == generation + 1 && session.accessToken == null)
+                    // The interceptor may already have cleared this very session for a 401 or 403.
+                    if ((response.code() == 401 || response.code() == 403) && session.generation == generation + 1 && session.accessToken == null)
                         result(AuthResult.Failure(ApiError.parse(response)))
                     return
                 }
@@ -128,7 +128,10 @@ class AuthRepository(
                     if (response.code() == 200 && user != null && validUser(user) && session.validate(generation, token, user)) {
                         result(AuthResult.Authenticated)
                     } else {
-                        if (response.code() == 401) session.invalidate(SessionCredential(token, generation))
+                        if (response.code() == 401 || response.code() == 403) {
+                            session.invalidate(SessionCredential(token, generation))
+                            session.clear()
+                        }
                         result(AuthResult.Failure(if (response.isSuccessful)
                             ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
                     }

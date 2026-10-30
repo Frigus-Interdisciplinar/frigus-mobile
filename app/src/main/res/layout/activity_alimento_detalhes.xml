@@ -252,6 +252,45 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </RelativeLayout>
+
+            <!-- Observações (se houver) -->
+            <LinearLayout
+                android:id="@+id/layoutInfoObservacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/color_divider" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="Observações"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvInfoObservacoes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:fontFamily="@font/sarabun"
+                        tools:text="Observação"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Spacer -->

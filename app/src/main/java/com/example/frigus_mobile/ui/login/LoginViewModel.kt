@@ -11,9 +11,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val result = MutableLiveData<AuthResult?>()
     val hasStoredSession: Boolean get() = repository.session.accessToken != null
     val isAuthenticated: Boolean get() = repository.session.validated
-    init {
-        if (isAuthenticated) result.value = AuthResult.Authenticated
-    }
+
     fun login(email: String, password: String) {
         if (result.value != AuthResult.Loading) repository.login(email, password) { result.value = it }
     }

@@ -30,9 +30,18 @@ object MobileHttp {
         "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
+    fun isPublicPath(path: String): Boolean {
+        val p = path.trim().lowercase()
+        return p.contains("auth/login") ||
+               p.contains("auth/register") ||
+               p.contains("auth/google") ||
+               p.contains("mobile/user/login") ||
+               p.contains("mobile/user/register")
+    }
+
     fun allowed(method: String, path: String): Boolean = true
 
-    fun public(path: String): Boolean = true
+    fun public(path: String): Boolean = isPublicPath(path)
 
     fun origin(value: String, debug: Boolean): HttpUrl {
         val target = if (value.isBlank() || value.contains("10.0.2.2") || value.contains("localhost")) {
@@ -84,7 +93,10 @@ object MobileHttp {
 
                 Log.d("MobileHttp", "<-- [${response.code()}] ${finalRequest.url()}")
 
-                if (response.code() == 401 && active != null) {
+                val path = finalRequest.url().encodedPath()
+                val isPublic = isPublicPath(path)
+                if ((response.code() == 401 || response.code() == 403) && active != null && !isPublic) {
+                    Log.w("MobileHttp", "Status ${response.code()} recebido para rota autenticada ($path). Disparando unauthorized.")
                     unauthorized(active)
                 }
                 response

@@ -154,8 +154,8 @@ class EstoqueFragment : Fragment() {
 
         if (isDespensa) {
             tvNomePrimeiraCat?.text = "Grãos"
-            imgPrimeiraCat?.setImageResource(R.drawable.ic_food_package)
-            imgPrimeiraCat?.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
+            imgPrimeiraCat?.clearColorFilter()
+            imgPrimeiraCat?.setImageResource(R.drawable.ic_cat_grains)
 
             val qtdGraos = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "GRAIN")
             val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")
@@ -168,8 +168,8 @@ class EstoqueFragment : Fragment() {
             view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = ProductCategoryHelper.formatarQtdItens(qtdBebidas)
         } else {
             tvNomePrimeiraCat?.text = "Carnes"
+            imgPrimeiraCat?.clearColorFilter()
             imgPrimeiraCat?.setImageResource(R.drawable.ic_cat_meat)
-            imgPrimeiraCat?.setColorFilter(android.graphics.Color.parseColor("#EF4444"))
 
             val qtdCarnes = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "MEAT")
             val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")

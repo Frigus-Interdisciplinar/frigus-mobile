@@ -48,6 +48,7 @@ class EstoqueProdutoAdapter(
         holder.tvSubtitulo.text = "$qty$unit • Vence $expireDate"
 
         // Ícone unificado baseado na categoria
+        holder.imgProduto.clearColorFilter()
         holder.imgProduto.setImageResource(
             ProductCategoryHelper.getIconeCategoria(item.category ?: item.product?.category)
         )
