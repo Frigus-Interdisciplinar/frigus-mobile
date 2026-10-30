@@ -171,13 +171,30 @@ class StockRepository(context: Context? = null) {
         return true
     }
 
-    suspend fun getMovements(id: Int, page: Int? = null, size: Int? = null):
-        PageResponse<StockMovementResponse> = withContext(Dispatchers.IO) {
-        api.getMovements(id, page, size).requireBody()
+    suspend fun getMovements(id: Int, page: Int, size: Int): PageResponse<StockMovementResponse> {
+        val response = api.getMovements(id, page, size).awaitLotResponse()
+        if (response.code() != 200) throw BffException(ApiError.parse(response), "")
+        val result = response.body()
+        val items: List<StockMovementResponse?>? = result?.content
+        val valid = result != null && items != null && result.number == page && result.size > 0 &&
+            result.totalPages >= 0 && result.totalElements >= items.size && items.size <= result.size &&
+            (if (result.totalPages == 0) items.isEmpty() && result.totalElements == 0L
+                else page < result.totalPages && (items.isNotEmpty() || page == result.totalPages - 1)) &&
+            items.all { it != null && (it.id ?: 0) > 0 && it.stockProductId == id }
+        if (!valid) throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return result!!
     }
 
-    suspend fun createMovement(id: Int, request: StockMovementRequest): StockMovementResponse =
-        withContext(Dispatchers.IO) { api.createMovement(id, request).requireBody() }
+    suspend fun createMovement(id: Int, request: StockMovementRequest): StockMovementResponse {
+        val response = api.createMovement(id, request).awaitLotResponse()
+        if (response.code() != 201) throw BffException(
+            if (response.isSuccessful) ApiError(code = "INVALID_RESPONSE") else ApiError.parse(response), "")
+        val movement = response.body()
+        if (movement == null || (movement.id ?: 0) <= 0 || movement.stockProductId != id ||
+            movement.movementType != request.movementType || movement.quantity != request.quantity)
+            throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return movement
+    }
 
     /** There is no mobile catalog or direct lot creation endpoint yet. */
     @Deprecated("No published /mobile catalog endpoint")

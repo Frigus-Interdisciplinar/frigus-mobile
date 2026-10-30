@@ -14,7 +14,41 @@
     <string name="lot_batch">Lote / identificação (até 120 caracteres)</string>
     <string name="lot_unit_read_only">Unidade (somente leitura): %1$s</string>
     <string name="lot_form_note">O saldo é um valor absoluto; sua alteração gera um ajuste no estoque. Mínimo em branco não limpa um valor existente; informe zero se desejar mínimo zero. Unidade, marca e preço não podem ser alterados aqui. Recarregar descarta o formulário e consulta os dados atuais.</string>
-    <string name="lot_movements_pending">Histórico e movimentos serão entregues na próxima parte.</string>
+    <string name="movement_history">Movimentações do lote</string>
+    <string name="movement_loading">Carregando movimentações…</string>
+    <string name="movement_empty">Nenhuma movimentação encontrada para este lote.</string>
+    <string name="movement_loaded">%1$s de %2$s movimentações carregadas</string>
+    <string name="movement_read_error">Não foi possível carregar o histórico. Tente novamente.</string>
+    <string name="movement_retry">Tentar novamente</string>
+    <string name="movement_more">Carregar mais</string>
+    <string name="movement_type_in">Entrada</string>
+    <string name="movement_type_out">Saída</string>
+    <string name="movement_type_adjustment">Ajuste do saldo final</string>
+    <string-array name="movement_type_labels">
+        <item>@string/movement_type_in</item>
+        <item>@string/movement_type_out</item>
+        <item>@string/movement_type_adjustment</item>
+    </string-array>
+    <string name="movement_item_title">%1$s · %2$s</string>
+    <string name="movement_item_detail">%1$s · Saldo após movimento: %2$s</string>
+    <string name="movement_form_title">Registrar movimentação</string>
+    <string name="movement_type_label">Tipo de movimentação</string>
+    <string name="movement_quantity_hint">Quantidade (inteiro)</string>
+    <string name="movement_observation_hint">Observação (opcional)</string>
+    <string name="movement_submit">Revisar movimentação</string>
+    <string name="movement_confirm_title">Confirmar movimentação</string>
+    <string name="movement_confirm_message">%1$s: %2$s. Esta ação altera o saldo do lote.</string>
+    <string name="movement_confirm_action">Registrar</string>
+    <string name="movement_invalid_quantity">Informe um inteiro válido. Entrada e saída exigem valor maior que zero; ajuste aceita zero.</string>
+    <string name="movement_invalid_observation">A observação deve ter até 2000 caracteres.</string>
+    <string name="movement_sending">Registrando movimentação…</string>
+    <string name="movement_saved">Movimentação confirmada pelo servidor.</string>
+    <string name="movement_error">Não foi possível registrar a movimentação. Confira os dados e tente novamente.</string>
+    <string name="movement_uncertain">Não foi possível confirmar o resultado. A movimentação pode ter sido aplicada. Confira o lote e o histórico antes de iniciar outra operação. O app não reenviará esta movimentação.</string>
+    <string name="movement_verify">Consultar lote e histórico</string>
+    <string name="movement_verifying">Consultando lote e histórico…</string>
+    <string name="movement_verification_ready">Dados atualizados. Compare o saldo e o histórico antes de encerrar a conferência.</string>
+    <string name="movement_acknowledge">Concluir conferência</string>
     <string name="lot_removed">Alimento removido com sucesso!</string>
     <string name="lot_saved">Alterações salvas com sucesso!</string>
     <string name="lot_quantity_fraction">%1$s de %2$s %3$s</string>
