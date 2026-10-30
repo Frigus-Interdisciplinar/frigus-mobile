@@ -12,7 +12,8 @@ class FeatureUnavailableFragment : Fragment(R.layout.fragment_feature_unavailabl
         super.onViewCreated(view, savedInstanceState)
         val title = arguments?.getInt(TITLE) ?: R.string.home_other_features
         view.findViewById<TextView>(R.id.unavailableMessage).text =
-            getString(R.string.home_feature_unavailable, getString(title))
+            if (title == R.string.home_qr) getString(R.string.home_qr_unavailable)
+            else getString(R.string.home_feature_unavailable, getString(title))
         view.findViewById<MaterialButton>(R.id.btnUnavailableBack).apply {
             setText(R.string.home_back)
             setOnClickListener { (requireActivity() as MainActivity).showHome() }

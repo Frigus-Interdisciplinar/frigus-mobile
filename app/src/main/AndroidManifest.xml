@@ -83,26 +83,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.qrcode.QrCodeScannerActivity"
-            android:enabled="false"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.qrcode.QrCodeCarregandoActivity"
-            android:enabled="false"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.qrcode.QrCodeItensActivity"
-            android:enabled="false"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.qrcode.QrCodeConfirmacaoActivity"
-            android:enabled="false"
-            android:exported="false" />
-
-        <activity
             android:name=".ui.ai.ChatIaActivity"
             android:exported="false" />
 

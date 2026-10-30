@@ -29,7 +29,7 @@ class AjudaSuporteFragment : Fragment() {
         view.findViewById<View>(R.id.btnFaqScanner).setOnClickListener {
             exibirRespostaFaq(
                 "Scanner de nota fiscal",
-                "Aponte a câmera para o QR Code da sua nota fiscal para que os itens sejam cadastrados automaticamente no seu estoque."
+                "A leitura e a importação de notas por QR Code ainda não estão disponíveis no aplicativo."
             )
         }
 
