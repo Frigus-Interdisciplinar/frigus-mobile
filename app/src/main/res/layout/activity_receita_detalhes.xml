@@ -82,6 +82,21 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
                 <TextView
+                    android:id="@+id/recipeDetailFavoriteStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/recipe_browser_gap"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:accessibilityLiveRegion="polite" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeDetailFavorite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_favorite_add" />
+                <TextView
                     android:id="@+id/txtDetailRecipeDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

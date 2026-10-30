@@ -4,6 +4,19 @@
         name="recipe_browser_title">Receitas</string>
     <string
         name="recipe_browser_catalog">Catálogo</string>
+    <string name="recipe_favorites_title">Favoritas</string>
+    <string name="recipe_favorites_empty">Você ainda não tem receitas favoritas.</string>
+    <string name="recipe_favorites_loaded">%1$s de %2$s favoritas carregadas</string>
+    <string name="recipe_favorite_add">Salvar em favoritas</string>
+    <string name="recipe_favorite_remove">Remover das favoritas</string>
+    <string name="recipe_favorite_working">Atualizando favorita…</string>
+    <string name="recipe_favorite_verify">Verificar estado da favorita</string>
+    <string name="recipe_favorite_unknown">Estado não informado</string>
+    <string name="recipe_favorite_not_informed">O servidor não informou se esta receita é favorita. Atualize para verificar.</string>
+    <string name="recipe_favorite_uncertain">Não foi possível confirmar a alteração. Verifique o estado antes de tentar de novo.</string>
+    <string name="recipe_favorite_forbidden">Você não tem permissão para alterar esta favorita.</string>
+    <string name="recipe_favorite_error">Não foi possível alterar esta favorita. Tente novamente.</string>
+    <string name="recipe_favorite_known">Estado da favorita confirmado pelo servidor.</string>
     <string
         name="recipe_browser_suggestions">Sugestões do seu grupo</string>
     <string
@@ -55,7 +68,7 @@
     <string
         name="recipe_browser_availability_unknown">A disponibilidade dos ingredientes não foi informada neste detalhe.</string>
     <string
-        name="recipe_browser_read_only">O modo de preparo é somente leitura e não altera seu estoque. Favoritos estarão disponíveis em uma próxima entrega.</string>
+        name="recipe_browser_read_only">O modo de preparo é somente leitura e não altera seu estoque.</string>
     <string
         name="recipe_browser_preparation">Ver modo de preparo</string>
     <string

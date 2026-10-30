@@ -15,6 +15,7 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.ui.recipes.adapter.RecipeIngredientAdapter
+import com.google.android.material.button.MaterialButton
 
 class ReceitaDetalhesActivity : AppCompatActivity() {
     private lateinit var session: SessionManager
@@ -37,6 +38,11 @@ class ReceitaDetalhesActivity : AppCompatActivity() {
         val model = ViewModelProvider(this)[RecipeDetailViewModel::class.java]
         findViewById<View>(R.id.btnDetailBack).setOnClickListener { finish() }
         findViewById<View>(R.id.recipeDetailRetry).setOnClickListener { model.load(id) }
+        findViewById<View>(R.id.recipeDetailFavorite).setOnClickListener {
+            val state = model.state.value ?: return@setOnClickListener
+            if (state.favoriteUncertain) model.load(id)
+            else state.recipe?.favorite?.let { model.setFavorite(!it) }
+        }
         val ingredients = RecipeIngredientAdapter(emptyList())
         findViewById<RecyclerView>(R.id.rvDetailIngredients).apply {
             layoutManager = LinearLayoutManager(this@ReceitaDetalhesActivity)
@@ -63,6 +69,23 @@ class ReceitaDetalhesActivity : AppCompatActivity() {
                 }
             }
             state.recipe?.let { recipe ->
+                findViewById<MaterialButton>(R.id.recipeDetailFavorite).apply {
+                    isEnabled = !state.favoriteBusy && (state.favoriteUncertain || recipe.favorite != null)
+                    setText(when {
+                        state.favoriteBusy -> R.string.recipe_favorite_working
+                        state.favoriteUncertain -> R.string.recipe_favorite_verify
+                        recipe.favorite == true -> R.string.recipe_favorite_remove
+                        recipe.favorite == false -> R.string.recipe_favorite_add
+                        else -> R.string.recipe_favorite_unknown
+                    })
+                }
+                findViewById<TextView>(R.id.recipeDetailFavoriteStatus).text = when {
+                    state.favoriteUncertain -> getString(R.string.recipe_favorite_uncertain)
+                    state.favoriteError?.status == 403 -> getString(R.string.recipe_favorite_forbidden)
+                    state.favoriteError != null -> state.favoriteError.userMessage(getString(R.string.recipe_favorite_error))
+                    recipe.favorite == null -> getString(R.string.recipe_favorite_not_informed)
+                    else -> getString(R.string.recipe_favorite_known)
+                }
                 val name = recipe.recipeName?.takeIf(String::isNotBlank) ?: getString(R.string.recipe_browser_unnamed)
                 findViewById<TextView>(R.id.txtDetailRecipeTitle).text = name
                 findViewById<TextView>(R.id.txtDetailRecipeDescription).text =

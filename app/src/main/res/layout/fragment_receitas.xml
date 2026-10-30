@@ -69,6 +69,30 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="@dimen/recipe_browser_padding">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeCatalogTab"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_browser_catalog" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeFavoritesTab"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_favorites_title" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/recipeCatalogSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
             <TextView
                 android:id="@+id/txtSectionParaVoce"
                 android:layout_width="wrap_content"
@@ -193,6 +217,64 @@
                 android:minHeight="@dimen/recipe_browser_touch"
                 android:text="@string/recipe_browser_more"
                 android:visibility="gone" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/recipeFavoritesSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_favorites_title"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_heading"
+                    android:textStyle="bold"
+                    android:accessibilityHeading="true" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeFavoritesRefresh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_browser_refresh" />
+                <ProgressBar
+                    android:id="@+id/recipeFavoritesProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:contentDescription="@string/recipe_browser_loading"
+                    android:visibility="gone" />
+                <TextView
+                    android:id="@+id/recipeFavoritesStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_browser_loading"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:accessibilityLiveRegion="polite" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeFavoritesRetry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_browser_retry"
+                    android:visibility="gone" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recipeFavoritesList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeFavoritesMore"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_browser_more"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
