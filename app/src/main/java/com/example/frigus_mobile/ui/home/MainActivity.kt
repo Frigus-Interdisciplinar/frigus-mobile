@@ -21,6 +21,7 @@ import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.push.PushRegistration
 import com.example.frigus_mobile.ui.stock.EstoqueFragment
+import com.example.frigus_mobile.ui.stock.AlimentoDetalhesActivity
 import com.example.frigus_mobile.ui.recipes.ReceitasFragment
 import com.example.frigus_mobile.ui.stock.InventoryViewModel
 import com.example.frigus_mobile.ui.profile.PerfilFragment
@@ -39,6 +40,12 @@ class MainActivity : AppCompatActivity() {
     private val backToHome = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() { showHome() }
     }
+    private val stockLotResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (::session.isInitialized && session.isLoggedIn && result.resultCode == RESULT_OK) {
+            ViewModelProvider(this)[InventoryViewModel::class.java].refresh()
+            ViewModelProvider(this)[HomeViewModel::class.java].invalidate()
+        }
+    }
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updatePermissionAction()
@@ -48,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Restore only the safe navigation state, never legacy feature fragments.
         super.onCreate(null)
+        savedInstanceState?.getBundle(ACTIVITY_RESULTS)?.let(activityResultRegistry::onRestoreInstanceState)
         session = SessionManager(this)
         val navigationState = safeNavigationState(savedInstanceState ?: intent.getBundleExtra(EXTRA_RESTORE_NAVIGATION))
         intent.removeExtra(EXTRA_RESTORE_NAVIGATION)
@@ -103,6 +111,12 @@ class MainActivity : AppCompatActivity() {
         selectTab(R.id.nav_estoque)
     }
 
+    fun openStockLot(id: Int) {
+        if (!session.isLoggedIn || id <= 0) return
+        stockLotResult.launch(Intent(this, AlimentoDetalhesActivity::class.java)
+            .putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, id))
+    }
+
     private fun openTab(id: Int) {
         val title = when (id) {
 
@@ -135,6 +149,7 @@ class MainActivity : AppCompatActivity() {
         if (::navigation.isInitialized) outState.putInt(SELECTED_TAB, navigation.selectedItemId)
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
         if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
+        outState.putBundle(ACTIVITY_RESULTS, Bundle().also(activityResultRegistry::onSaveInstanceState))
         super.onSaveInstanceState(outState)
     }
 
@@ -210,6 +225,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_RESTORE_NAVIGATION = "restore_navigation"
+        private const val ACTIVITY_RESULTS = "safe_activity_results"
         private const val INVENTORY_NAVIGATION = "inventory_navigation"
         private const val SELECTED_TAB = "selected_tab"
         private const val UNAVAILABLE_TITLE = "unavailable_title"

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.data.model.ApiError
 import com.example.frigus_mobile.data.model.RecipeResponse
 import com.example.frigus_mobile.ui.recipes.adapter.RecipePopularAdapter
@@ -22,6 +24,10 @@ class ReceitasFragment : Fragment(R.layout.fragment_receitas) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<View>(R.id.btnBack).setOnClickListener { (requireActivity() as MainActivity).showHome() }
+        view.findViewById<View>(R.id.btnNotification).setOnClickListener {
+            startActivity(Intent(requireContext(), NotificacoesActivity::class.java))
+        }
         model = ViewModelProvider(requireActivity())[RecipesViewModel::class.java]
         val catalogAdapter = RecipePopularAdapter(emptyList(), ::openDetail,
             onFavoriteClick = ::onFavoriteClick)
@@ -47,10 +53,12 @@ class ReceitasFragment : Fragment(R.layout.fragment_receitas) {
             view.findViewById<View>(R.id.recipeFavoritesTab).isSelected = model.showingFavorites
         }
         view.findViewById<View>(R.id.recipeCatalogTab).setOnClickListener {
-            model.selectFavorites(false); showSection()
+            model.selectFavorites(false)
+            showSection()
         }
         view.findViewById<View>(R.id.recipeFavoritesTab).setOnClickListener {
-            model.selectFavorites(true); showSection()
+            model.selectFavorites(true)
+            showSection()
         }
         showSection()
         view.findViewById<EditText>(R.id.recipeSearch).apply {

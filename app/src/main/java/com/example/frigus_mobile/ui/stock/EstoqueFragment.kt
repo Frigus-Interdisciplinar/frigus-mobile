@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.ui.home.MainActivity
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
 import java.text.NumberFormat
 
@@ -32,7 +33,9 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
         inventoryScroll = scroll
         restoredRevision = null
         scheduledRevision = null
-        val adapter = EstoqueProdutoAdapter(requireContext(), emptyList())
+        val adapter = EstoqueProdutoAdapter(requireContext(), emptyList()) { lot ->
+            lot.id?.let { (requireActivity() as MainActivity).openStockLot(it) }
+        }
         view.findViewById<RecyclerView>(R.id.rvProximosVencimento).apply {
             layoutManager = LinearLayoutManager(requireContext())
             this.adapter = adapter

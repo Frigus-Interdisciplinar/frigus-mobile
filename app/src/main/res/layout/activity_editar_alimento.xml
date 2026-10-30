@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
-    android:fitsSystemWindows="true">
+    android:id="@+id/lotEditRoot">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="96dp"
         android:fillViewport="true">
 
     <LinearLayout
@@ -17,7 +18,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"
-        android:paddingBottom="96dp">
+        android:paddingBottom="24dp">
 
         <!-- Top Bar -->
         <RelativeLayout
@@ -27,8 +28,8 @@
 
             <ImageButton
                 android:id="@+id/btnVoltar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -47,6 +48,20 @@
                 android:textStyle="bold" />
         </RelativeLayout>
 
+        <ProgressBar android:id="@+id/lotProgress"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" android:visibility="gone"
+            android:contentDescription="@string/inventory_loading" />
+        <TextView android:id="@+id/lotStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size" android:accessibilityLiveRegion="polite" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/lotReload"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="end" android:text="@string/lot_reload" />
+        <LinearLayout android:id="@+id/lotForm"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:visibility="gone">
         <!-- Imagem do Alimento -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgEditarAlimento"
@@ -76,6 +91,8 @@
             android:background="@drawable/bg_search_bar"
             android:fontFamily="@font/sarabun"
             android:hint="@string/stock_food_name"
+            android:inputType="textCapSentences"
+            android:importantForAutofill="no"
             android:paddingHorizontal="14dp"
             android:textColor="@color/color_text_primary"
             android:textSize="14sp" />
@@ -173,14 +190,50 @@
                 android:textColor="@color/color_text_primary"
                 android:textSize="14sp" />
 
-            <Spinner
-                android:id="@+id/spinnerUnidade"
-                android:layout_width="140dp"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_search_bar"
-                android:paddingHorizontal="10dp" />
+            <TextView android:id="@+id/lotUnit"
+                android:layout_width="140dp" android:layout_height="match_parent"
+                android:gravity="center" android:fontFamily="@font/sarabun"
+                android:textColor="@color/darkBlue" android:textSize="13sp" />
         </LinearLayout>
 
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:layout_marginBottom="6dp"
+            android:fontFamily="@font/sarabun" android:text="@string/stock_original_quantity"
+            android:labelFor="@id/lotInitialQuantity" android:textColor="@color/darkBlue"
+            android:textSize="13sp" android:textStyle="bold" />
+        <EditText android:id="@+id/lotInitialQuantity" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"
+            android:background="@drawable/bg_search_bar" android:fontFamily="@font/sarabun"
+            android:inputType="number" android:importantForAutofill="no"
+            android:paddingHorizontal="14dp" android:textColor="@color/color_text_primary"
+            android:textSize="14sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:layout_marginBottom="6dp"
+            android:fontFamily="@font/sarabun" android:text="@string/lot_minimum"
+            android:labelFor="@id/lotMinimum" android:textColor="@color/darkBlue"
+            android:textSize="13sp" android:textStyle="bold" />
+        <EditText android:id="@+id/lotMinimum" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"
+            android:background="@drawable/bg_search_bar" android:fontFamily="@font/sarabun"
+            android:inputType="number" android:importantForAutofill="no"
+            android:paddingHorizontal="14dp" android:textColor="@color/color_text_primary"
+            android:textSize="14sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:layout_marginBottom="6dp"
+            android:fontFamily="@font/sarabun" android:text="@string/lot_batch"
+            android:labelFor="@id/lotBatch" android:textColor="@color/darkBlue"
+            android:textSize="13sp" android:textStyle="bold" />
+        <EditText android:id="@+id/lotBatch" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="48dp"
+            android:background="@drawable/bg_search_bar" android:fontFamily="@font/sarabun"
+            android:inputType="text" android:importantForAutofill="no"
+            android:paddingHorizontal="14dp" android:textColor="@color/color_text_primary"
+            android:textSize="14sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:fontFamily="@font/sarabun"
+            android:text="@string/lot_form_note" android:textColor="@color/color_text_secondary"
+            android:textSize="13sp" />
+        </LinearLayout>
     </LinearLayout>
     </ScrollView>
 

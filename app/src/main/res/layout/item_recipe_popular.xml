@@ -1,59 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardRecipePopular"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:minHeight="@dimen/recipe_browser_touch"
-    android:padding="@dimen/recipe_browser_section_gap"
-    android:layout_marginTop="@dimen/recipe_browser_gap"
-    android:background="@drawable/bg_card_white_rounded"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/color_card_border"
+    app:cardBackgroundColor="@color/pure_white"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/txtRecipePopularTitle"
-        android:fontFamily="@font/sarabun"
-        android:text="@string/recipe_browser_unnamed"
-        android:textColor="@color/darkBlue"
-        android:textSize="@dimen/recipe_browser_heading"
-        android:layout_marginTop="@dimen/recipe_browser_gap"
-        android:textStyle="bold" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/recipeRowDescription"
-        android:fontFamily="@font/sarabun"
-        android:text="@string/recipe_browser_no_description"
-        android:textColor="@color/darkBlue"
-        android:textSize="@dimen/recipe_browser_body"
-        android:layout_marginTop="@dimen/recipe_browser_gap" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/recipeRowAvailability"
-        android:fontFamily="@font/sarabun"
-        android:text="@string/recipe_browser_not_informed"
-        android:textColor="@color/darkBlue"
-        android:textSize="@dimen/recipe_browser_body"
-        android:layout_marginTop="@dimen/recipe_browser_gap"
-        android:visibility="gone" />
-    <TextView
-        android:id="@+id/recipeRowFavoriteStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/sarabun"
-        android:textColor="@color/darkBlue"
-        android:textSize="@dimen/recipe_browser_body"
-        android:accessibilityLiveRegion="polite"
-        android:visibility="gone" />
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/recipeRowFavorite"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/recipe_browser_touch"
-        android:visibility="gone"
-        android:text="@string/recipe_favorite_add" />
-</LinearLayout>
+        android:padding="12dp">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@id/iconChevron"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+            <TextView
+                android:id="@+id/txtRecipePopularTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/darkBlue"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/recipeRowDescription"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/recipe_browser_no_description"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/recipe_browser_body"
+                android:layout_marginTop="@dimen/recipe_browser_gap" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/recipeRowAvailability"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/recipe_browser_not_informed"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/recipe_browser_body"
+                android:layout_marginTop="@dimen/recipe_browser_gap"
+                android:visibility="gone" />
+            <TextView
+                android:id="@+id/recipeRowFavoriteStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/recipe_browser_body"
+                android:accessibilityLiveRegion="polite"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/recipeRowFavorite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/recipe_browser_touch"
+                android:visibility="gone"
+                android:text="@string/recipe_favorite_add" />
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/iconChevron"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/blue_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@null" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
