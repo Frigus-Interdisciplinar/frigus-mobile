@@ -23,6 +23,9 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification_status" />
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
 
         <service
             android:name=".push.FrigusMessagingService"
@@ -84,22 +87,22 @@
 
         <activity
             android:name=".ui.qrcode.QrCodeScannerActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeCarregandoActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeItensActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeConfirmacaoActivity"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false" />
 
         <activity

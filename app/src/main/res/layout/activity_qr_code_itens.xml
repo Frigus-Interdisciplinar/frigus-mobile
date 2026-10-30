@@ -7,22 +7,20 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <!-- Top Bar -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="12dp">
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Voltar"
+            android:contentDescription="@string/profile_back"
             android:src="@drawable/ic_chevron_left"
             app:tint="@color/darkBlue" />
 
@@ -31,54 +29,134 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="@font/sarabun"
-            android:text="Itens da nota fiscal"
+            android:text="@string/receipt_review_title"
             android:textColor="@color/darkBlue"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <!-- Lista de Itens -->
+    <ProgressBar
+        android:id="@+id/receiptReviewProgress"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/receiptReviewStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/sarabun"
+        android:gravity="center"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/receiptInvoiceSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_card_blue_tint"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/receiptIssuer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/darkBlue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/receiptIssuedAt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/receiptTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="12sp" />
+        <TextView
+            android:id="@+id/receiptAccessKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="11sp" />
+        <TextView
+            android:id="@+id/receiptWarnings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/color_gold"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvItensNotaFiscal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="12dp" />
 
-    <!-- Container Bottom com Botão e Legenda -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingBottom="24dp">
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/receiptReviewNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:fontFamily="@font/sarabun"
+            android:gravity="center"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSalvarItensNota"
+            android:id="@+id/btnVerifyReceipt"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/receipt_verify"
+            android:visibility="gone"
+            app:cornerRadius="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmReceipt"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:fontFamily="@font/sarabun"
-            android:text="Salvar alterações"
+            android:text="@string/receipt_confirm_action"
             android:textAllCaps="false"
             android:textColor="@color/pure_white"
             android:textSize="14sp"
             android:textStyle="bold"
             app:backgroundTint="@color/blue_primary"
             app:cornerRadius="10dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:fontFamily="@font/sarabun"
-            android:text="Você poderá editar ou remover itens antes de confirmar."
-            android:textAlignment="center"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="11sp" />
     </LinearLayout>
 
 </LinearLayout>

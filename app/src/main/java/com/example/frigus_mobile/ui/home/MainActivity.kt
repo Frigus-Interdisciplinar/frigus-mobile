@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         navigation.menu.findItem(validSelected).isChecked = true
         val pendingTitle = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
         if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
+        consumeReceiptImport(intent)
 
         updatePermissionAction()
         if (PushNotifications.shouldOpenCenter(intent)) {
@@ -162,6 +163,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeReceiptImport(intent)
+    }
+
+    private fun consumeReceiptImport(source: Intent?) {
+        if (source?.getBooleanExtra(EXTRA_RECEIPT_IMPORTED, false) != true || !::navigation.isInitialized) return
+        source.removeExtra(EXTRA_RECEIPT_IMPORTED)
+        ViewModelProvider(this)[InventoryViewModel::class.java].refresh()
+        ViewModelProvider(this)[HomeViewModel::class.java].invalidate()
+        navigation.selectedItemId = R.id.nav_estoque
+    }
+
     fun refreshSessionIdentity() {
         if (!session.isLoggedIn || leaving) return
         findViewById<TextView>(R.id.sessionIdentity).text = session.userName ?: session.userEmail.orEmpty()
@@ -225,6 +240,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_RESTORE_NAVIGATION = "restore_navigation"
+        const val EXTRA_RECEIPT_IMPORTED = "receipt_imported"
         private const val ACTIVITY_RESULTS = "safe_activity_results"
         private const val INVENTORY_NAVIGATION = "inventory_navigation"
         private const val SELECTED_TAB = "selected_tab"
