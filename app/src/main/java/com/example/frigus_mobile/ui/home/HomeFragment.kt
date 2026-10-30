@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
+import com.example.frigus_mobile.ui.ai.ChatIaActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
@@ -37,9 +38,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {
             startActivity(Intent(requireContext(), NotificacoesActivity::class.java))
         }
+        view.findViewById<View>(R.id.cardFaleComIa).setOnClickListener {
+            startActivity(Intent(requireContext(), ChatIaActivity::class.java))
+        }
         mapOf(R.id.cardChats to R.string.home_conversations,
-            R.id.cardEscanearQrCode to R.string.home_qr,
-            R.id.cardFaleComIa to R.string.home_ai).forEach { (id, title) ->
+            R.id.cardEscanearQrCode to R.string.home_qr).forEach { (id, title) ->
             view.findViewById<View>(id).setOnClickListener { main.showUnavailable(title) }
         }
 

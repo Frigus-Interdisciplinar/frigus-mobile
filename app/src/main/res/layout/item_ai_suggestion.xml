@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/ai_space_8"
+    android:background="@drawable/bg_card_blue_tint"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:padding="@dimen/ai_space_12">
+
+    <TextView
+        android:id="@+id/aiSuggestionName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/darkBlue"
+        android:textSize="@dimen/ai_text_15"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/aiSuggestionDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/ai_space_4"
+        android:fontFamily="@font/sarabun"
+        android:maxLines="3"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="@dimen/ai_text_13" />
+
+    <TextView
+        android:id="@+id/aiSuggestionMatch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/ai_space_4"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/blue_primary"
+        android:textSize="@dimen/ai_text_12" />
+</LinearLayout>

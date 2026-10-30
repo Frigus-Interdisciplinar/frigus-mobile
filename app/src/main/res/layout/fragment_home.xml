@@ -531,7 +531,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/home_feature_pending"
+                    android:text="@string/ai_home_entry_label"
                     android:textColor="#E0EAFF"
                     android:textSize="@dimen/home_body_size" />
             </LinearLayout>
