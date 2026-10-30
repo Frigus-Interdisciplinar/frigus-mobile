@@ -8,7 +8,6 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -62,7 +61,6 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, "Não foi possível obter o token do Google", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
-                Log.e("LoginActivity", "Falha no Google Sign-In: ${e.statusCode}", e)
                 val msg = when (e.statusCode) {
                     10 -> "Erro 10 (Developer Error): SHA-1 ou Client ID não configurados no console."
                     12501 -> "Login com Google cancelado pelo usuário."
