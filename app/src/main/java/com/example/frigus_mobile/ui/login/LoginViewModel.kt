@@ -18,6 +18,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(email: String, password: String) {
         if (result.value != AuthResult.Loading) repository.login(email, password) { result.value = it }
     }
+    fun loginWithGoogle(idToken: String) {
+        if (result.value != AuthResult.Loading) repository.loginWithGoogle(idToken) { result.value = it }
+    }
     fun restore() {
         if (result.value != AuthResult.Loading) repository.restore { result.value = it }
     }

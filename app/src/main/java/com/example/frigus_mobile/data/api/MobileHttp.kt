@@ -15,7 +15,7 @@ object MobileHttp {
         "POST" to "/mobile/user/(login|register)",
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
-        "GET" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
+        "GET|POST" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
         "POST" to "/mobile/inventory/receipts/scan",
         "GET" to "/mobile/inventory/receipts/$uuid",
         "POST" to "/mobile/inventory/receipts/$uuid/confirm",
@@ -31,12 +31,14 @@ object MobileHttp {
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
         "GET" to "/mobile/advertisements/active",
-        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
+        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)",
+        "GET|POST|DELETE" to "/mobile/shopping-list.*",
+        "GET|POST|PUT|PATCH|DELETE" to "/mobile/core/.*"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
     fun allowed(method: String, path: String): Boolean = routes.any { it.matches("$method $path") } &&
         path.split('/').filter { it.isNotEmpty() && it.all(Char::isDigit) }.all { it.toIntOrNull() != null }
-    fun public(path: String): Boolean = path == "/mobile/user/login" || path == "/mobile/user/register"
+    fun public(path: String): Boolean = path == "/mobile/user/login" || path == "/mobile/user/register" || path == "/mobile/core/auth/google"
 
     fun origin(value: String, debug: Boolean): HttpUrl {
         val url = HttpUrl.parse(value) ?: error("Configure FRIGUS_BFF_BASE_URL with a BFF origin")

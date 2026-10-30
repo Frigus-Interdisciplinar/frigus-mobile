@@ -13,16 +13,14 @@ if (envFile.exists()) {
         if (trimmed.isNotEmpty() && !trimmed.startsWith("#") && trimmed.contains("=")) {
             val parts = trimmed.split("=", limit = 2)
             val key = parts[0].trim()
-            var value = parts[1].trim()
-            if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
-                value = value.substring(1, value.length - 1)
-            }
+            val value = parts[1].trim().removeSurrounding("\"")
             envProperties.setProperty(key, value)
         }
     }
 }
 val frigusBffBaseUrl = providers.environmentVariable("FRIGUS_BFF_BASE_URL").orNull
-    ?: envProperties.getProperty("FRIGUS_BFF_BASE_URL") ?: "http://10.0.2.2:3001/"
+    ?: envProperties.getProperty("FRIGUS_BFF_BASE_URL") ?: "https://frigus-bff.onrender.com/"
+val googleClientId = envProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""
 require(frigusBffBaseUrl.none { it == '"' || it == '\\' || it.isISOControl() }) {
     "FRIGUS_BFF_BASE_URL must be a plain BFF origin URL"
 }
@@ -42,6 +40,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BFF_BASE_URL", "\"$frigusBffBaseUrl\"")
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
     }
 
     buildFeatures {
@@ -72,6 +71,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
@@ -79,4 +79,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
     implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-firestore")
 }

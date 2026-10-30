@@ -80,6 +80,9 @@ data class StockProductResponse(
     @SerializedName("category")
     var category: String? = null,
 
+    @SerializedName("storagePlace")
+    var storagePlace: String? = null,
+
     @SerializedName("batch")
     val batch: String? = null
 ) : Serializable
@@ -105,6 +108,44 @@ data class StockProductUpdateRequest(
 
     @SerializedName("storagePlace")
     val storagePlace: String? = null,
+
+    @SerializedName("batch")
+    val batch: String? = null
+)
+
+data class ManualStockProductRequest(
+    @SerializedName("productId")
+    val productId: Int? = null,
+
+    @SerializedName("name")
+    val name: String? = null,
+
+    @SerializedName("category")
+    val category: String? = null,
+
+    @SerializedName("storagePlace")
+    val storagePlace: String? = null,
+
+    @SerializedName("unitPrice")
+    val unitPrice: Double? = null,
+
+    @SerializedName("unitOfMeasure")
+    val unitOfMeasure: String? = null,
+
+    @SerializedName("brand")
+    val brand: String? = null,
+
+    @SerializedName("imageUrl")
+    val imageUrl: String? = null,
+
+    @SerializedName("quantity")
+    val quantity: Int,
+
+    @SerializedName("expireDate")
+    val expireDate: String,
+
+    @SerializedName("minimalQuantity")
+    val minimalQuantity: Int? = null,
 
     @SerializedName("batch")
     val batch: String? = null

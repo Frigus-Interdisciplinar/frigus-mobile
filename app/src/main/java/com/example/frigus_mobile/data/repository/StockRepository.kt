@@ -13,8 +13,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.example.frigus_mobile.data.api.requireBody
 import com.example.frigus_mobile.data.api.requireNoContent
-import com.example.frigus_mobile.data.api.unavailableMobileContract
 import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.data.model.ManualStockProductRequest
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.StockMovementRequest
 import com.example.frigus_mobile.data.model.StockMovementResponse
@@ -179,13 +179,47 @@ class StockRepository(context: Context? = null) {
     suspend fun createMovement(id: Int, request: StockMovementRequest): StockMovementResponse =
         withContext(Dispatchers.IO) { api.createMovement(id, request).requireBody() }
 
-    /** There is no mobile catalog or direct lot creation endpoint yet. */
-    @Deprecated("No published /mobile catalog endpoint")
-    suspend fun getCatalogProducts(): List<StockProductProductResponse> = unavailableMobileContract()
+    suspend fun addManualStockProduct(
+        stockId: Int,
+        request: ManualStockProductRequest
+    ): StockProductResponse = withContext(Dispatchers.IO) {
+        api.createStockProduct(stockId, request).requireBody()
+    }
 
-    @Deprecated("No published /mobile lot creation endpoint")
-    suspend fun addStockProduct(@Suppress("UNUSED_PARAMETER") item: StockProductResponse): Unit =
-        unavailableMobileContract()
+    suspend fun getCatalogProducts(): List<StockProductProductResponse> = withContext(Dispatchers.IO) {
+        val stockProducts = getStockProducts()
+        stockProducts.mapNotNull { it.product }.distinctBy { it.id }
+    }
+
+    suspend fun addStockProduct(item: StockProductResponse): StockProductResponse {
+        val stockId = item.stockId ?: resolveUserStockId() ?: throw java.io.IOException("Nenhum estoque ativo encontrado.")
+        val expire = item.expireDate?.let(::isoDate) ?: LocalDate.now().plusDays(15).toString()
+        val req = if (item.productId != null && item.productId > 0) {
+            ManualStockProductRequest(
+                productId = item.productId,
+                quantity = item.quantity ?: 1,
+                expireDate = expire,
+                minimalQuantity = item.minimalQuantity ?: 1,
+                batch = item.batch
+            )
+        } else {
+            val prod = item.product
+            ManualStockProductRequest(
+                name = prod?.name ?: "Alimento",
+                category = prod?.category ?: item.category ?: "OTHER",
+                storagePlace = prod?.storagePlace ?: item.storagePlace ?: "FRIDGE",
+                unitPrice = prod?.unitPrice ?: item.purchaseUnitPrice ?: 1.0,
+                unitOfMeasure = prod?.unitOfMeasure ?: "UNIT",
+                brand = prod?.brand,
+                imageUrl = prod?.imageUrl,
+                quantity = item.quantity ?: 1,
+                expireDate = expire,
+                minimalQuantity = item.minimalQuantity ?: 1,
+                batch = item.batch
+            )
+        }
+        return addManualStockProduct(stockId, req)
+    }
 
     companion object {
         fun isoDate(value: String): String {

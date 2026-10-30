@@ -3,6 +3,19 @@
     <string name="lista_onde_adicionar">Onde quer adicionar?</string>
     <string name="lista_destino_estoque">Estoque</string>
     <string name="lista_destino_lista_compras">Lista de Compras</string>
+    <string name="lista_qual_lugar_estoque">Qual lugar do estoque?</string>
+    <string name="lista_validade_opcional">Data de validade *</string>
+    <string name="lista_data_validade_obrigatoria">Data de validade *</string>
+    <string name="lista_validade_hint">DD/MM/AAAA</string>
+    <string name="lista_validade_obrigatoria_erro">A data de validade é obrigatória</string>
+    <string name="lista_validade_obrigatoria_aviso">Informe a data de validade do alimento.</string>
     <string name="lista_observacoes_opcional">Observações (opcional)</string>
+    <string name="lista_observacoes_hint_estoque">Ex.: peito, coxa, marca...</string>
     <string name="lista_adicionar_foto">Adicionar foto do produto</string>
+    <string name="lista_item_adicionado_estoque">Item adicionado ao seu estoque!</string>
+    <string name="lista_editar_alimento">Editar alimento</string>
+    <string name="lista_nome_alimento">Nome do alimento</string>
+    <string name="lista_quantidade_total">Quantidade total</string>
+    <string name="lista_unidade_medida">Unidade de medida</string>
+    <string name="lista_salvar_alteracoes">Salvar alterações</string>
 </resources>

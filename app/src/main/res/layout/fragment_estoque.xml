@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/inventoryScroll"
@@ -194,3 +199,18 @@
             android:visibility="gone" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnAdicionarAlimentoEstoque"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="@string/stock_add_food"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/blue_primary"
+        app:elevation="6dp"
+        app:fabCustomSize="56dp"
+        app:maxImageSize="28dp"
+        app:tint="@color/pure_white" />
+</FrameLayout>

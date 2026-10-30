@@ -63,6 +63,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.stock.EstoqueLocalActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.stock.TodasCategoriasActivity"
             android:enabled="false"
             android:exported="false" />

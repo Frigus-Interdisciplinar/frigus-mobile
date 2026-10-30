@@ -59,6 +59,15 @@ class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
         view.findViewById<View>(R.id.inventoryRefresh).setOnClickListener { model.refresh() }
         view.findViewById<View>(R.id.inventoryRetry).setOnClickListener { model.retry() }
         view.findViewById<View>(R.id.inventoryMore).setOnClickListener { model.loadMore() }
+        view.findViewById<View>(R.id.btnAdicionarAlimentoEstoque)?.setOnClickListener {
+            val fragment = com.example.frigus_mobile.ui.shopping.AddShoppingListItemFragment.newInstance(
+                initialDestination = com.example.frigus_mobile.ui.shopping.AddShoppingListItemFragment.DESTINATION_STOCK
+            )
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
 
         var stockIds = listOf<Int?>(null)
         var stockLabels = emptyList<String>()

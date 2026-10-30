@@ -30,6 +30,34 @@ class AuthRepository(
         signIn(email, password, generation, result)
     }
 
+    fun loginWithGoogle(idToken: String, result: (AuthResult) -> Unit) {
+        cancel()
+        val generation = session.beginAuthentication()
+        result(AuthResult.Loading)
+        val call = api.loginComGoogle(GoogleLoginRequest(idToken))
+        pending = call
+        call.enqueue(object : Callback<UserLoginResponse> {
+            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                if (call.isCanceled || generation != session.generation) return
+                val body = response.body()
+                try {
+                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
+                        result(AuthResult.Authenticated)
+                    } else {
+                        result(AuthResult.Failure(if (response.isSuccessful) ApiError(displayMessage = text(R.string.auth_invalid_response))
+                            else ApiError.parse(response)))
+                    }
+                } catch (_: Exception) {
+                    session.clear()
+                    result(AuthResult.Failure(ApiError(displayMessage = text(R.string.auth_storage_error))))
+                }
+            }
+            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(networkError()))
+            }
+        })
+    }
+
     private fun signIn(email: String, password: String, generation: Long, result: (AuthResult) -> Unit,
                        accountCreated: Boolean = false) {
         val call = api.login(UserLoginRequest(email, password))

@@ -1,6 +1,7 @@
 package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
+import com.example.frigus_mobile.data.model.ManualStockProductRequest
 import com.example.frigus_mobile.data.model.PageResponse
 import com.example.frigus_mobile.data.model.StockMovementRequest
 import com.example.frigus_mobile.data.model.StockMovementResponse
@@ -34,6 +35,12 @@ interface StockApiService {
         @Query("storagePlace") storagePlace: String? = null,
         @Query("q") query: String? = null
     ): Call<PageResponse<StockProductResponse>>
+
+    @POST("mobile/inventory/stocks/{stockId}/products")
+    fun createStockProduct(
+        @Path("stockId") stockId: Int,
+        @Body request: ManualStockProductRequest
+    ): Call<StockProductResponse>
 
     @GET("mobile/inventory/stock-products/{id}")
     fun getStockProductById(

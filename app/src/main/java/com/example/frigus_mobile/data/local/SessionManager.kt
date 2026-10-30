@@ -68,12 +68,20 @@ class SessionManager(context: Context) {
 
     val accessToken: String? get() = state.accessToken
     val isLoggedIn: Boolean get() = state.validated && !accessToken.isNullOrBlank()
+    val userId: String? get() = state.user?.id
     val userName: String? get() = state.user?.name
     val userEmail: String? get() = state.user?.email
     val userBirthDate: String? get() = state.user?.birthDate
     val userAccountType: String? get() = state.user?.accountType
     val activeGroupId: String? get() = preferences.getString("group", null)
     val activeStockId: Int? get() = preferences.getInt("stock", -1).takeIf { it > 0 }
+    val googlePhotoUrl: String? get() = preferences.getString("google_photo_url", null)
+
+    fun saveGooglePhotoUrl(url: String?) {
+        if (!url.isNullOrBlank()) {
+            preferences.edit().putString("google_photo_url", url).apply()
+        }
+    }
 
     fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
     fun clearSession() = state.clear()
