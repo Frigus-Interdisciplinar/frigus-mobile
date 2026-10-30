@@ -1,6 +1,7 @@
 package com.example.frigus_mobile.ui.stock
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -12,10 +13,13 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ProductCategoryHelper
 import com.example.frigus_mobile.utils.ProductImageTracker
@@ -27,6 +31,7 @@ import java.util.Locale
 
 class EditarAlimentoActivity : AppCompatActivity() {
 
+    private lateinit var session: SessionManager
     private lateinit var repository: StockRepository
     private var item: StockProductResponse? = null
 
@@ -59,6 +64,12 @@ class EditarAlimentoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        session = SessionManager(this)
+        if (!session.isLoggedIn) {
+            openLogin()
+            return
+        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_editar_alimento)
 
         repository = StockRepository(this)
@@ -307,5 +318,15 @@ class EditarAlimentoActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::session.isInitialized && !session.isLoggedIn) openLogin()
+    }
+
+    private fun openLogin() {
+        startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
+        finish()
     }
 }

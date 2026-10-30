@@ -1,20 +1,24 @@
-package com.example.frigus_mobile.data.api
+﻿package com.example.frigus_mobile.data.api
 
-import android.util.Log
 import com.example.frigus_mobile.data.local.SessionCredential
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 object MobileHttp {
+    private class SendOnce(val sent: AtomicBoolean = AtomicBoolean(false))
     private val uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     private val routes = listOf(
         "POST" to "/mobile/user/(login|register)",
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
         "GET" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
+        "POST" to "/mobile/inventory/receipts/scan",
+        "GET" to "/mobile/inventory/receipts/$uuid",
+        "POST" to "/mobile/inventory/receipts/$uuid/confirm",
         "GET|PUT|DELETE" to "/mobile/inventory/stock-products/[1-9][0-9]*",
         "GET|POST" to "/mobile/inventory/stock-products/[1-9][0-9]*/movements",
         "GET" to "/mobile/recipes",
@@ -30,74 +34,62 @@ object MobileHttp {
         "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
-    fun isPublicPath(path: String): Boolean {
+    fun allowed(method: String, path: String): Boolean = routes.any { it.matches("$method $path") } &&
+        path.split('/').filter { it.isNotEmpty() && it.all(Char::isDigit) }.all { it.toIntOrNull() != null }
+
+    fun public(path: String): Boolean {
         val p = path.trim().lowercase()
-        return p.contains("auth/login") ||
-               p.contains("auth/register") ||
-               p.contains("auth/google") ||
-               p.contains("mobile/user/login") ||
-               p.contains("mobile/user/register")
+        return p == "/mobile/user/login" || p == "/mobile/user/register" ||
+               p.contains("auth/login") || p.contains("auth/register") || p.contains("auth/google")
     }
 
-    fun allowed(method: String, path: String): Boolean = true
-
-    fun public(path: String): Boolean = isPublicPath(path)
+    fun isPublicPath(path: String): Boolean = public(path)
 
     fun origin(value: String, debug: Boolean): HttpUrl {
-        val target = if (value.isBlank() || value.contains("10.0.2.2") || value.contains("localhost")) {
-            "https://frigus-core-api.onrender.com/"
-        } else {
-            if (value.endsWith("/")) value else "$value/"
+        val url = HttpUrl.parse(value) ?: error("Configure FRIGUS_BFF_BASE_URL with a BFF origin")
+        require(url.encodedPath() == "/" && url.query() == null && url.fragment() == null &&
+            url.username().isEmpty() && url.password().isEmpty()) { "BFF URL must contain only the origin" }
+        require(url.host() != "frigus-core-api.onrender.com") { "Core is not a mobile BFF" }
+        require(url.isHttps || (debug && url.host() in setOf("10.0.2.2", "localhost", "127.0.0.1"))) {
+            "Use HTTPS for the BFF; HTTP is allowed only for local debug"
         }
-        return HttpUrl.parse(target) ?: HttpUrl.parse("https://frigus-core-api.onrender.com/")!!
+        return url
     }
 
-    fun bffOrigin(value: String, debug: Boolean): HttpUrl {
-        val target = if (value.isBlank() || value.contains("10.0.2.2") || value.contains("localhost")) {
-            "https://frigus-bff.onrender.com/"
-        } else {
-            if (value.endsWith("/")) value else "$value/"
-        }
-        return HttpUrl.parse(target) ?: HttpUrl.parse("https://frigus-bff.onrender.com/")!!
-    }
+    fun bffOrigin(value: String, debug: Boolean): HttpUrl = origin(value, debug)
 
     fun client(origin: HttpUrl, credential: () -> SessionCredential?, unauthorized: (SessionCredential) -> Unit): OkHttpClient =
         OkHttpClient.Builder()
-            .followRedirects(true)
-            .followSslRedirects(true)
-            .retryOnConnectionFailure(true)
-            .connectTimeout(120, TimeUnit.SECONDS)
-            .readTimeout(120, TimeUnit.SECONDS)
-            .writeTimeout(120, TimeUnit.SECONDS)
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .retryOnConnectionFailure(false)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(40, TimeUnit.SECONDS)
+            .writeTimeout(40, TimeUnit.SECONDS)
+            // OkHttp can also follow up HTTP 503 + Retry-After: 0; never send a call twice.
+            .addNetworkInterceptor(Interceptor { chain ->
+                val attempt = chain.request().tag(SendOnce::class.java)
+                if (attempt == null || !attempt.sent.compareAndSet(false, true))
+                    throw IOException("Automatic replay disabled")
+                chain.proceed(chain.request())
+            })
             .addInterceptor(Interceptor { chain ->
                 val request = chain.request()
-                val active = credential()
+                val url = request.url()
+                if (url.scheme() != origin.scheme() || url.host() != origin.host() || url.port() != origin.port() ||
+                    !allowed(request.method(), url.encodedPath())) throw IOException("Unavailable mobile contract")
+                val isPublic = public(url.encodedPath())
+                val active = if (isPublic) null else credential()
                 val access = active?.token?.takeIf { it.isNotBlank() }
-
-                val builder = request.newBuilder()
-                    .header("Accept", "application/json")
-
-                if (access != null && request.header("Authorization") == null) {
-                    builder.header("Authorization", "Bearer $access")
-                }
-
-                val finalRequest = builder.build()
-                Log.d("MobileHttp", "--> ${finalRequest.method()} ${finalRequest.url()}")
-
-                val response = try {
-                    chain.proceed(finalRequest)
-                } catch (e: Exception) {
-                    Log.e("MobileHttp", "<-- FALHA em ${finalRequest.url()}: ${e.message}", e)
-                    throw e
-                }
-
-                Log.d("MobileHttp", "<-- [${response.code()}] ${finalRequest.url()}")
-
-                val path = finalRequest.url().encodedPath()
-                val isPublic = isPublicPath(path)
-                if ((response.code() == 401 || response.code() == 403) && active != null && !isPublic) {
-                    Log.w("MobileHttp", "Status ${response.code()} recebido para rota autenticada ($path). Disparando unauthorized.")
-                    unauthorized(active)
+                if (!isPublic && access == null) throw IOException("Authentication required")
+                val builder = request.newBuilder().tag(SendOnce::class.java, SendOnce()).removeHeader("Authorization").header("Accept", "application/json")
+                if (access != null) builder.header("Authorization", "Bearer $access")
+                val longRunning = url.encodedPath() == "/mobile/recipes/ai/chat" ||
+                    url.encodedPath() == "/mobile/inventory/receipts/scan"
+                val requestChain = if (longRunning) chain.withReadTimeout(135, TimeUnit.SECONDS) else chain
+                val response = requestChain.proceed(builder.build())
+                if ((response.code() == 401 || response.code() == 403) && access != null && !isPublic) {
+                    unauthorized(active!!)
                 }
                 response
             }).build()

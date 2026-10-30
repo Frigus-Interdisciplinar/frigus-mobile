@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
-    android:fitsSystemWindows="true">
-
-    <!-- Scrollable Content -->
+    android:id="@+id/recipeDetailRoot">
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollRecipeDetails"
         android:layout_width="match_parent"
@@ -16,73 +11,57 @@
         android:fillViewport="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomButtonContainer">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <!-- Hero Image Banner with Floating Buttons -->
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="260dp">
-
-                <ImageView
-                    android:id="@+id/imgRecipeHero"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    tools:src="@drawable/img_frango_molho_cremoso"
-                    android:contentDescription="@string/recipe_photo" />
-
-                <!-- Floating Back Button -->
-                <FrameLayout
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+                <ImageButton
                     android:id="@+id/btnDetailBack"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_circle_translucent"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_chevron_left"
-                        app:tint="@color/pure_white"
-                        android:contentDescription="@string/profile_back" />
-                </FrameLayout>
-
-                <!-- Floating Heart/Favorite Button -->
-                <FrameLayout
-                    android:id="@+id/btnDetailFavorite"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_circle_translucent"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <ImageView
-                        android:id="@+id/imgFavoriteIcon"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_heart"
-                        app:tint="@color/pure_white"
-                        android:contentDescription="@string/recipe_favorite" />
-                </FrameLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- Sheet Content -->
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="@string/recipe_browser_back"
+                    app:tint="@color/darkBlue" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_browser_title"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+            <ProgressBar
+                android:id="@+id/recipeDetailProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/recipe_browser_loading"
+                android:visibility="gone" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/recipeDetailStatus"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/recipe_browser_loading"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/recipe_browser_body"
+                android:layout_marginTop="@dimen/recipe_browser_gap"
+                android:accessibilityLiveRegion="polite" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/recipeDetailRetry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/recipe_browser_touch"
+                android:text="@string/recipe_browser_retry"
+                android:visibility="gone" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -91,9 +70,9 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="24dp"
                 android:paddingTop="12dp"
-                android:paddingBottom="24dp">
-
-                <!-- Recipe Title -->
+                android:paddingBottom="24dp"
+                android:id="@+id/recipeDetailContent"
+                android:visibility="gone">
                 <TextView
                     android:id="@+id/txtDetailRecipeTitle"
                     android:layout_width="match_parent"
@@ -101,69 +80,22 @@
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
                     android:textSize="22sp"
-                    android:textStyle="bold"
-                    tools:text="Frango ao molho cremoso" />
-
-                <!-- Meta row: Rating, Time, Difficulty -->
-                <LinearLayout
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/recipeDetailFavoriteStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_marginEnd="4dp"
-                        android:src="@drawable/ic_star"
-                        app:tint="@color/color_gold" />
-
-                    <TextView
-                        android:id="@+id/txtDetailRecipeRating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:textColor="@color/gray"
-                        android:textSize="13sp"
-                        tools:text="4,8" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="6dp"
-                        android:text="•"
-                        android:textColor="@color/gray"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/txtDetailRecipeTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:textColor="@color/gray"
-                        android:textSize="13sp"
-                        tools:text="35 min" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="6dp"
-                        android:text="•"
-                        android:textColor="@color/gray"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/txtDetailRecipeDifficulty"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:textColor="@color/gray"
-                        android:textSize="13sp"
-                        tools:text="Fácil" />
-                </LinearLayout>
-
-                <!-- Description -->
+                    android:layout_marginTop="@dimen/recipe_browser_gap"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:accessibilityLiveRegion="polite" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recipeDetailFavorite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/recipe_browser_touch"
+                    android:text="@string/recipe_favorite_add" />
                 <TextView
                     android:id="@+id/txtDetailRecipeDescription"
                     android:layout_width="match_parent"
@@ -172,30 +104,7 @@
                     android:fontFamily="@font/sarabun"
                     android:lineSpacingExtra="3dp"
                     android:textColor="@color/color_text_secondary"
-                    android:textSize="14sp"
-                    tools:text="Uma receita prática e deliciosa para o dia a dia." />
-
-                <!-- Section: Usa ingredientes que você tem -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="10dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/recipe_uses_your_ingredients"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <!-- Chips Container -->
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupIngredientsInStock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:chipSpacingHorizontal="8dp"
-                    app:chipSpacingVertical="6dp" />
-
-                <!-- Section: Ingredientes (N) -->
+                    android:textSize="14sp" />
                 <TextView
                     android:id="@+id/txtDetailIngredientsSectionTitle"
                     android:layout_width="wrap_content"
@@ -207,8 +116,15 @@
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />
-
-                <!-- Ingredients Card Container -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/recipeIngredientsState"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_browser_no_ingredients"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:layout_marginTop="@dimen/recipe_browser_gap" />
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -217,16 +133,12 @@
                     app:strokeWidth="1dp"
                     app:strokeColor="@color/color_card_border"
                     app:cardBackgroundColor="@color/recipe_ingredient_card">
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvDetailIngredients"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"
-                        tools:listitem="@layout/item_recipe_ingredient" />
+                        android:nestedScrollingEnabled="false" />
                 </com.google.android.material.card.MaterialCardView>
-
-                <!-- Populated and shown by future recipe integration; no example instructions at runtime. -->
                 <LinearLayout
                     android:id="@+id/layoutRecipeInstructions"
                     android:layout_width="match_parent"
@@ -235,9 +147,7 @@
                     android:background="@drawable/bg_recipe_instructions"
                     android:orientation="vertical"
                     android:padding="12dp"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
+                    android:visibility="visible">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -246,7 +156,6 @@
                         android:textColor="@color/darkBlue"
                         android:textSize="15sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/txtDetailRecipeInstructions"
                         android:layout_width="match_parent"
@@ -256,14 +165,28 @@
                         android:lineSpacingExtra="6dp"
                         android:textColor="@color/black"
                         android:textSize="14sp"
-                        tools:text="1. Temperar: Corte o frango e tempere.&#10;2. Picar: Corte os tomates." />
+                        android:text="@string/recipe_browser_no_instructions"
+                        android:textIsSelectable="true" />
                 </LinearLayout>
-
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_browser_availability_unknown"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:layout_marginTop="@dimen/recipe_browser_gap" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/recipe_browser_read_only"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="@dimen/recipe_browser_body"
+                    android:layout_marginTop="@dimen/recipe_browser_gap" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Bottom Action Button Container -->
     <FrameLayout
         android:id="@+id/bottomButtonContainer"
         android:layout_width="match_parent"
@@ -274,7 +197,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVerModoPreparo"
             android:layout_width="match_parent"
@@ -286,7 +208,7 @@
             android:textColor="@color/pure_white"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="12dp"
+            android:enabled="false" />
     </FrameLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

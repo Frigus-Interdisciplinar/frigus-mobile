@@ -22,9 +22,9 @@ if (envFile.exists()) {
     }
 }
 val frigusBffBaseUrl = providers.environmentVariable("FRIGUS_BFF_BASE_URL").orNull
-    ?: envProperties.getProperty("FRIGUS_BFF_BASE_URL") ?: "https://frigus-bff.onrender.com/"
+    ?: envProperties.getProperty("FRIGUS_BFF_BASE_URL")
 val frigusCoreBaseUrl = providers.environmentVariable("FRIGUS_BASE_URL").orNull
-    ?: envProperties.getProperty("FRIGUS_BASE_URL") ?: "https://frigus-core-api.onrender.com/"
+    ?: envProperties.getProperty("FRIGUS_BASE_URL")
 val googleClientId = envProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""
 
 android {
@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.frigus_mobile"
-        minSdk = 26
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -78,7 +78,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 }

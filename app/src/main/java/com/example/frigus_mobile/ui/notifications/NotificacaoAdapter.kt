@@ -1,6 +1,5 @@
 package com.example.frigus_mobile.ui.notifications
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +8,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.NotificationResponse
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class NotificacaoAdapter(
-    private val context: Context,
-    private var items: List<NotificationResponse>
+    private var items: List<NotificationResponse>,
+    private val onClick: (NotificationResponse) -> Unit
 ) : RecyclerView.Adapter<NotificacaoAdapter.ViewHolder>() {
 
     fun updateList(newList: List<NotificationResponse>) {
@@ -30,12 +32,15 @@ class NotificacaoAdapter(
         val item = items[position]
         holder.tvTitle.text = item.title ?: "Notificação"
         holder.tvBody.text = item.body ?: ""
-        holder.tvTime.text = item.createdAt ?: ""
+        holder.tvTime.text = item.createdAt?.let {
+            runCatching { TIME_FORMAT.format(Instant.parse(it).atZone(ZoneId.systemDefault())) }.getOrDefault(it)
+        }.orEmpty()
+        holder.itemView.alpha = if (item.readAt == null) 1f else 0.65f
+        holder.itemView.setOnClickListener { onClick(item) }
 
         when (item.type) {
-            "EXPIRATION" -> holder.imgIcon.setImageResource(R.drawable.ic_cat_meat)
-            "RECIPE" -> holder.imgIcon.setImageResource(R.drawable.ic_restaurant)
-            "LIST" -> holder.imgIcon.setImageResource(R.drawable.ic_receipt_long)
+            "PRODUCT_NEAR_EXPIRATION" -> holder.imgIcon.setImageResource(R.drawable.ic_cat_meat)
+            "SHOPPING_LIST_REMINDER" -> holder.imgIcon.setImageResource(R.drawable.ic_receipt_long)
             else -> holder.imgIcon.setImageResource(R.drawable.ic_notifications)
         }
     }
@@ -47,5 +52,9 @@ class NotificacaoAdapter(
         val tvTitle: TextView = itemView.findViewById(R.id.tvNotifTitle)
         val tvBody: TextView = itemView.findViewById(R.id.tvNotifBody)
         val tvTime: TextView = itemView.findViewById(R.id.tvNotifTime)
+    }
+
+    companion object {
+        private val TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM HH:mm")
     }
 }

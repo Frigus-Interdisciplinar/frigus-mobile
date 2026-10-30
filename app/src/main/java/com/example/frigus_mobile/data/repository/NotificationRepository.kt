@@ -1,22 +1,32 @@
 package com.example.frigus_mobile.data.repository
 
 import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.api.NotificationApiService
+import com.example.frigus_mobile.data.api.requireBody
+import com.example.frigus_mobile.data.api.requireNoContent
+import com.example.frigus_mobile.data.model.NotificationPageResponse
 import com.example.frigus_mobile.data.model.NotificationResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
-class NotificationRepository {
+class NotificationRepository(
+    private val api: NotificationApiService = RetrofitClient.notificationService
+) {
 
-    private val api = RetrofitClient.notificationService
+    suspend fun getNotifications(page: Int, size: Int, unreadOnly: Boolean? = null): NotificationPageResponse = withContext(Dispatchers.IO) {
+        api.getNotifications(page, size, unreadOnly).requireBody()
+    }
 
-    suspend fun getNotifications(): List<NotificationResponse> = withContext(Dispatchers.IO) {
-        val response = api.getNotifications().execute()
-        if (response.isSuccessful) {
-            response.body()?.content.orEmpty()
-        } else {
-            throw IOException("Falha ao carregar notificações do servidor (Código ${response.code()}).")
-        }
+    suspend fun markAsRead(id: String): NotificationResponse = withContext(Dispatchers.IO) {
+        api.markAsRead(id).requireBody()
+    }
+
+    suspend fun markAllAsRead() = withContext(Dispatchers.IO) {
+        api.markAllAsRead().requireNoContent()
+    }
+
+    suspend fun clearAll() = withContext(Dispatchers.IO) {
+        api.clearAll().requireNoContent()
     }
 }
 

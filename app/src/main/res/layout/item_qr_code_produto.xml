@@ -3,97 +3,135 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="10dp"
     android:background="@drawable/bg_card_white_rounded"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="14dp">
+    android:orientation="vertical"
+    android:padding="12dp">
 
-    <!-- Thumbnail -->
-    <FrameLayout
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:background="@drawable/bg_card_blue_tint">
-
-        <ImageView
-            android:id="@+id/imgQrItem"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_food_package"
-            app:tint="@color/blue_primary" />
-    </FrameLayout>
-
-    <!-- Nome e Preço -->
-    <LinearLayout
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/tvQrItemNome"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/darkBlue"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvQrItemNome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:text="Leite integral"
-            android:textColor="@color/darkBlue"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+    <TextView
+        android:id="@+id/tvQrItemDescricao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="12sp" />
 
-        <TextView
-            android:id="@+id/tvQrItemPreco"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:fontFamily="@font/sarabun"
-            android:text="1 un • R$ 5,49"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="12sp" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvQrItemPreco"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/darkBlue"
+        android:textSize="12sp" />
 
-    <!-- Controles [- 1 +] -->
+    <TextView
+        android:id="@+id/tvQrItemDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/tvQrItemEvidence"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvQrItemMatch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="@font/sarabun"
+        android:textColor="@color/blue_primary"
+        android:textSize="12sp" />
+
+    <CheckBox
+        android:id="@+id/qrIncludeItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/sarabun"
+        android:text="@string/receipt_include_item"
+        android:textColor="@color/darkBlue"
+        android:textSize="13sp" />
+
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/qrImportControls"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/btnDiminuirQtd"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="@drawable/bg_tab_unselected"
+            android:clickable="true"
+            android:contentDescription="@string/receipt_quantity_decrease"
+            android:focusable="true"
             android:fontFamily="@font/sarabun"
             android:gravity="center"
-            android:text="-"
+            android:text="@string/receipt_quantity_decrease_symbol"
             android:textColor="@color/blue_primary"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvQrItemQtd"
-            android:layout_width="28dp"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
             android:gravity="center"
-            android:text="1"
             android:textColor="@color/darkBlue"
             android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btnAumentarQtd"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="@drawable/bg_tab_unselected"
+            android:clickable="true"
+            android:contentDescription="@string/receipt_quantity_increase"
+            android:focusable="true"
             android:fontFamily="@font/sarabun"
             android:gravity="center"
-            android:text="+"
+            android:text="@string/receipt_quantity_increase_symbol"
             android:textColor="@color/blue_primary"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnQrExpireDate"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/receipt_expiration_choose"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            app:cornerRadius="8dp" />
     </LinearLayout>
 
 </LinearLayout>

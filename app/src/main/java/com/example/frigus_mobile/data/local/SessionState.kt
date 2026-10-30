@@ -16,7 +16,7 @@ class SessionState(
         private set
     @Volatile var user: UserResponse? = initialUser
         private set
-    @Volatile var validated: Boolean = initialToken?.isNotBlank() == true
+    @Volatile var validated: Boolean = false
         private set
     @Volatile var generation: Long = 0
         private set

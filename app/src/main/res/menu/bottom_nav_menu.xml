@@ -4,25 +4,25 @@
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
         android:fontFamily="@font/sarabun"
-        android:title="Início" />
+        android:title="@string/home_start" />
     <item
         android:id="@+id/nav_estoque"
         android:icon="@drawable/ic_estoque"
         android:fontFamily="@font/sarabun"
-        android:title="Estoque" />
+        android:title="@string/home_stock" />
     <item
         android:id="@+id/nav_receitas"
         android:icon="@drawable/ic_receita"
         android:fontFamily="@font/sarabun"
-        android:title="Receitas" />
+        android:title="@string/home_recipes" />
     <item
         android:id="@+id/nav_lista"
         android:icon="@drawable/ic_lista"
         android:fontFamily="@font/sarabun"
-        android:title="Lista" />
+        android:title="@string/home_list_tab" />
     <item
         android:id="@+id/nav_perfil"
         android:icon="@drawable/ic_user"
         android:fontFamily="@font/sarabun"
-        android:title="Perfil" />
+        android:title="@string/home_profile" />
 </menu>

@@ -36,6 +36,15 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/tvNotificationsError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:text="@string/notifications_error"
+        android:textColor="@color/profile_red"
+        android:visibility="gone" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -75,7 +84,59 @@
                 android:textColor="@color/gray"
                 android:textSize="15sp" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutErrorState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/notifications_error"
+                android:textColor="@color/gray" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRetryNotifications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/lista_tentar_novamente" />
+        </LinearLayout>
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/btnMarcarTodasLidas"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/notifications_mark_all_read"
+        android:textColor="@color/blue1"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/btnCarregarMais"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/notifications_load_more"
+        android:textColor="@color/blue1"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/btnLimparTodas"

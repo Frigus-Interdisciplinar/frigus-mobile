@@ -1,4 +1,4 @@
-package com.example.frigus_mobile.ui.login
+﻿package com.example.frigus_mobile.ui.login
 
 import android.content.Intent
 import android.graphics.Color
@@ -19,11 +19,13 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.BuildConfig
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionCredential
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
 import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.utils.CustomTypefaceSpan
 import com.example.frigus_mobile.utils.ValidationUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -42,6 +44,9 @@ class LoginActivity : AppCompatActivity() {
     private var navigated = false
     private var isAutoRevalidating = false
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var session: SessionManager
+    private var restoreCredential: SessionCredential? = null
+    private var pendingNavigation: Bundle? = null
 
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
@@ -57,15 +62,15 @@ class LoginActivity : AppCompatActivity() {
                 if (!idToken.isNullOrBlank()) {
                     viewModel.loginWithGoogle(idToken)
                 } else {
-                    Toast.makeText(this, "Não foi possível obter o token do Google", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "NÃ£o foi possÃ­vel obter o token do Google", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
                 val msg = when (e.statusCode) {
-                    10 -> "Erro 10 (Developer Error): SHA-1 ou Client ID não configurados no console."
-                    12501 -> "Login com Google cancelado pelo usuário."
+                    10 -> "Erro 10 (Developer Error): SHA-1 ou Client ID nÃ£o configurados no console."
+                    12501 -> "Login com Google cancelado pelo usuÃ¡rio."
                     12500 -> "Falha ao autenticar com Google. Tente novamente."
-                    7 -> "Sem conexão com a internet para autenticar com o Google."
-                    else -> "Falha ao entrar com Google (código ${e.statusCode})"
+                    7 -> "Sem conexÃ£o com a internet para autenticar com o Google."
+                    else -> "Falha ao entrar com Google (cÃ³digo ${e.statusCode})"
                 }
                 Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
             }
@@ -75,6 +80,10 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        session = SessionManager(this)
+        restoreCredential = session.state.credential()
+        pendingNavigation = if (restoreCredential != null)
+            intent.getBundleExtra(MainActivity.EXTRA_RESTORE_NAVIGATION) else null
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
         etEmail = findViewById(R.id.email)
         etSenha = findViewById(R.id.senha)
@@ -87,24 +96,37 @@ class LoginActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.btnEntrar).setOnClickListener { fazerLogin() }
         findViewById<View>(R.id.tvCriarConta).setOnClickListener {
+            discardPendingNavigation()
             startActivity(Intent(this, CreateAccountActivity::class.java))
         }
         findViewById<View>(R.id.tvEsqueciSenha).setOnClickListener {
+            discardPendingNavigation()
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
 
+
+
         viewModel.result.observe(this) { result ->
+            if (restoreCredential == null || session.state.credential() != restoreCredential) {
+                discardPendingNavigation()
+            }
             if (result == AuthResult.Authenticated && viewModel.isAuthenticated) {
                 isAutoRevalidating = false
                 if (!navigated) {
                     navigated = true
                     startActivity(Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        if (restoreCredential != null && session.state.credential() == restoreCredential) {
+                            pendingNavigation?.let { putExtra(MainActivity.EXTRA_RESTORE_NAVIGATION, it) }
+                        }
+                        if (PushNotifications.shouldOpenCenter(this@LoginActivity.intent)) {
+                            putExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS, true)
+                        }
                     })
                     finish()
                 }
             } else if (result is AuthResult.Failure && isAutoRevalidating) {
-                Log.d("LoginActivity", "Auto-login com token expirado/inválido. Limpando sessão silenciosamente...")
+                Log.d("LoginActivity", "Auto-login com token expirado/invÃ¡lido. Limpando sessÃ£o silenciosamente...")
                 isAutoRevalidating = false
                 SessionManager(this).clearSession()
                 render(null)
@@ -146,15 +168,15 @@ class LoginActivity : AppCompatActivity() {
                             return@addOnCompleteListener
                         }
                     }
-                    Log.d("LoginActivity", "silentSignIn não completou. Validando token existente com getProfile...")
+                    Log.d("LoginActivity", "silentSignIn nÃ£o completou. Validando token existente com getProfile...")
                     revalidarSessaoServidor(sessionManager)
                 }
             } catch (e: Exception) {
-                Log.w("LoginActivity", "Exceção em silentSignIn: ${e.message}. Validando com getProfile...")
+                Log.w("LoginActivity", "ExceÃ§Ã£o em silentSignIn: ${e.message}. Validando com getProfile...")
                 revalidarSessaoServidor(sessionManager)
             }
         } else {
-            Log.d("LoginActivity", "Conta padrão. Validando token existente com getProfile...")
+            Log.d("LoginActivity", "Conta padrÃ£o. Validando token existente com getProfile...")
             revalidarSessaoServidor(sessionManager)
         }
     }
@@ -216,7 +238,14 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun discardPendingNavigation() {
+        restoreCredential = null
+        pendingNavigation = null
+        intent.removeExtra(MainActivity.EXTRA_RESTORE_NAVIGATION)
+    }
+
     private fun fazerLogin() {
+        discardPendingNavigation()
         val email = etEmail.text?.toString()?.trim().orEmpty()
         val password = etSenha.text?.toString().orEmpty()
         if (!ValidationUtils.isEmailValido(email)) {

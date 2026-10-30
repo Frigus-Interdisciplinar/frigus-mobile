@@ -16,30 +16,29 @@ import com.example.frigus_mobile.utils.ProductCategoryHelper
 
 class EstoqueProdutoAdapter(
     private val context: Context,
-    private var items: List<StockProductResponse>
+    private var items: List<StockProductResponse>,
+    private val onClick: ((StockProductResponse) -> Unit)? = null
 ) : RecyclerView.Adapter<EstoqueProdutoAdapter.ViewHolder>() {
 
     fun updateList(newList: List<StockProductResponse>) {
-        this.items = newList
+        if (items == newList) return
+        items = newList
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_estoque_produto, parent, false)
-        return ViewHolder(view)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_estoque_produto, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        val productName = item.product?.name ?: "Alimento"
-        val qty = item.quantity ?: 0
+        val productName = item.product?.name?.takeIf(String::isNotBlank)
+            ?: context.getString(R.string.inventory_unnamed_product)
+        val qty = item.quantity?.toString() ?: "-"
         val unit = when (item.product?.unitOfMeasure) {
             "GRAM" -> "g"
             "KILOGRAM" -> "kg"
             "LITER" -> "L"
             "MILLILITER" -> "ml"
-            "UNIT" -> "un"
             else -> "un"
         }
         val expireDate = item.expireDate ?: "Sem data"
@@ -72,11 +71,18 @@ class EstoqueProdutoAdapter(
             }
         }
 
+        holder.itemView.isClickable = true
+        holder.itemView.isFocusable = true
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, AlimentoDetalhesActivity::class.java).apply {
-                putExtra("STOCK_PRODUCT", item)
+            if (onClick != null) {
+                onClick.invoke(item)
+            } else {
+                val intent = Intent(context, AlimentoDetalhesActivity::class.java).apply {
+                    putExtra("STOCK_PRODUCT", item)
+                    putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, item.id ?: 0)
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
         }
     }
 

@@ -3,8 +3,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".FrigusApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,6 +14,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Frigus_mobile"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="frigus_reminders" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification_status" />
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
+
+        <service
+            android:name=".push.FrigusMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".ui.login.LoginActivity"
@@ -36,10 +56,16 @@
 
         <activity
             android:name=".ui.recipes.ReceitaDetalhesActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.notifications.NotificacoesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.TodasCategoriasActivity"
+            android:enabled="false"
             android:exported="false" />
 
         <activity
@@ -48,26 +74,32 @@
 
         <activity
             android:name=".ui.stock.AlimentoDetalhesActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.stock.EditarAlimentoActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeScannerActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeCarregandoActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeItensActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
             android:name=".ui.qrcode.QrCodeConfirmacaoActivity"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
@@ -76,4 +108,3 @@
 
     </application>
 </manifest>
-

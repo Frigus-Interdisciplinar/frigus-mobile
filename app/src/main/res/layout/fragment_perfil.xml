@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
-        android:paddingTop="48dp"
+        android:paddingTop="24dp"
         android:paddingBottom="24dp">
         <TextView
             android:layout_width="match_parent"
@@ -21,7 +21,8 @@
             android:id="@+id/tvTituloPerfil"
             android:gravity="center"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:accessibilityHeading="true" />
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
@@ -32,285 +33,170 @@
             android:layout_marginTop="18dp"
             android:background="@drawable/bg_avatar_circle"
             android:padding="20dp"
-            app:tint="@color/profile_primary"/>
+            app:tint="@color/profile_primary" />
+        <ProgressBar
+            android:id="@+id/accountProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/account_gap"
+            android:contentDescription="@string/account_loading"
+            android:visibility="gone" />
         <TextView
+            android:id="@+id/accountStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
+            android:text="@string/account_loading"
+            android:textSize="@dimen/account_body_size"
             android:textColor="@color/darkBlue"
-            android:id="@+id/tvNomeUsuario"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:text="Juliana Martins"/>
-        <TextView
+            android:layout_marginTop="@dimen/account_gap"
+            android:accessibilityLiveRegion="polite"
+            android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/accountReload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:textColor="@color/gray"
-            android:id="@+id/tvEmailUsuario"
-            android:layout_marginTop="2dp"
-            android:gravity="center"
-            android:textSize="12sp"
-            tools:text="juliana.martins@email.com"/>
+            android:layout_marginTop="@dimen/account_gap"
+            android:minHeight="@dimen/account_touch_target"
+            android:text="@string/account_refresh" />
         <LinearLayout
-            android:id="@+id/cardPlanoPremium"
+            android:id="@+id/accountFields"
             android:layout_width="match_parent"
-            android:layout_height="78dp"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="23dp"
-            android:background="@drawable/bg_card_white_rounded"
-            android:clickable="true"
-            android:focusable="true">
-            <LinearLayout
-                android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/darkBlue"
+                android:id="@+id/tvNomeUsuario"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:text="@string/account_not_informed" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/gray"
+                android:id="@+id/tvEmailUsuario"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:text="@string/account_not_informed" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp"
+                android:padding="20dp"
+                android:background="@drawable/bg_card_white_rounded">
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
+                    android:text="@string/account_birth_date"
+                    android:textSize="@dimen/account_label_size"
                     android:textColor="@color/darkBlue"
-                    android:id="@+id/tvNomePlanoPerfil"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    tools:text="Plano Free"/>
+                    android:layout_marginTop="@dimen/account_section_gap"
+                    android:labelFor="@id/accountBirthDate" />
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/accountBirthDate"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:id="@+id/tvValidadePlanoPerfil"
-                    android:layout_marginTop="4dp"
-                    android:textSize="11sp"
-                    tools:text="Válido até 25/12/2026"/>
+                    android:text="@string/account_not_informed"
+                    android:textSize="@dimen/account_body_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_gap"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_type"
+                    android:textSize="@dimen/account_label_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_section_gap"
+                    android:labelFor="@id/accountType" />
+                <TextView
+                    android:id="@+id/accountType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/account_not_informed"
+                    android:textSize="@dimen/account_body_size"
+                    android:textColor="@color/darkBlue"
+                    android:layout_marginTop="@dimen/account_gap"
+                    android:textStyle="bold" />
             </LinearLayout>
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:src="@drawable/ic_crown"
-                android:contentDescription="@null"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_card_white_rounded"
             android:layout_marginTop="24dp"
-            android:paddingHorizontal="12dp">
-            <LinearLayout
-                android:id="@+id/btnAssinaturaPlanos"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_subscription"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_plans"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
-                android:id="@+id/btnConfiguracoes"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_sliders"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_settings"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
-                android:id="@+id/btnAjudaSuporte"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_help"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:text="@string/profile_support"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="13sp"
-                    android:textStyle="normal"
-                    android:maxLines="2"/>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@null"
-                    app:tint="@color/darkBlue"
-                    android:layout_marginEnd="4dp"/>
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/groupMoneySaving"
+            android:padding="20dp"
+            android:background="@drawable/bg_card_white_rounded">
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginHorizontal="12dp"
-                    android:background="@color/profile_divider"/>
-                <LinearLayout
-                    android:id="@+id/btnMoneySaving"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="12dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_trending_up"
-                        android:contentDescription="@null"
-                        android:layout_marginStart="6dp"/>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/sarabun"
-                            android:textColor="@color/darkBlue"
-                            android:text="@string/profile_money_saving"
-                            android:textSize="13sp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/sarabun"
-                            android:textColor="@color/gray"
-                            android:text="@string/profile_money_saving_subtitle"
-                            android:textSize="10sp"/>
-                    </LinearLayout>
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="@null"
-                        app:tint="@color/darkBlue"
-                        android:layout_marginEnd="4dp"/>
-                </LinearLayout>
-            </LinearLayout>
-            <View
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_read_only"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_section_gap" />
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@color/profile_divider"/>
-            <LinearLayout
-                android:id="@+id/btnSair"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_security_unavailable"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_gap" />
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:minHeight="48dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_profile_figma_logout"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="6dp"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/profile_red"
-                    android:text="@string/profile_sign_out"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:maxLines="2"/>
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/account_other_unavailable"
+                android:textSize="@dimen/account_body_size"
+                android:textColor="@color/darkBlue"
+                android:layout_marginTop="@dimen/account_gap" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/btnSair"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="48dp"
+            android:layout_marginTop="24dp"
+            android:contentDescription="@string/account_logout">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile_figma_logout"
+                android:contentDescription="@null"
+                android:layout_marginStart="6dp" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:textColor="@color/profile_red"
+                android:text="@string/profile_sign_out"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="2" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

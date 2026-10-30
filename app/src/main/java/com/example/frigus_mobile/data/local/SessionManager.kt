@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.example.frigus_mobile.BuildConfig
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.model.UserResponse
+import com.example.frigus_mobile.push.PushRegistration
 import com.google.gson.Gson
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -40,12 +41,13 @@ class SessionManager(context: Context) {
                     user = null
                     preferences.edit().clear().apply()
                 }
-                sharedState = SessionState(token, user,
+                sharedState = SessionState(
+                    initialToken = token,
+                    initialUser = user,
                     persist = { access, profile ->
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                        cipher.init(Cipher.ENCRYPT_MODE, key())
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
                         val encrypted = cipher.doFinal(access.toByteArray(Charsets.UTF_8))
-                        check(preferences.edit().clear()
+                        check(preferences.edit()
                             .putString("origin", BuildConfig.BFF_BASE_URL)
                             .putString("access", Base64.encodeToString(encrypted, Base64.NO_WRAP))
                             .putString("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
@@ -64,7 +66,10 @@ class SessionManager(context: Context) {
                             .clear()
                             .apply()
                     },
-                    changed = { authenticated.postValue(it) })
+                    changed = {
+                        authenticated.postValue(it)
+                        PushRegistration.onSessionChanged(context.applicationContext, it)
+                    })
                 if (!token.isNullOrBlank()) {
                     authenticated.postValue(true)
                 }

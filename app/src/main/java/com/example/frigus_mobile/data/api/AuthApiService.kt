@@ -12,16 +12,16 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthApiService {
-    @POST("auth/register")
+    @POST("mobile/user/register")
     fun cadastrar(@Body request: UserRegisterRequest): Call<UserResponse>
 
-    @POST("auth/login")
+    @POST("mobile/user/login")
     fun login(@Body request: UserLoginRequest): Call<UserLoginResponse>
 
     @POST("auth/google")
     fun loginComGoogle(@Body request: GoogleLoginRequest): Call<UserLoginResponse>
 
-    @GET("profile")
+    @GET("mobile/user/profile")
     fun getProfile(): Call<UserResponse>
 
     @GET("subscriptions/me")

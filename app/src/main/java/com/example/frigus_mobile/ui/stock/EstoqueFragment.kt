@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
@@ -49,7 +50,7 @@ class EstoqueFragment : Fragment() {
         repository = StockRepository(requireContext())
 
         // Botão Ler QR Code
-        view.findViewById<View>(R.id.btnEstoqueQrScanner).setOnClickListener {
+        view.findViewById<View>(R.id.btnEstoqueQrScanner)?.setOnClickListener {
             startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))
         }
 
@@ -96,7 +97,13 @@ class EstoqueFragment : Fragment() {
         // RecyclerView
         val rv = view.findViewById<RecyclerView>(R.id.rvProximosVencimento)
         rv.layoutManager = LinearLayoutManager(requireContext())
-        adapter = EstoqueProdutoAdapter(requireContext(), emptyList())
+        adapter = EstoqueProdutoAdapter(requireContext(), emptyList()) { item ->
+            val intent = Intent(requireContext(), AlimentoDetalhesActivity::class.java).apply {
+                putExtra("STOCK_PRODUCT", item)
+                putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, item.id ?: 0)
+            }
+            startActivity(intent)
+        }
         rv.adapter = adapter
 
         // Busca
@@ -108,6 +115,14 @@ class EstoqueFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        val inventoryViewModel = ViewModelProvider(requireActivity())[InventoryViewModel::class.java]
+        inventoryViewModel.state.observe(viewLifecycleOwner) { state ->
+            val place = state.filters.storagePlace
+            if (place != null && place != currentStoragePlace) {
+                selectTab(place)
+            }
+        }
 
         carregarDados()
     }

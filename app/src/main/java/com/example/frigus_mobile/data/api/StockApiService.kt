@@ -1,34 +1,69 @@
 package com.example.frigus_mobile.data.api
 
+import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import com.example.frigus_mobile.data.model.PageResponse
-import com.example.frigus_mobile.data.model.StockCreateRequest
+import com.example.frigus_mobile.data.model.ProductCreateRequest
+import com.example.frigus_mobile.data.model.StockMovementRequest
+import com.example.frigus_mobile.data.model.StockMovementResponse
 import com.example.frigus_mobile.data.model.StockProductCreateRequest
 import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
-import com.google.gson.JsonElement
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
+/** Published /mobile/inventory contract on frigus-bff/dev + catalog & direct lot endpoints. */
 interface StockApiService {
 
-    @GET("groups")
-    suspend fun getMyGroups(): Response<JsonElement>
+    @GET("mobile/inventory/home")
+    fun getInventoryHome(@Query("groupId") groupId: String? = null): Call<InventoryHomeResponse>
 
-    @POST("groups")
-    suspend fun createGroup(
-        @Body request: Map<String, String>
-    ): Response<JsonElement>
+    @GET("mobile/inventory/products")
+    fun getProducts(
+        @Query("groupId") groupId: String? = null,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 30,
+        @Query("category") category: String? = null,
+        @Query("storagePlace") storagePlace: String? = null,
+        @Query("q") query: String? = null
+    ): Call<PageResponse<StockProductResponse>>
 
-    @GET("stocks")
-    suspend fun getStocksByGroup(
-        @Query("groupId") groupId: String
-    ): Response<JsonElement>
+    @GET("mobile/inventory/stocks/{stockId}/products")
+    fun getStockProducts(
+        @Path("stockId") stockId: Int,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 30,
+        @Query("category") category: String? = null,
+        @Query("storagePlace") storagePlace: String? = null,
+        @Query("q") query: String? = null
+    ): Call<PageResponse<StockProductResponse>>
 
-    @POST("stocks")
-    suspend fun createStock(
-        @Body request: StockCreateRequest
-    ): Response<JsonElement>
+    @GET("mobile/inventory/stock-products/{id}")
+    fun getStockProductById(
+        @Path("id") id: Int
+    ): Call<StockProductResponse>
+
+    @PUT("mobile/inventory/stock-products/{id}")
+    fun updateStockProduct(
+        @Path("id") id: Int,
+        @Body request: StockProductUpdateRequest
+    ): Call<StockProductResponse>
+
+    @DELETE("mobile/inventory/stock-products/{id}")
+    fun deleteStockProduct(
+        @Path("id") id: Int
+    ): Call<Void>
+
+    @GET("mobile/inventory/stock-products/{id}/movements")
+    fun getMovements(
+        @Path("id") id: Int,
+        @Query("page") page: Int? = null,
+        @Query("size") size: Int? = null
+    ): Call<PageResponse<StockMovementResponse>>
+
+    @POST("mobile/inventory/stock-products/{id}/movements")
+    fun createMovement(@Path("id") id: Int, @Body request: StockMovementRequest): Call<StockMovementResponse>
 
     @GET("products")
     suspend fun getCatalogProducts(
@@ -39,32 +74,11 @@ interface StockApiService {
 
     @POST("products")
     suspend fun createProduct(
-        @Body request: com.example.frigus_mobile.data.model.ProductCreateRequest
+        @Body request: ProductCreateRequest
     ): Response<StockProductProductResponse>
-
-    @GET("stock-products")
-    suspend fun getStockProducts(
-        @Query("stockId") stockId: Int
-    ): Response<PageResponse<StockProductResponse>>
-
-    @GET("stock-products/{id}")
-    suspend fun getStockProductById(
-        @Path("id") id: Int
-    ): Response<StockProductResponse>
 
     @POST("stock-products")
     suspend fun createStockProduct(
         @Body request: StockProductCreateRequest
     ): Response<StockProductResponse>
-
-    @PUT("stock-products/{id}")
-    suspend fun updateStockProduct(
-        @Path("id") id: Int,
-        @Body request: StockProductUpdateRequest
-    ): Response<StockProductResponse>
-
-    @DELETE("stock-products/{id}")
-    suspend fun deleteStockProduct(
-        @Path("id") id: Int
-    ): Response<Unit>
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="inventory_all_stocks">Todos os estoques do grupo</string>
+    <string name="inventory_unnamed_stock">Estoque sem nome</string>
+    <string name="inventory_stock_option">%1$s (#%2$d)</string>
+    <string name="inventory_stock_label">Estoque</string>
+    <string name="inventory_place_label">Local do alimento</string>
+    <string name="inventory_category_label">Categoria</string>
+    <string name="inventory_search">Buscar por nome, marca ou lote</string>
+    <string name="inventory_group_summary">Resumo geral do grupo</string>
+    <string name="inventory_group_counts">%1$s lotes no total\nEm dia: %2$s · Próximos de vencer: %3$s · Vencidos: %4$s</string>
+    <string name="inventory_summary_note">O resumo inclui todos os estoques e locais do grupo. Os filtros abaixo se aplicam à lista.</string>
+    <string name="inventory_results">Lotes encontrados</string>
+    <string name="inventory_read_only">Selecione um lote para consultar, editar ou remover. Movimentos estarão disponíveis em uma próxima entrega.</string>
+    <string name="inventory_loading">Consultando estoque…</string>
+    <string name="inventory_invalid_response">Não foi possível interpretar o estoque. Tente novamente.</string>
+    <string name="inventory_network_error">Não foi possível conectar ao estoque. Verifique sua conexão e tente novamente.</string>
+    <string name="inventory_forbidden">Você não tem permissão para consultar este estoque.</string>
+    <string name="inventory_load_error">Não foi possível carregar o estoque. Tente novamente.</string>
+    <string name="inventory_no_stocks">Nenhum estoque disponível neste grupo. A criação de estoques não está disponível no app.</string>
+    <string name="inventory_no_matches">Nenhum lote encontrado. Altere os filtros ou atualize a consulta.</string>
+    <string name="inventory_loaded_count">%1$s de %2$s lotes carregados</string>
+    <string name="inventory_more">Carregar mais</string>
+    <string name="inventory_refresh">Atualizar</string>
+    <string name="inventory_retry">Tentar novamente</string>
+    <string name="inventory_unknown">—</string>
+    <string name="inventory_unnamed_product">Alimento sem nome</string>
+    <string name="inventory_quantity">%1$s %2$s</string>
+    <string name="inventory_expiry">Validade: %1$s</string>
+    <string name="inventory_lot_identity">Lote #%1$d · Estoque #%2$d</string>
+    <string name="inventory_fresh">Em dia</string>
+    <string name="inventory_near_expiration">Próximo de vencer</string>
+    <string name="inventory_expired">Vencido</string>
+    <string name="inventory_unclassified">Status não informado</string>
+    <string name="inventory_unit_kg">kg</string>
+    <string name="inventory_unit_g">g</string>
+    <string name="inventory_unit_l">L</string>
+    <string name="inventory_unit_ml">ml</string>
+    <string name="inventory_unit_each">un.</string>
+    <string name="inventory_unit_dozen">dúzia(s)</string>
+    <string name="inventory_unit_package">pacote(s)</string>
+    <string name="inventory_unit_unknown">unidade não informada</string>
+    <string-array name="inventory_place_codes">
+        <item></item><item>FRIDGE</item><item>FREEZER</item><item>PANTRY</item><item>CABINET</item><item>SHELF</item>
+    </string-array>
+    <string-array name="inventory_place_labels">
+        <item>Todos os locais</item><item>Geladeira</item><item>Freezer</item><item>Despensa</item><item>Armário</item><item>Prateleira</item>
+    </string-array>
+    <string-array name="inventory_category_codes">
+        <item></item><item>FRUIT</item><item>VEGETABLE</item><item>DAIRY</item><item>GRAIN</item><item>MEAT</item><item>BEVERAGE</item><item>CLEANING</item><item>PERSONAL_HYGIENE</item><item>FISH</item><item>FROZEN</item><item>SWEETS</item><item>CANNED</item><item>SEASONING</item>
+    </string-array>
+    <string-array name="inventory_category_labels">
+        <item>Todas as categorias</item><item>Frutas</item><item>Vegetais</item><item>Laticínios</item><item>Grãos</item><item>Carnes</item><item>Bebidas</item><item>Limpeza</item><item>Higiene pessoal</item><item>Peixes</item><item>Congelados</item><item>Doces</item><item>Enlatados</item><item>Temperos</item>
+    </string-array>
+</resources>

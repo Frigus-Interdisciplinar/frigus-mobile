@@ -25,8 +25,13 @@ import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_LOT_ID = "extra_lot_id"
+    }
+
     private lateinit var repository: StockRepository
     private var item: StockProductResponse? = null
+    private var lotId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +39,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
         repository = StockRepository(this)
         item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
+        lotId = intent.getIntExtra(EXTRA_LOT_ID, item?.id ?: -1)
 
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()
@@ -57,7 +63,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
     }
 
     private fun atualizarDetalhesDaApi() {
-        val id = item?.id ?: return
+        val id = item?.id ?: if (lotId > 0) lotId else return
         if (!NetworkGuard.ensureConnected(this) { atualizarDetalhesDaApi() }) return
 
         lifecycleScope.launch {
@@ -65,6 +71,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
                 val updated = repository.getStockProductById(id)
                 if (updated != null) {
                     item = updated
+                    lotId = updated.id ?: id
                     preencherDados()
                 }
             } catch (e: Exception) {

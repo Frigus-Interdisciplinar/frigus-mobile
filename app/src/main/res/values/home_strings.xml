@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_greeting">Olá!</string>
+    <string name="home_named_greeting">Olá, %1$s!</string>
+    <string name="home_subtitle">Vamos cuidar do que importa!</string>
+    <string name="home_stock">Estoque</string>
+    <string name="home_recipes">Receitas</string>
+    <string name="home_list_tab">Lista</string>
+    <string name="home_shopping_list">Lista de compras</string>
+    <string name="home_profile">Perfil</string>
+    <string name="home_start">Início</string>
+    <string name="home_notifications">Notificações</string>
+    <string name="home_notifications_pending">Notificações — indisponível nesta versão</string>
+    <string name="home_conversations">Conversas</string>
+    <string name="home_qr">Leitor de QR Code</string>
+    <string name="home_qr_description">Leia NFC-e da SEFAZ-SP e revise os produtos antes de importar.</string>
+    <string name="home_ai">Assistente IA</string>
+    <string name="home_feature_pending">Indisponível nesta versão</string>
+    <string name="home_feature_unavailable">%1$s\n\nEsta função ainda não está disponível nesta versão.</string>
+    <string name="home_other_features">Outros recursos</string>
+    <string name="home_back">Voltar ao início</string>
+    <string name="home_loading">Carregando resumo do estoque…</string>
+    <string name="home_refresh">Atualizar resumo</string>
+    <string name="home_retry">Tentar novamente</string>
+    <string name="home_network_error">Não foi possível conectar ao Frigus. Verifique a conexão e tente novamente.</string>
+    <string name="home_invalid_response">Não foi possível obter um resumo válido. Tente atualizar novamente.</string>
+    <string name="home_forbidden">Você não tem permissão para consultar este estoque.</string>
+    <string name="home_load_error">Não foi possível carregar o resumo do estoque. Tente novamente.</string>
+    <string name="home_no_stocks">Nenhum estoque disponível no grupo atual.</string>
+    <string name="home_empty_stock">Os estoques do grupo atual estão vazios.</string>
+    <string name="home_unknown_count">—</string>
+    <string name="home_expiration_counts">Perto do vencimento: %1$s\nVencidos: %2$s</string>
+    <string name="home_expiration_unknown">Os alertas de validade não estão disponíveis no momento.</string>
+    <string name="home_details_pending">Detalhes indisponíveis nesta versão</string>
+    <string name="home_your_stock">Seu estoque</string>
+    <string name="home_all_places_note">O total considera todos os estoques e locais do grupo atual.</string>
+    <string name="home_fridge">Geladeira</string>
+    <string name="home_freezer">Freezer</string>
+    <string name="home_pantry">Despensa</string>
+    <plurals name="home_item_count">
+        <item quantity="one">%1$s item</item>
+        <item quantity="other">%1$s itens</item>
+    </plurals>
+</resources>
