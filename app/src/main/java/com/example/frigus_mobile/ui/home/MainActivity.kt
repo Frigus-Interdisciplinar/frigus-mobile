@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         if (validSelected == R.id.nav_perfil) {
             val section = when (navigationState?.getString(PROFILE_SECTION)) {
                 "subscription" -> com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment()
+                "money-saving" -> com.example.frigus_mobile.ui.profile.MoneySavingFragment()
                 else -> null
             }
             section?.let {
@@ -166,6 +167,7 @@ class MainActivity : AppCompatActivity() {
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
         when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
             is com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment -> outState.putString(PROFILE_SECTION, "subscription")
+            is com.example.frigus_mobile.ui.profile.MoneySavingFragment -> outState.putString(PROFILE_SECTION, "money-saving")
         }
         if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
         outState.putBundle(ACTIVITY_RESULTS, Bundle().also(activityResultRegistry::onSaveInstanceState))
@@ -238,7 +240,7 @@ class MainActivity : AppCompatActivity() {
                 R.string.home_conversations, R.string.home_qr, R.string.home_ai)
             putInt(UNAVAILABLE_TITLE, title.takeIf { it in safeTitles } ?: 0)
             putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
-            source.getString(PROFILE_SECTION)?.takeIf { it == "subscription" }
+            source.getString(PROFILE_SECTION)?.takeIf { it in setOf("subscription", "money-saving") }
                 ?.let { putString(PROFILE_SECTION, it) }
         }
     }
