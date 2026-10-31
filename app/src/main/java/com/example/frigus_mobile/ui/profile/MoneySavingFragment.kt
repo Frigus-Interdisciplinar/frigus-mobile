@@ -78,19 +78,21 @@ class MoneySavingFragment : Fragment() {
         view.findViewById<Button>(R.id.retry).visibility = if (state.error != null) View.VISIBLE else View.GONE
         view.findViewById<Button>(R.id.loadMore).visibility = if (state.hasMore && !state.loading) View.VISIBLE else View.GONE
         val summary = state.summary
+        val confirmed = summary?.hasFinancialData == true
+        fun confirmedAmount(value: Double?): String = if (confirmed) amount(value) else "Valor não confirmado"
         view.findViewById<TextView>(R.id.summary).text = if (summary == null) "" else buildString {
-            appendLine("Gastos: ${amount(summary.spending?.amount)}")
-            appendLine("Economia: ${amount(summary.saving?.amount)}")
-            appendLine("Perdas: ${amount(summary.loss?.amount)}")
-            summary.spendingChangePercent?.let { append("Variação de gastos: ${it}%") }
+            appendLine("Gastos: ${confirmedAmount(summary.spending?.amount)}")
+            appendLine("Economia: ${confirmedAmount(summary.saving?.amount)}")
+            appendLine("Perdas: ${confirmedAmount(summary.loss?.amount)}")
+            if (confirmed) summary.spendingChangePercent?.let { append("Variação de gastos: ${it}%") }
         }
         view.findViewById<TextView>(R.id.categories).text =
-            summary?.categories?.takeIf { it.isNotEmpty() }?.joinToString("\n") {
-                "${it.category ?: "Categoria"}: gastos ${amount(it.spent)}, economia ${amount(it.saved)}, perdas ${amount(it.lost)}"
+            summary?.categories?.takeIf { confirmed && it.isNotEmpty() }?.joinToString("\n") {
+                "${it.category ?: "Categoria"}: gastos ${confirmedAmount(it.spent)}, economia ${confirmedAmount(it.saved)}, perdas ${confirmedAmount(it.lost)}"
             }?.let { "Categorias\n$it" } ?: ""
         view.findViewById<TextView>(R.id.months).text =
-            summary?.months?.takeIf { it.isNotEmpty() }?.joinToString("\n") {
-                "${it.month ?: "Mês"}: ${amount(it.spent)} gastos · ${amount(it.saved)} economia · ${amount(it.lost)} perdas"
+            summary?.months?.takeIf { confirmed && it.isNotEmpty() }?.joinToString("\n") {
+                "${it.month ?: "Mês"}: ${confirmedAmount(it.spent)} gastos · ${confirmedAmount(it.saved)} economia · ${confirmedAmount(it.lost)} perdas"
             }?.let { "Últimos meses\n$it" } ?: ""
         val eventList = view.findViewById<LinearLayout>(R.id.events)
         eventList.removeAllViews()
