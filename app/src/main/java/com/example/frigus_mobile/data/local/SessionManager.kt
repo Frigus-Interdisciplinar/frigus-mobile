@@ -30,7 +30,9 @@ class SessionManager(context: Context) {
                 try {
                     val ciphertext = preferences.getString("access", null)
                     val iv = preferences.getString("iv", null)
-                    if (ciphertext != null && iv != null) {
+                    if (preferences.getString("origin", null) != BuildConfig.BFF_BASE_URL) {
+                        preferences.edit().clear().apply()
+                    } else if (ciphertext != null && iv != null) {
                         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
                         token = String(cipher.doFinal(Base64.decode(ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
@@ -41,38 +43,23 @@ class SessionManager(context: Context) {
                     user = null
                     preferences.edit().clear().apply()
                 }
-                sharedState = SessionState(
-                    initialToken = token,
-                    initialUser = user,
+                sharedState = SessionState(token, user,
                     persist = { access, profile ->
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        cipher.init(Cipher.ENCRYPT_MODE, key())
                         val encrypted = cipher.doFinal(access.toByteArray(Charsets.UTF_8))
-                        check(preferences.edit()
+                        check(preferences.edit().clear()
                             .putString("origin", BuildConfig.BFF_BASE_URL)
                             .putString("access", Base64.encodeToString(encrypted, Base64.NO_WRAP))
                             .putString("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
                             .putString("profile", Gson().toJson(profile))
                             .commit()) { "Session persistence failed" }
                     },
-                    erase = {
-                        preferences.edit()
-                            .remove("group")
-                            .remove("stock")
-                            .remove("google_photo_url")
-                            .remove("origin")
-                            .remove("access")
-                            .remove("iv")
-                            .remove("profile")
-                            .clear()
-                            .apply()
-                    },
+                    erase = { preferences.edit().clear().apply() },
                     changed = {
                         authenticated.postValue(it)
                         PushRegistration.onSessionChanged(context.applicationContext, it)
                     })
-                if (!token.isNullOrBlank()) {
-                    authenticated.postValue(true)
-                }
             }
             state = sharedState!!
         }
@@ -85,53 +72,20 @@ class SessionManager(context: Context) {
     val userEmail: String? get() = state.user?.email
     val userBirthDate: String? get() = state.user?.birthDate
     val userAccountType: String? get() = state.user?.accountType
-    val userId: String? get() = state.user?.id
-    /** Conta do tipo Doméstico (backend: "DOMESTIC"). Usado para liberar o MoneySaving. */
-    val isDomestic: Boolean get() = userAccountType.equals("DOMESTIC", ignoreCase = true)
     val activeGroupId: String? get() = preferences.getString("group", null)
     val activeStockId: Int? get() = preferences.getInt("stock", -1).takeIf { it > 0 }
-    val googlePhotoUrl: String? get() = preferences.getString("google_photo_url", null)
-
-    fun saveGooglePhotoUrl(url: String?) {
-        if (!url.isNullOrBlank()) {
-            preferences.edit().putString("google_photo_url", url).apply()
-        }
-    }
 
     fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
-
-    fun clearSession() {
-        state.clear()
-        preferences.edit()
-            .remove("group")
-            .remove("stock")
-            .remove("google_photo_url")
-            .remove("origin")
-            .remove("access")
-            .remove("iv")
-            .remove("profile")
-            .clear()
-            .apply()
-    }
-
+    fun clearSession() = state.clear()
     fun saveActiveGroupAndStock(groupId: String?, stockId: Int?) {
-        val editor = preferences.edit()
-        if (!groupId.isNullOrBlank()) {
-            editor.putString("group", groupId)
-        } else {
-            editor.remove("group")
-        }
-        if (stockId != null && stockId > 0) {
-            editor.putInt("stock", stockId)
-        } else {
-            editor.remove("stock")
-        }
-        editor.apply()
+        preferences.edit().putString("group", groupId).apply {
+            if (stockId != null) putInt("stock", stockId) else remove("stock")
+        }.apply()
     }
 
     companion object {
         const val PREF_NAME = "mobile_bff_session"
-        val authenticated = MutableLiveData<Boolean>()
+        val authenticated = MutableLiveData(false)
         private var sharedState: SessionState? = null
         private const val KEY_ALIAS = "frigus_mobile_bff_access_v1"
 

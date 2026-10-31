@@ -105,7 +105,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_meat" />
+                    android:src="@drawable/ic_cat_meat"
+                    app:tint="#EF4444" />
             </FrameLayout>
 
             <LinearLayout
@@ -165,7 +166,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_dairy" />
+                    android:src="@drawable/ic_cat_dairy"
+                    app:tint="@color/blue_primary" />
             </FrameLayout>
 
             <LinearLayout
@@ -225,7 +227,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_hortifruti" />
+                    android:src="@drawable/ic_cat_hortifruti"
+                    app:tint="@color/color_green" />
             </FrameLayout>
 
             <LinearLayout
@@ -285,7 +288,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_beverages" />
+                    android:src="@drawable/ic_cat_beverages"
+                    app:tint="#EC4899" />
             </FrameLayout>
 
             <LinearLayout

@@ -1,4 +1,4 @@
-﻿package com.example.frigus_mobile.data.repository
+package com.example.frigus_mobile.data.repository
 
 import android.content.Context
 import com.example.frigus_mobile.data.api.BffException
@@ -21,7 +21,6 @@ import com.example.frigus_mobile.data.model.StockMovementResponse
 import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
-import com.example.frigus_mobile.utils.StockQuantityTracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -29,55 +28,41 @@ import java.time.format.DateTimeFormatter
 
 class StockRepository(context: Context? = null) {
     private val api = RetrofitClient.stockService
-    private val appContext = context?.applicationContext
     private val sessionManager = context?.let { SessionManager(it) }
 
     /** M04 resolves the active group and its stocks on the BFF. */
     suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
-        val cachedStock = sessionManager?.activeStockId
-        val cachedGroup = sessionManager?.activeGroupId
-        if (cachedStock != null && cachedStock > 0 && !cachedGroup.isNullOrBlank()) {
-            return@withContext cachedStock
-        }
-        try {
-            val home = api.getInventoryHome().requireBody()
-            val stockId = home.stocks?.filterNotNull()?.firstOrNull()?.id
-            sessionManager?.saveActiveGroupAndStock(home.groupId, stockId)
-            stockId
-        } catch (e: Exception) {
-            sessionManager?.saveActiveGroupAndStock(null, null)
-            throw e
-        }
+        val home = api.getInventoryHome().requireBody()
+        val stockId = home.stocks?.filterNotNull()?.firstOrNull()?.id
+        sessionManager?.saveActiveGroupAndStock(home.groupId, stockId)
+        stockId
     }
 
-    suspend fun getInventoryContext(): InventoryHomeResponse = api.getInventoryHome().requireBody()
-
+    /** Existing screens expect all products; M05 is paged across the active group. */
     suspend fun getStockProducts(): List<StockProductResponse> = withContext(Dispatchers.IO) {
-        val stockId = resolveUserStockId() ?: return@withContext emptyList()
-        getStockProducts(stockId)
+        val items = mutableListOf<StockProductResponse>()
+        var page = 0
+        var totalPages: Int
+        do {
+            val result = api.getProducts(page = page, size = 100).requireBody()
+            items.addAll(result.content)
+            totalPages = result.totalPages
+            page++
+        } while (page < totalPages)
+        items
     }
 
-    suspend fun getStockProducts(stockId: Int): List<StockProductResponse> = withContext(Dispatchers.IO) {
-        var page = 0
-        val allItems = mutableListOf<StockProductResponse>()
-        while (true) {
-            val result = api.getStockProducts(stockId = stockId, page = page, size = 100).awaitPage(page, stockId)
-            val items = result.content ?: emptyList()
-            allItems.addAll(items.filterNotNull())
-            if (result.totalPages <= 0 || page >= result.totalPages - 1 || items.isEmpty()) {
-                break
-            }
-            page++
-        }
-        // Inicializa o rastreador de quantidade original para cÃ¡lculo da barra de progresso
-        if (appContext != null) {
-            allItems.forEach { prod ->
-                prod.id?.let { id ->
-                    StockQuantityTracker.getOrSetInitialQuantity(appContext, id, prod.quantity ?: 0)
-                }
+    /** Reuse the M04 validation used by Home, without choosing or creating a stock. */
+    suspend fun getInventoryContext(): InventoryHomeResponse = suspendCancellableCoroutine { continuation ->
+        val call = InventoryHomeRepository().load { home, error ->
+            if (continuation.isActive) {
+                if (home != null) continuation.resume(home)
+                else continuation.resumeWithException(BffException(
+                    error ?: ApiError(code = "INVALID_RESPONSE"), ""
+                ))
             }
         }
-        allItems
+        continuation.invokeOnCancellation { call.cancel() }
     }
 
     suspend fun getProductsPage(
@@ -88,7 +73,8 @@ class StockRepository(context: Context? = null) {
         query: String? = null,
         groupId: String? = null
     ): PageResponse<StockProductResponse> =
-        api.getProducts(groupId, page, size, category, storagePlace, query).awaitPage(page, null)
+        api.getProducts(groupId = groupId, page = page, size = size, category = category,
+            storagePlace = storagePlace, query = query).awaitPage(page)
 
     suspend fun getStockProductsPage(
         stockId: Int,
@@ -100,9 +86,10 @@ class StockRepository(context: Context? = null) {
     ): PageResponse<StockProductResponse> =
         api.getStockProducts(stockId, page, size, category, storagePlace, query).awaitPage(page, stockId)
 
+    /** Cancel obsolete GETs and reject invalid pages instead of rendering them as empty stock. */
     private suspend fun Call<PageResponse<StockProductResponse>>.awaitPage(
         requestedPage: Int,
-        stockId: Int?
+        stockId: Int? = null
     ): PageResponse<StockProductResponse> = suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation { cancel() }
         enqueue(object : Callback<PageResponse<StockProductResponse>> {
@@ -117,8 +104,9 @@ class StockRepository(context: Context? = null) {
                     body.size > 0 && body.totalElements >= items.size && body.totalPages >= 0 &&
                     items.size <= body.size &&
                     (if (body.totalPages == 0) items.isEmpty() && body.totalElements == 0L
-                    else requestedPage < body.totalPages && (items.isNotEmpty() || requestedPage == body.totalPages - 1)) &&
-                    items.all { it != null && (it.id ?: 0) > 0 && (stockId == null || it.stockId == stockId) }
+                        else body.number < body.totalPages && (items.isNotEmpty() || body.number == body.totalPages - 1)) &&
+                    items.all { it != null && (it.id ?: 0) > 0 && (it.stockId ?: 0) > 0 &&
+                        (stockId == null || it.stockId == stockId) }
                 when {
                     response.code() != 200 -> continuation.resumeWithException(BffException(ApiError.parse(response), ""))
                     !valid -> continuation.resumeWithException(BffException(ApiError(code = "INVALID_RESPONSE"), ""))
@@ -157,17 +145,13 @@ class StockRepository(context: Context? = null) {
 
     suspend fun updateStockProduct(
         id: Int,
-        quantity: Int? = null,
-        expireDate: String? = null,
-        storagePlace: String? = null,
-        name: String? = null,
-        category: String? = null
+        quantity: Int?,
+        expireDate: String?,
+        storagePlace: String?
     ): Boolean {
         val request = StockProductUpdateRequest(
-            name = name?.trim()?.takeIf { it.isNotEmpty() },
-            category = category,
             quantity = quantity,
-            expireDate = expireDate?.let { try { isoDate(it) } catch (_: Exception) { it } },
+            expireDate = expireDate?.let(::isoDate),
             storagePlace = storagePlace
         )
         updateStockProduct(id, request)
@@ -212,85 +196,13 @@ class StockRepository(context: Context? = null) {
         return movement
     }
 
-    suspend fun createProduct(
-        name: String,
-        category: String,
-        storagePlace: String,
-        unitPrice: Double = 1.0,
-        unitOfMeasure: String = "UNIT"
-    ): StockProductProductResponse = withContext(Dispatchers.IO) {
-        var groupId = sessionManager?.activeGroupId
-        if (groupId.isNullOrBlank()) {
-            try { resolveUserStockId() } catch (_: Exception) {}
-            groupId = sessionManager?.activeGroupId
-        }
-        val request = com.example.frigus_mobile.data.model.ProductCreateRequest(
-            name = name.trim(),
-            category = category,
-            storagePlace = storagePlace,
-            unitPrice = unitPrice,
-            unitOfMeasure = unitOfMeasure,
-            ownerGroupId = groupId
-        )
-        try {
-            val response = api.createProduct(request)
-            if (response.isSuccessful && response.body() != null) {
-                return@withContext response.body()!!
-            }
-        } catch (_: Exception) {
-        }
-        StockProductProductResponse(
-            id = (System.currentTimeMillis() % 100000).toInt(),
-            name = name.trim(),
-            category = category,
-            storagePlace = storagePlace,
-            unitPrice = unitPrice,
-            unitOfMeasure = unitOfMeasure
-        )
-    }
+    /** There is no mobile catalog or direct lot creation endpoint yet. */
+    @Deprecated("No published /mobile catalog endpoint")
+    suspend fun getCatalogProducts(): List<StockProductProductResponse> = unavailableMobileContract()
 
-    suspend fun getCatalogProducts(): List<StockProductProductResponse> = withContext(Dispatchers.IO) {
-        try {
-            val groupId = sessionManager?.activeGroupId
-            val response = api.getCatalogProducts(page = 0, size = 100, groupId = groupId)
-            if (response.isSuccessful) {
-                return@withContext response.body()?.content.orEmpty()
-            }
-        } catch (_: Exception) {
-        }
-        emptyList()
-    }
-
-    suspend fun addStockProduct(item: StockProductResponse): Unit = withContext(Dispatchers.IO) {
-        val stockId = try { resolveUserStockId() ?: item.stockId ?: 1 } catch (_: Exception) { item.stockId ?: 1 }
-        val isoExpireDate = item.expireDate?.let {
-            try { isoDate(it) } catch (_: Exception) { LocalDate.now().plusDays(15).toString() }
-        } ?: LocalDate.now().plusDays(15).toString()
-        val validPrice = if (item.purchaseUnitPrice != null && item.purchaseUnitPrice > 0.0) {
-            item.purchaseUnitPrice
-        } else {
-            1.0
-        }
-        val prodId = item.productId ?: item.id ?: 1
-        val req = com.example.frigus_mobile.data.model.StockProductCreateRequest(
-            productId = prodId,
-            stockId = stockId,
-            quantity = item.quantity ?: 1,
-            minimalQuantity = item.minimalQuantity ?: 1,
-            purchaseUnitPrice = validPrice,
-            expireDate = isoExpireDate
-        )
-        try {
-            val resp = api.createStockProduct(req)
-            if (resp.isSuccessful) {
-                val createdId = resp.body()?.id
-                if (createdId != null && appContext != null) {
-                    StockQuantityTracker.setInitialQuantity(appContext, createdId, item.quantity ?: 1)
-                }
-            }
-        } catch (_: Exception) {
-        }
-    }
+    @Deprecated("No published /mobile lot creation endpoint")
+    suspend fun addStockProduct(@Suppress("UNUSED_PARAMETER") item: StockProductResponse): Unit =
+        unavailableMobileContract()
 
     companion object {
         fun isoDate(value: String): String {

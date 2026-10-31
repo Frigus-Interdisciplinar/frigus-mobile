@@ -55,7 +55,7 @@
                 android:layout_width="189dp"
                 android:layout_height="144dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="32dp"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:background="@drawable/bg_shopping_product_photo"
@@ -66,8 +66,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/lista_imagem_produto"
-                    android:padding="20dp"
-                    android:scaleType="fitCenter"
+                    android:padding="42dp"
+                    android:scaleType="centerInside"
                     android:src="@drawable/ic_food_package"
                     app:tint="@color/blue_primary"
                     tools:ignore="ContentDescription" />
@@ -99,10 +99,10 @@
                 android:id="@+id/rgDestinoAdicionarLista"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="12dp"
                 android:background="@drawable/bg_shopping_destination_group"
                 android:orientation="horizontal"
-                android:padding="2dp">
+                android:padding="1dp">
 
                 <RadioButton
                     android:id="@+id/rbDestinoEstoqueLista"
@@ -111,8 +111,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_shopping_destination_unselected"
                     android:button="@null"
-                    android:clickable="true"
-                    android:focusable="true"
+                    android:clickable="false"
                     android:fontFamily="@font/sarabun"
                     android:gravity="center"
                     android:text="@string/lista_destino_estoque"
@@ -127,57 +126,13 @@
                     android:background="@drawable/bg_shopping_destination_selected"
                     android:button="@null"
                     android:checked="true"
-                    android:clickable="true"
-                    android:focusable="true"
+                    android:clickable="false"
                     android:fontFamily="@font/sarabun"
                     android:gravity="center"
                     android:text="@string/lista_destino_lista_compras"
                     android:textColor="@color/pure_white"
                     android:textSize="14sp" />
             </RadioGroup>
-
-            <!-- Qual lugar do estoque? (Exibido apenas quando Estoque selecionado) -->
-            <LinearLayout
-                android:id="@+id/layoutLugarEstoque"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/lista_qual_lugar_estoque"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/bg_shopping_list_field">
-
-                    <Spinner
-                        android:id="@+id/spinnerLugarEstoque"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@null"
-                        android:contentDescription="@string/lista_qual_lugar_estoque"
-                        android:paddingHorizontal="14dp" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="end|center_vertical"
-                        android:layout_marginEnd="14dp"
-                        android:clickable="false"
-                        android:src="@drawable/ic_chevron_down"
-                        app:tint="@color/darkBlue" />
-                </FrameLayout>
-            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -189,14 +144,11 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <AutoCompleteTextView
+            <EditText
                 android:id="@+id/etNomeItemLista"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="12dp"
                 android:background="@drawable/bg_shopping_list_field"
-                android:completionThreshold="1"
-                android:dropDownHeight="200dp"
                 android:fontFamily="@font/sarabun"
                 android:hint="@string/lista_nome_hint"
                 android:inputType="textCapWords"
@@ -206,148 +158,55 @@
                 android:textColorHint="@color/color_text_secondary"
                 android:textSize="13sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/lista_quantidade"
+                android:textColor="@color/darkBlue"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:baselineAligned="false"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_shopping_list_field"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- Coluna Esquerda: Quantidade -->
-                <LinearLayout
+                <EditText
+                    android:id="@+id/etQuantidadeLista"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/lista_quantidade"
-                        android:textColor="@color/darkBlue"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/etQuantidadeLista"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_shopping_list_field"
-                        android:fontFamily="@font/sarabun"
-                        android:hint="@string/lista_quantidade_hint"
-                        android:inputType="numberDecimal"
-                        android:paddingHorizontal="14dp"
-                        android:singleLine="true"
-                        android:textColor="@color/darkBlue"
-                        android:textColorHint="@color/color_text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <!-- Coluna Direita: Unidade de medida -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/lista_unidade_medida"
-                        android:textColor="@color/darkBlue"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_shopping_list_field">
-
-                        <Spinner
-                            android:id="@+id/spinnerUnidadeLista"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@null"
-                            android:contentDescription="@string/lista_unidade_medida"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="36dp" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_gravity="end|center_vertical"
-                            android:layout_marginEnd="14dp"
-                            android:clickable="false"
-                            android:src="@drawable/ic_chevron_down"
-                            app:tint="@color/darkBlue" />
-                    </FrameLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Validade (Exibido apenas quando Estoque selecionado) -->
-            <LinearLayout
-                android:id="@+id/layoutValidade"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tvLabelValidade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
+                    android:background="@null"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/lista_data_validade_obrigatoria"
+                    android:hint="@string/lista_quantidade_hint"
+                    android:inputType="numberDecimal"
+                    android:paddingHorizontal="14dp"
                     android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textColorHint="@color/color_text_secondary"
+                    android:textSize="13sp" />
 
-                <FrameLayout
-                    android:id="@+id/layoutValidadeInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/bg_shopping_list_field">
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/shopping_field_outline" />
 
-                    <EditText
-                        android:id="@+id/etValidadeLista"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@null"
-                        android:clickable="true"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:fontFamily="@font/sarabun"
-                        android:hint="@string/lista_validade_hint"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="42dp"
-                        android:singleLine="true"
-                        android:textColor="@color/darkBlue"
-                        android:textColorHint="@color/color_text_secondary"
-                        android:textSize="13sp" />
-
-                    <ImageView
-                        android:id="@+id/ivValidadeCalendario"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="end|center_vertical"
-                        android:layout_marginEnd="14dp"
-                        android:clickable="false"
-                        android:src="@drawable/ic_calendar_outline"
-                        app:tint="@color/darkBlue" />
-                </FrameLayout>
+                <Spinner
+                    android:id="@+id/spinnerUnidadeLista"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/lista_unidade"
+                    android:paddingHorizontal="8dp" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sarabun"
                 android:text="@string/lista_categoria"
@@ -355,33 +214,18 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <FrameLayout
+            <Spinner
+                android:id="@+id/spinnerCategoriaLista"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/bg_shopping_list_field">
-
-                <Spinner
-                    android:id="@+id/spinnerCategoriaLista"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:contentDescription="@string/lista_categoria"
-                    android:paddingHorizontal="14dp" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="14dp"
-                    android:clickable="false"
-                    android:src="@drawable/ic_chevron_down"
-                    app:tint="@color/darkBlue" />
-            </FrameLayout>
+                android:background="@drawable/bg_shopping_list_field"
+                android:contentDescription="@string/lista_categoria"
+                android:paddingHorizontal="14dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sarabun"
                 android:text="@string/lista_observacoes_opcional"
@@ -393,43 +237,29 @@
                 android:id="@+id/etObservacoesLista"
                 android:layout_width="match_parent"
                 android:layout_height="82dp"
-                android:layout_marginBottom="24dp"
                 android:background="@drawable/bg_shopping_list_field"
                 android:fontFamily="@font/sarabun"
                 android:gravity="top|start"
-                android:hint="@string/lista_observacoes_hint_estoque"
+                android:hint="@string/lista_observacoes_hint"
                 android:inputType="textCapSentences|textMultiLine"
                 android:padding="14dp"
                 android:textColor="@color/darkBlue"
                 android:textColorHint="@color/color_text_secondary"
                 android:textSize="13sp" />
 
-            <FrameLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSalvarItemLista"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSalvarItemLista"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/lista_salvar"
-                    android:textAllCaps="false"
-                    android:textColor="@color/pure_white"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@color/blue_primary"
-                    app:cornerRadius="14dp" />
-
-                <ProgressBar
-                    android:id="@+id/progressSalvarItemLista"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/pure_white"
-                    android:visibility="gone" />
-            </FrameLayout>
+                android:layout_height="52dp"
+                android:layout_marginTop="32dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/lista_salvar"
+                android:textAllCaps="false"
+                android:textColor="@color/pure_white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/blue_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

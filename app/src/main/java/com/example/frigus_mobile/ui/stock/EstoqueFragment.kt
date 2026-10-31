@@ -1,251 +1,182 @@
 package com.example.frigus_mobile.ui.stock
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import androidx.core.view.doOnPreDraw
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.model.StockProductResponse
-import com.example.frigus_mobile.data.repository.StockRepository
-import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
-import com.example.frigus_mobile.ui.shopping.AddShoppingListItemFragment
+import com.example.frigus_mobile.ui.home.MainActivity
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
-import com.example.frigus_mobile.utils.ProductCategoryHelper
-import com.example.frigus_mobile.utils.ProductNameTracker
-import com.example.frigus_mobile.utils.launchSafeNetwork
+import java.text.NumberFormat
 
-class EstoqueFragment : Fragment() {
-
-    private lateinit var repository: StockRepository
-    private lateinit var adapter: EstoqueProdutoAdapter
-    private var allProducts = listOf<StockProductResponse>()
-    private var currentStoragePlace = "FRIDGE" // FRIDGE, FREEZER, PANTRY
-
-    private lateinit var tabGeladeira: TextView
-    private lateinit var tabFreezer: TextView
-    private lateinit var tabDespensa: TextView
-    private lateinit var etBuscar: EditText
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_estoque, container, false)
-    }
-
+class EstoqueFragment : Fragment(R.layout.fragment_estoque) {
+    private lateinit var model: InventoryViewModel
+    private var inventoryScroll: NestedScrollView? = null
+    private var restoredRevision: Long? = null
+    private var scheduledRevision: Long? = null
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        repository = StockRepository(requireContext())
-
-        // Botão Ler QR Code
-        view.findViewById<View>(R.id.btnEstoqueQrScanner)?.setOnClickListener {
-            startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))
+        model = ViewModelProvider(requireActivity())[InventoryViewModel::class.java]
+        view.isSaveFromParentEnabled = false
+        val scroll = view.findViewById<NestedScrollView>(R.id.inventoryScroll)
+        inventoryScroll = scroll
+        restoredRevision = null
+        scheduledRevision = null
+        val adapter = EstoqueProdutoAdapter(requireContext(), emptyList()) { lot ->
+            lot.id?.let { (requireActivity() as MainActivity).openStockLot(it) }
         }
-
-        // Botão Adicionar Alimento Manualmente no Estoque
-        view.findViewById<View>(R.id.btnAdicionarAlimentoEstoque)?.setOnClickListener {
-            val fragment = AddShoppingListItemFragment.newInstance(
-                initialDestination = AddShoppingListItemFragment.DESTINATION_STOCK
-            )
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+        view.findViewById<RecyclerView>(R.id.rvProximosVencimento).apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            this.adapter = adapter
         }
-
-        // Tabs
-        tabGeladeira = view.findViewById(R.id.tabGeladeira)
-        tabFreezer = view.findViewById(R.id.tabFreezer)
-        tabDespensa = view.findViewById(R.id.tabDespensa)
-
-        tabGeladeira.setOnClickListener { selectTab("FRIDGE") }
-        tabFreezer.setOnClickListener { selectTab("FREEZER") }
-        tabDespensa.setOnClickListener { selectTab("PANTRY") }
-
-        // Categorias Clicks
-        view.findViewById<View>(R.id.catCarnes).setOnClickListener {
-            val code = if (currentStoragePlace == "PANTRY") "GRAIN" else "MEAT"
-            abrirLocalArmazenamento(code)
-        }
-        view.findViewById<View>(R.id.catLaticinios).setOnClickListener {
-            abrirLocalArmazenamento("DAIRY")
-        }
-        view.findViewById<View>(R.id.catHortifruti).setOnClickListener {
-            abrirLocalArmazenamento("VEGETABLE")
-        }
-        view.findViewById<View>(R.id.catBebidas).setOnClickListener {
-            abrirLocalArmazenamento("BEVERAGE")
-        }
-
-        // Botão "Ver mais >"
-        view.findViewById<View>(R.id.btnVerTodasCategorias).setOnClickListener {
-            abrirLocalArmazenamento()
-        }
-
-        // RecyclerView
-        val rv = view.findViewById<RecyclerView>(R.id.rvProximosVencimento)
-        rv.layoutManager = LinearLayoutManager(requireContext())
-        adapter = EstoqueProdutoAdapter(requireContext(), emptyList()) { item ->
-            val intent = Intent(requireContext(), AlimentoDetalhesActivity::class.java).apply {
-                putExtra("STOCK_PRODUCT", item)
-                putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, item.id ?: 0)
-            }
-            startActivity(intent)
-        }
-        rv.adapter = adapter
-
-        // Busca
-        etBuscar = view.findViewById(R.id.etBuscarAlimento)
-        etBuscar.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        val stock = view.findViewById<Spinner>(R.id.inventoryStock)
+        val place = view.findViewById<Spinner>(R.id.inventoryPlace)
+        val category = view.findViewById<Spinner>(R.id.inventoryCategory)
+        val search = view.findViewById<EditText>(R.id.etBuscarAlimento)
+        val places = resources.getStringArray(R.array.inventory_place_codes)
+        val categories = resources.getStringArray(R.array.inventory_category_codes)
+        place.adapter = choices(resources.getStringArray(R.array.inventory_place_labels).toList())
+        category.adapter = choices(resources.getStringArray(R.array.inventory_category_labels).toList())
+        search.setText(model.state.value?.filters?.query.orEmpty())
+        search.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun afterTextChanged(s: Editable?) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filtrarProdutos(s.toString())
+                model.state.value?.filters?.let { model.changeFilters(it.copy(query = s.toString())) }
             }
-            override fun afterTextChanged(s: Editable?) {}
         })
+        view.findViewById<View>(R.id.inventoryRefresh).setOnClickListener { model.refresh() }
+        view.findViewById<View>(R.id.inventoryRetry).setOnClickListener { model.retry() }
+        view.findViewById<View>(R.id.inventoryMore).setOnClickListener { model.loadMore() }
 
-        val inventoryViewModel = ViewModelProvider(requireActivity())[InventoryViewModel::class.java]
-        inventoryViewModel.state.observe(viewLifecycleOwner) { state ->
-            val place = state.filters.storagePlace
-            if (place != null && place != currentStoragePlace) {
-                selectTab(place)
+        var stockIds = listOf<Int?>(null)
+        var stockLabels = emptyList<String>()
+        var rendering = false
+        stock.onItemSelectedListener = selection { position ->
+            if (!rendering) model.state.value?.filters?.let {
+                if (stock.isEnabled) model.changeFilters(it.copy(stockId = stockIds.getOrNull(position)))
+            }
+        }
+        place.onItemSelectedListener = selection { position ->
+            if (!rendering) model.state.value?.filters?.let {
+                model.changeFilters(it.copy(storagePlace = places.getOrNull(position)?.takeIf(String::isNotEmpty)))
+            }
+        }
+        category.onItemSelectedListener = selection { position ->
+            if (!rendering) model.state.value?.filters?.let {
+                model.changeFilters(it.copy(category = categories.getOrNull(position)?.takeIf(String::isNotEmpty)))
             }
         }
 
-        carregarDados()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        carregarDados()
-    }
-
-    private fun carregarDados() {
-        if (!::repository.isInitialized) return
-        launchSafeNetwork(::carregarDados) {
-            allProducts = repository.getStockProducts()
-            atualizarResumo()
-            aplicarFiltroAtual()
-        }
-    }
-
-    private fun isProductInStoragePlace(item: StockProductResponse, targetPlace: String): Boolean {
-        val rawPlace = (item.storagePlace ?: item.product?.storagePlace ?: "").uppercase().trim()
-        val target = targetPlace.uppercase().trim()
-
-        return when (target) {
-            "FREEZER" -> rawPlace == "FREEZER"
-            "PANTRY" -> rawPlace == "PANTRY" || rawPlace == "DESPENSA"
-            else -> rawPlace == "FRIDGE" || rawPlace == "GELADEIRA" || rawPlace.isEmpty()
-        }
-    }
-
-    private fun atualizarResumo() {
-        val produtosDoLocal = allProducts.filter { isProductInStoragePlace(it, currentStoragePlace) }
-
-        val emDia = produtosDoLocal.count { it.productStatus == "FRESH" }
-        val atencao = produtosDoLocal.count { it.productStatus == "NEAR_EXPIRATION" }
-        val vencendo = produtosDoLocal.count { it.productStatus == "EXPIRED" }
-
-        view?.findViewById<TextView>(R.id.tvCountEmDia)?.text = emDia.toString()
-        view?.findViewById<TextView>(R.id.tvCountAtencao)?.text = atencao.toString()
-        view?.findViewById<TextView>(R.id.tvCountVencendo)?.text = vencendo.toString()
-
-        val isDespensa = currentStoragePlace == "PANTRY"
-        val tvNomePrimeiraCat = view?.findViewById<TextView>(R.id.tvNomeCatCarnes)
-        val imgPrimeiraCat = view?.findViewById<ImageView>(R.id.imgCatCarnes)
-
-        if (isDespensa) {
-            tvNomePrimeiraCat?.text = "Grãos"
-            imgPrimeiraCat?.clearColorFilter()
-            imgPrimeiraCat?.setImageResource(R.drawable.ic_cat_grains)
-
-            val qtdGraos = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "GRAIN")
-            val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")
-            val qtdHortifruti = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "HORTIFRUTI")
-            val qtdBebidas = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "BEVERAGE")
-
-            view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = ProductCategoryHelper.formatarQtdItens(qtdGraos)
-            view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = ProductCategoryHelper.formatarQtdItens(qtdLaticinios)
-            view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = ProductCategoryHelper.formatarQtdItens(qtdHortifruti)
-            view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = ProductCategoryHelper.formatarQtdItens(qtdBebidas)
-        } else {
-            tvNomePrimeiraCat?.text = "Carnes"
-            imgPrimeiraCat?.clearColorFilter()
-            imgPrimeiraCat?.setImageResource(R.drawable.ic_cat_meat)
-
-            val qtdCarnes = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "MEAT")
-            val qtdLaticinios = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "DAIRY")
-            val qtdHortifruti = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "HORTIFRUTI")
-            val qtdBebidas = ProductCategoryHelper.contarPorCategoria(produtosDoLocal, "BEVERAGE")
-
-            view?.findViewById<TextView>(R.id.tvQtdCatCarnes)?.text = ProductCategoryHelper.formatarQtdItens(qtdCarnes)
-            view?.findViewById<TextView>(R.id.tvQtdCatLaticinios)?.text = ProductCategoryHelper.formatarQtdItens(qtdLaticinios)
-            view?.findViewById<TextView>(R.id.tvQtdCatHortifruti)?.text = ProductCategoryHelper.formatarQtdItens(qtdHortifruti)
-            view?.findViewById<TextView>(R.id.tvQtdCatBebidas)?.text = ProductCategoryHelper.formatarQtdItens(qtdBebidas)
-        }
-    }
-
-    private fun selectTab(place: String) {
-        currentStoragePlace = place
-        val white = ContextCompat.getColor(requireContext(), R.color.pure_white)
-        val gray = ContextCompat.getColor(requireContext(), R.color.color_text_secondary)
-
-        tabGeladeira.setBackgroundResource(if (place == "FRIDGE") R.drawable.bg_tab_selected else 0)
-        tabGeladeira.setTextColor(if (place == "FRIDGE") white else gray)
-
-        tabFreezer.setBackgroundResource(if (place == "FREEZER") R.drawable.bg_tab_selected else 0)
-        tabFreezer.setTextColor(if (place == "FREEZER") white else gray)
-
-        tabDespensa.setBackgroundResource(if (place == "PANTRY") R.drawable.bg_tab_selected else 0)
-        tabDespensa.setTextColor(if (place == "PANTRY") white else gray)
-
-        atualizarResumo()
-        aplicarFiltroAtual()
-    }
-
-    private fun aplicarFiltroAtual() {
-        val query = etBuscar.text.toString().trim().lowercase()
-        val filtered = allProducts.filter { item ->
-            val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
-            val name = (item.id?.let { id -> ProductNameTracker.getName(requireContext(), id) } ?: item.product?.name ?: "").lowercase()
-            val nameMatches = query.isEmpty() || name.contains(query)
-            placeMatches && nameMatches
-        }
-        adapter.updateList(filtered)
-    }
-
-    private fun filtrarProdutos(query: String) {
-        val q = query.trim().lowercase()
-        val filtered = allProducts.filter { item ->
-            val placeMatches = isProductInStoragePlace(item, currentStoragePlace)
-            val name = (item.id?.let { id -> ProductNameTracker.getName(requireContext(), id) } ?: item.product?.name ?: "").lowercase()
-            val nameMatches = q.isEmpty() || name.contains(q)
-            placeMatches && nameMatches
-        }
-        adapter.updateList(filtered)
-    }
-
-    private fun abrirLocalArmazenamento(categoryCode: String? = null) {
-        val intent = Intent(requireContext(), EstoqueLocalActivity::class.java).apply {
-            putExtra(EstoqueLocalActivity.EXTRA_STORAGE_PLACE, currentStoragePlace)
-            if (categoryCode != null) {
-                putExtra(EstoqueLocalActivity.EXTRA_CATEGORY_CODE, categoryCode)
+        model.state.observe(viewLifecycleOwner) { state ->
+            rendering = true
+            if (search.text.toString() != state.filters.query) search.setText(state.filters.query)
+            val stocks = state.home?.stocks.orEmpty().filterNotNull()
+            val labels = listOf(getString(R.string.inventory_all_stocks)) + stocks.map {
+                getString(R.string.inventory_stock_option, it.name?.takeIf(String::isNotBlank)
+                    ?: getString(R.string.inventory_unnamed_stock), it.id)
+            }
+            stockIds = listOf(null) + stocks.map { it.id }
+            if (labels != stockLabels) {
+                stockLabels = labels
+                stock.adapter = choices(labels)
+            }
+            stock.setSelection(stockIds.indexOf(state.filters.stockId).coerceAtLeast(0))
+            place.setSelection(places.indexOf(state.filters.storagePlace.orEmpty()).coerceAtLeast(0))
+            category.setSelection(categories.indexOf(state.filters.category.orEmpty()).coerceAtLeast(0))
+            stock.isEnabled = stocks.isNotEmpty()
+            rendering = false
+            adapter.updateList(state.items)
+            render(view, state)
+            if (!state.loading && restoredRevision != state.scrollRevision &&
+                scheduledRevision != state.scrollRevision) {
+                val revision = state.scrollRevision
+                val position = model.scrollPosition
+                scheduledRevision = revision
+                scroll.doOnPreDraw {
+                    if (inventoryScroll === scroll && model.state.value?.scrollRevision == revision) {
+                        scroll.scrollTo(0, position)
+                        restoredRevision = revision
+                    }
+                }
             }
         }
-        startActivity(intent)
+        model.loadIfNeeded()
+    }
+
+    override fun onPause() {
+        rememberScroll()
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
+        rememberScroll()
+        inventoryScroll = null
+        super.onDestroyView()
+    }
+
+    private fun rememberScroll() {
+        val revision = restoredRevision ?: return
+        inventoryScroll?.let { model.saveScrollPosition(it.scrollY, revision) }
+    }
+
+    private fun choices(labels: List<String>) =
+        ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, labels).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+    private fun selection(action: (Int) -> Unit) = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = action(position)
+        override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+    }
+
+    private fun render(view: View, state: InventoryUiState) {
+        view.findViewById<View>(R.id.inventoryProgress).visibility = if (state.loading) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.inventoryRefresh).isEnabled = !state.loading
+        view.findViewById<View>(R.id.inventoryRetry).visibility = if (state.error != null) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.inventoryMore).apply {
+            visibility = if (state.hasMore && state.error == null) View.VISIBLE else View.GONE
+            isEnabled = !state.loading
+        }
+        view.findViewById<View>(R.id.inventoryAllStatusesNotice).visibility =
+            if (state.showAllStatusesNotice) View.VISIBLE else View.GONE
+        val home = state.home
+        view.findViewById<View>(R.id.inventorySummary).visibility = if (home != null) View.VISIBLE else View.GONE
+        if (home != null) {
+            val number = NumberFormat.getIntegerInstance()
+            fun count(value: Long?) = value?.takeIf { it >= 0 }?.let(number::format)
+                ?: getString(R.string.inventory_unknown)
+            view.findViewById<TextView>(R.id.inventorySummaryText).text = getString(
+                R.string.inventory_group_counts, count(home.summary?.itemCount),
+                count(home.statusCounts?.fresh), count(home.statusCounts?.nearExpiration),
+                count(home.statusCounts?.expired)
+            )
+        }
+        view.findViewById<TextView>(R.id.inventoryStatus).apply {
+            val error = state.error
+            text = when {
+                state.loading -> getString(R.string.inventory_loading)
+                error?.code == "INVALID_RESPONSE" -> getString(R.string.inventory_invalid_response)
+                error?.code == "NETWORK_ERROR" -> getString(R.string.inventory_network_error)
+                error != null -> error.userMessage(getString(
+                    if (error.status == 403) R.string.inventory_forbidden else R.string.inventory_load_error))
+                home?.stocks.isNullOrEmpty() -> getString(R.string.inventory_no_stocks)
+                state.items.isEmpty() -> getString(R.string.inventory_no_matches)
+                else -> getString(R.string.inventory_loaded_count,
+                    NumberFormat.getIntegerInstance().format(state.items.size),
+                    NumberFormat.getIntegerInstance().format(state.totalElements))
+            }
+        }
     }
 }

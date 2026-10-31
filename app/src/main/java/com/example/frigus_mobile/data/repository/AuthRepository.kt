@@ -30,35 +30,6 @@ class AuthRepository(
         signIn(email, password, generation, result)
     }
 
-    fun loginWithGoogle(idToken: String, result: (AuthResult) -> Unit) {
-        cancel()
-        val generation = session.beginAuthentication()
-        result(AuthResult.Loading)
-        val call = api.loginComGoogle(GoogleLoginRequest(idToken))
-        pending = call
-        call.enqueue(object : Callback<UserLoginResponse> {
-            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
-                if (call.isCanceled || generation != session.generation) return
-                val body = response.body()
-                try {
-                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
-                        result(AuthResult.Authenticated)
-                    } else {
-                        val err = if (response.isSuccessful) ApiError(displayMessage = text(R.string.auth_invalid_response))
-                            else ApiError.parse(response)
-                        result(AuthResult.Failure(err))
-                    }
-                } catch (_: Exception) {
-                    session.clear()
-                    result(AuthResult.Failure(ApiError(displayMessage = text(R.string.auth_storage_error))))
-                }
-            }
-            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
-                if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(networkError()))
-            }
-        })
-    }
-
     private fun signIn(email: String, password: String, generation: Long, result: (AuthResult) -> Unit,
                        accountCreated: Boolean = false) {
         val call = api.login(UserLoginRequest(email, password))
@@ -118,8 +89,8 @@ class AuthRepository(
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 if (call.isCanceled) return
                 if (generation != session.generation) {
-                    // The interceptor may already have cleared this very session for a 401 or 403.
-                    if ((response.code() == 401 || response.code() == 403) && session.generation == generation + 1 && session.accessToken == null)
+                    // The interceptor may already have cleared this very session for a 401.
+                    if (response.code() == 401 && session.generation == generation + 1 && session.accessToken == null)
                         result(AuthResult.Failure(ApiError.parse(response)))
                     return
                 }
@@ -128,10 +99,7 @@ class AuthRepository(
                     if (response.code() == 200 && user != null && validUser(user) && session.validate(generation, token, user)) {
                         result(AuthResult.Authenticated)
                     } else {
-                        if (response.code() == 401 || response.code() == 403) {
-                            session.invalidate(SessionCredential(token, generation))
-                            session.clear()
-                        }
+                        if (response.code() == 401) session.invalidate(SessionCredential(token, generation))
                         result(AuthResult.Failure(if (response.isSuccessful)
                             ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
                     }
@@ -146,8 +114,10 @@ class AuthRepository(
         })
     }
 
-    private fun validUser(user: UserResponse?): Boolean =
-        user != null && !user.id.isNullOrBlank()
+    private fun validUser(user: UserResponse?): Boolean = try {
+        val id = user?.id
+        id != null && java.util.UUID.fromString(id).toString().equals(id, ignoreCase = true)
+    } catch (_: IllegalArgumentException) { false }
 
     private fun networkError() = ApiError(displayMessage = text(R.string.auth_network_error))
     fun cancel() { pending?.cancel(); pending = null }

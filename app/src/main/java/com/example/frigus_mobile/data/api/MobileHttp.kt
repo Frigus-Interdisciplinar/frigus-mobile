@@ -13,6 +13,7 @@ object MobileHttp {
     private val uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     private val routes = listOf(
         "POST" to "/mobile/user/(login|register)",
+        "POST" to "/mobile/core/auth/google",
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
         "GET" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
@@ -31,16 +32,25 @@ object MobileHttp {
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
         "GET" to "/mobile/advertisements/active",
-        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
+        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)",
+        "GET" to "/mobile/core/plans/(active|me/limits)",
+        "GET" to "/mobile/core/subscriptions/me",
+        "POST" to "/mobile/core/subscriptions/me/(cancel|reactivate)",
+        "GET" to "/mobile/core/transactions",
+        "POST" to "/mobile/core/transactions/checkout",
+        "GET|POST" to "/mobile/core/groups",
+        "POST" to "/mobile/core/stocks",
+        "GET" to "/mobile/core/groups/$uuid",
+        "GET|POST" to "/mobile/core/groups/$uuid/invitations",
+        "DELETE" to "/mobile/core/groups/$uuid/invitations/$uuid",
+        "GET" to "/mobile/commercial/groups/$uuid/money-saving/(summary|events)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
     fun allowed(method: String, path: String): Boolean = routes.any { it.matches("$method $path") } &&
         path.split('/').filter { it.isNotEmpty() && it.all(Char::isDigit) }.all { it.toIntOrNull() != null }
 
     fun public(path: String): Boolean {
-        val p = path.trim().lowercase()
-        return p == "/mobile/user/login" || p == "/mobile/user/register" ||
-               p.contains("auth/login") || p.contains("auth/register") || p.contains("auth/google")
+        return path in setOf("/mobile/user/login", "/mobile/user/register", "/mobile/core/auth/google")
     }
 
     fun isPublicPath(path: String): Boolean = public(path)
@@ -88,7 +98,7 @@ object MobileHttp {
                     url.encodedPath() == "/mobile/inventory/receipts/scan"
                 val requestChain = if (longRunning) chain.withReadTimeout(135, TimeUnit.SECONDS) else chain
                 val response = requestChain.proceed(builder.build())
-                if ((response.code() == 401 || response.code() == 403) && access != null && !isPublic) {
+                if (response.code() == 401 && access != null && !isPublic) {
                     unauthorized(active!!)
                 }
                 response

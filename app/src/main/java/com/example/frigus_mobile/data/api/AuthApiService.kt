@@ -1,7 +1,5 @@
 package com.example.frigus_mobile.data.api
 
-import com.example.frigus_mobile.data.model.GoogleLoginRequest
-import com.example.frigus_mobile.data.model.SubscriptionResponse
 import com.example.frigus_mobile.data.model.UserLoginRequest
 import com.example.frigus_mobile.data.model.UserLoginResponse
 import com.example.frigus_mobile.data.model.UserRegisterRequest
@@ -18,12 +16,6 @@ interface AuthApiService {
     @POST("mobile/user/login")
     fun login(@Body request: UserLoginRequest): Call<UserLoginResponse>
 
-    @POST("auth/google")
-    fun loginComGoogle(@Body request: GoogleLoginRequest): Call<UserLoginResponse>
-
     @GET("mobile/user/profile")
     fun getProfile(): Call<UserResponse>
-
-    @GET("subscriptions/me")
-    fun getMySubscription(): Call<SubscriptionResponse>
 }

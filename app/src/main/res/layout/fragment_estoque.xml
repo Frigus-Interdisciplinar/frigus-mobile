@@ -1,511 +1,196 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/inventoryScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/pure_white">
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/inventoryScroll"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
+    android:background="@color/pure_white"
+    android:fillViewport="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="88dp">
-
-        <!-- Top Bar: TÃ­tulo Estoque + BotÃ£o Scanner QR Code -->
-        <RelativeLayout
+        android:padding="@dimen/inventory_page_padding">
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/stock_title"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_title_size"
+            android:textStyle="bold"
+            android:accessibilityHeading="true" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/inventoryRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:text="@string/inventory_refresh"
+            android:layout_marginTop="@dimen/inventory_gap" />
+        <LinearLayout
+            android:id="@+id/inventorySummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/inventory_section_gap"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_blue_tint"
+            android:padding="@dimen/inventory_section_gap"
+            android:visibility="gone">
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/stock_title"
+                android:text="@string/inventory_group_summary"
                 android:textColor="@color/darkBlue"
-                android:textSize="24sp"
+                android:textSize="@dimen/inventory_heading_size"
                 android:textStyle="bold" />
-
-            <FrameLayout
-                android:id="@+id/btnEstoqueQrScanner"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_tab_selected"
-                android:clickable="true"
-                android:contentDescription="@string/stock_scan_receipt"
-                android:focusable="true">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_qr_code_scanner"
-                    app:tint="@color/pure_white" />
-            </FrameLayout>
-        </RelativeLayout>
-
-        <!-- Segmented Tab: Geladeira / Freezer / Despensa -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_tab_unselected"
-            android:orientation="horizontal"
-            android:padding="4dp">
-
             <TextView
-                android:id="@+id/tabGeladeira"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/bg_tab_selected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/inventorySummaryText"
                 android:fontFamily="@font/sarabun"
-                android:gravity="center"
-                android:text="@string/stock_fridge"
-                android:textColor="@color/pure_white"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
+                android:text="@string/inventory_unknown"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/inventory_body_size"
+                android:layout_marginTop="@dimen/inventory_gap" />
             <TextView
-                android:id="@+id/tabFreezer"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:gravity="center"
-                android:text="@string/stock_freezer"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/tabDespensa"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:fontFamily="@font/sarabun"
-                android:gravity="center"
-                android:text="@string/stock_pantry"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp" />
+                android:text="@string/inventory_summary_note"
+                android:textColor="@color/darkBlue"
+                android:textSize="@dimen/inventory_body_size"
+                android:layout_marginTop="@dimen/inventory_gap" />
         </LinearLayout>
-
-        <!-- Search Bar: Buscar Alimento -->
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="14dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/inventory_stock_label"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:labelFor="@id/inventoryStock"
+            android:layout_marginTop="@dimen/inventory_gap" />
+        <Spinner
+            android:id="@+id/inventoryStock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:spinnerMode="dropdown" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/inventory_place_label"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:labelFor="@id/inventoryPlace"
+            android:layout_marginTop="@dimen/inventory_gap" />
+        <Spinner
+            android:id="@+id/inventoryPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:spinnerMode="dropdown" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/inventory_category_label"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:labelFor="@id/inventoryCategory"
+            android:layout_marginTop="@dimen/inventory_gap" />
+        <Spinner
+            android:id="@+id/inventoryCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:spinnerMode="dropdown" />
+        <EditText
+            android:id="@+id/etBuscarAlimento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:layout_marginTop="@dimen/inventory_gap"
             android:background="@drawable/bg_search_bar"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_search"
-                app:tint="@color/color_text_secondary" />
-
-            <EditText
-                android:id="@+id/etBuscarAlimento"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:fontFamily="@font/sarabun"
-                android:hint="@string/stock_search_food"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:textColor="@color/color_text_primary"
-                android:textColorHint="@color/color_text_secondary"
-                android:textSize="13sp" />
-
-            <ImageView
-                android:id="@+id/btnFiltro"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:contentDescription="@string/stock_filter"
-                android:padding="12dp"
-                android:src="@drawable/ic_sliders"
-                app:tint="@color/color_text_secondary" />
-        </LinearLayout>
-
-        <!-- Resumo -->
+            android:padding="@dimen/inventory_gap"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/darkBlue"
+            android:textColorHint="@color/color_text_secondary"
+            android:textSize="@dimen/inventory_body_size"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:hint="@string/inventory_search" />
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/inventory_results"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_heading_size"
+            android:layout_marginTop="@dimen/inventory_section_gap"
+            android:textStyle="bold"
+            android:accessibilityHeading="true" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/inventory_read_only"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:layout_marginTop="@dimen/inventory_gap" />
+        <TextView
+            android:id="@+id/inventoryAllStatusesNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/inventory_gap"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/navigation_inventory_all_statuses"
+            android:textColor="@color/darkBlue"
+            android:textSize="@dimen/inventory_body_size"
+            android:accessibilityLiveRegion="polite"
+            android:visibility="gone" />
+        <ProgressBar
+            android:id="@+id/inventoryProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/stock_summary"
-            android:textColor="@color/darkBlue"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <!-- Card Em dia -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_pill_fresh"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:id="@+id/tvCountEmDia"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_green"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/stock_on_time"
-                    android:textColor="@color/color_green"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <!-- Card AtenÃ§Ã£o -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_pill_warning"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:id="@+id/tvCountAtencao"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_gold"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/stock_attention"
-                    android:textColor="@color/color_gold"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <!-- Card Vencendo -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_pill_expired"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:id="@+id/tvCountVencendo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_red"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/stock_expiring"
-                    android:textColor="@color/color_red"
-                    android:textSize="12sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- SeÃ§Ã£o Categorias -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/stock_categories"
-                android:textColor="@color/darkBlue"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/btnVerTodasCategorias"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/stock_see_more"
-                android:textColor="@color/blue_primary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <!-- Card Container de Categorias -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_stock_category_group"
-            android:orientation="horizontal"
-            android:paddingVertical="14dp"
-            android:paddingHorizontal="8dp">
-
-            <!-- Carnes -->
-            <LinearLayout
-                android:id="@+id/catCarnes"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/bg_pill_expired">
-
-                    <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/imgCatCarnes"
-                        android:src="@drawable/ic_cat_meat" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="@font/sarabun"
-                    android:id="@+id/tvNomeCatCarnes"
-                    android:text="@string/stock_meat"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvQtdCatCarnes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <!-- LaticÃ­nios -->
-            <LinearLayout
-                android:id="@+id/catLaticinios"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/bg_card_blue_tint">
-
-                    <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/imgCatLaticinios"
-                        android:src="@drawable/ic_cat_dairy" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="@font/sarabun"
-                    android:id="@+id/tvNomeCatLaticinios"
-                    android:text="@string/stock_dairy"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvQtdCatLaticinios"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <!-- Hortifruti -->
-            <LinearLayout
-                android:id="@+id/catHortifruti"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/bg_pill_fresh">
-
-                    <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/imgCatHortifruti"
-                        android:src="@drawable/ic_cat_hortifruti" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="@font/sarabun"
-                    android:id="@+id/tvNomeCatHortifruti"
-                    android:text="@string/stock_produce"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvQtdCatHortifruti"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <!-- Bebidas -->
-            <LinearLayout
-                android:id="@+id/catBebidas"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/bg_stock_drinks_category">
-
-                    <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/imgCatBebidas"
-                        android:src="@drawable/ic_cat_beverages" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="@font/sarabun"
-                    android:id="@+id/tvNomeCatBebidas"
-                    android:text="@string/stock_drinks"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvQtdCatBebidas"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text=""
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="10sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- PrÃ³ximos do vencimento -->
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/inventory_gap"
+            android:contentDescription="@string/inventory_loading"
+            android:visibility="gone" />
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="10dp"
+            android:id="@+id/inventoryStatus"
             android:fontFamily="@font/sarabun"
-            android:text="@string/stock_expiring_soon"
+            android:text="@string/inventory_loading"
             android:textColor="@color/darkBlue"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
+            android:textSize="@dimen/inventory_body_size"
+            android:layout_marginTop="@dimen/inventory_section_gap"
+            android:accessibilityLiveRegion="polite" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/inventoryRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:text="@string/inventory_retry"
+            android:layout_marginTop="@dimen/inventory_gap"
+            android:visibility="gone" />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProximosVencimento"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/inventory_gap"
             android:nestedScrollingEnabled="false" />
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/inventoryMore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/inventory_touch_target"
+            android:text="@string/inventory_more"
+            android:layout_marginTop="@dimen/inventory_gap"
+            android:visibility="gone" />
     </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnAdicionarAlimentoEstoque"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:contentDescription="@string/stock_add_food"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/blue_primary"
-        app:elevation="6dp"
-        app:fabCustomSize="56dp"
-        app:maxImageSize="28dp"
-        app:tint="@color/pure_white" />
-</FrameLayout>
+</androidx.core.widget.NestedScrollView>

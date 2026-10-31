@@ -1,4 +1,4 @@
-﻿package com.example.frigus_mobile.ui.home
+package com.example.frigus_mobile.ui.home
 
 import android.Manifest
 import android.content.Intent
@@ -38,7 +38,10 @@ class MainActivity : AppCompatActivity() {
     private var unavailableTitle = 0
     private var pendingNavigation: Bundle? = null
     private val backToHome = object : OnBackPressedCallback(false) {
-        override fun handleOnBackPressed() { showHome() }
+        override fun handleOnBackPressed() {
+            if (supportFragmentManager.backStackEntryCount > 0) supportFragmentManager.popBackStack()
+            else showHome()
+        }
     }
     private val stockLotResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (::session.isInitialized && session.isLoggedIn && result.resultCode == RESULT_OK) {
@@ -90,14 +93,32 @@ class MainActivity : AppCompatActivity() {
         navigation.setOnItemReselectedListener { openTab(it.itemId) }
         ViewModelProvider(this)[InventoryViewModel::class.java].restoreNavigationState(navigationState?.getBundle(INVENTORY_NAVIGATION))
         val selected = navigationState?.getInt(SELECTED_TAB) ?: R.id.nav_home
-        val unavailable = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
-        if (unavailable != 0) showUnavailable(unavailable)
-        else openTab(selected)
-        navigation.selectedItemId = selected
+        val validSelected = if (navigation.menu.findItem(selected) != null) selected else R.id.nav_home
+        navigation.menu.findItem(validSelected).isChecked = true
+        val pendingTitle = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
+        if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
+        if (validSelected == R.id.nav_perfil) {
+            val section = when (navigationState?.getString(PROFILE_SECTION)) {
+                "subscription" -> com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment()
+                "money-saving" -> com.example.frigus_mobile.ui.profile.MoneySavingFragment()
+                else -> null
+            }
+            section?.let {
+                supportFragmentManager.beginTransaction().replace(R.id.fragment_container, it)
+                    .addToBackStack(null).commit()
+            }
+        }
         consumeReceiptImport(intent)
-        if (PushNotifications.shouldOpenCenter(intent)) openNotifications()
+
         updatePermissionAction()
+        if (PushNotifications.shouldOpenCenter(intent)) {
+            intent.removeExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS)
+            openNotifications()
+        }
     }
+
+    fun selectTab(id: Int) { navigation.selectedItemId = id }
+    fun showHome() { selectTab(R.id.nav_home) }
 
     fun openInventory(storagePlace: String? = null, showAllStatusesNotice: Boolean = false) {
         if (!session.isLoggedIn) return
@@ -111,35 +132,20 @@ class MainActivity : AppCompatActivity() {
             .putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, id))
     }
 
-    fun selectTab(tabId: Int) {
-        if (!::navigation.isInitialized) return
-        navigation.selectedItemId = tabId
-    }
+    private fun openTab(id: Int) {
+        if (supportFragmentManager.backStackEntryCount > 0)
+            supportFragmentManager.popBackStackImmediate(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        val title = when (id) {
 
-    fun showHome() {
-        unavailableTitle = 0
-        backToHome.isEnabled = false
-        if (::navigation.isInitialized && navigation.selectedItemId != R.id.nav_home) {
-            navigation.selectedItemId = R.id.nav_home
-        } else {
-            openTab(R.id.nav_home)
-        }
-    }
+            R.id.nav_lista -> R.string.home_shopping_list
 
-    private fun openTab(tabId: Int) {
-        unavailableTitle = 0
-        backToHome.isEnabled = tabId != R.id.nav_home
-        val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        val shouldReplace = when (tabId) {
-            R.id.nav_home -> current !is HomeFragment
-            R.id.nav_estoque -> current !is EstoqueFragment
-            R.id.nav_receitas -> current !is ReceitasFragment
-            R.id.nav_perfil -> current !is PerfilFragment
-            else -> true
+            else -> 0
         }
-        if (shouldReplace) {
-            val fragment = when (tabId) {
-                R.id.nav_home -> HomeFragment()
+        if (title != 0) showUnavailable(title)
+        else {
+            unavailableTitle = 0
+            backToHome.isEnabled = id == R.id.nav_estoque || id == R.id.nav_receitas || id == R.id.nav_perfil
+            val fragment = when (id) {
                 R.id.nav_estoque -> EstoqueFragment()
                 R.id.nav_receitas -> ReceitasFragment()
                 R.id.nav_perfil -> PerfilFragment()
@@ -159,6 +165,10 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::navigation.isInitialized) outState.putInt(SELECTED_TAB, navigation.selectedItemId)
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
+        when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
+            is com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment -> outState.putString(PROFILE_SECTION, "subscription")
+            is com.example.frigus_mobile.ui.profile.MoneySavingFragment -> outState.putString(PROFILE_SECTION, "money-saving")
+        }
         if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
         outState.putBundle(ACTIVITY_RESULTS, Bundle().also(activityResultRegistry::onSaveInstanceState))
         super.onSaveInstanceState(outState)
@@ -230,6 +240,8 @@ class MainActivity : AppCompatActivity() {
                 R.string.home_conversations, R.string.home_qr, R.string.home_ai)
             putInt(UNAVAILABLE_TITLE, title.takeIf { it in safeTitles } ?: 0)
             putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
+            source.getString(PROFILE_SECTION)?.takeIf { it in setOf("subscription", "money-saving") }
+                ?.let { putString(PROFILE_SECTION, it) }
         }
     }
 
@@ -255,5 +267,6 @@ class MainActivity : AppCompatActivity() {
         private const val INVENTORY_NAVIGATION = "inventory_navigation"
         private const val SELECTED_TAB = "selected_tab"
         private const val UNAVAILABLE_TITLE = "unavailable_title"
+        private const val PROFILE_SECTION = "profile_section"
     }
 }

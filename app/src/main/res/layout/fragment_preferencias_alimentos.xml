@@ -129,6 +129,27 @@
         </LinearLayout>
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="@color/profile_divider" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="16dp" android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_allergies_title"
+                android:textColor="@color/profile_primary" android:textSize="15sp"
+                android:textStyle="bold" />
+            <TextView android:id="@+id/btnAddAllergy" android:layout_width="wrap_content"
+                android:layout_height="48dp" android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true" android:focusable="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/profile_food_add_allergy"
+                android:textColor="@color/profile_primary" android:textSize="14sp" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/profile_divider" />
+        <LinearLayout android:id="@+id/allergyListContainer"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="24dp" android:fontFamily="@font/sarabun"
             android:text="@string/profile_food_other_title" android:textColor="@color/profile_primary"

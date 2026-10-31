@@ -27,7 +27,7 @@
     <string name="profile_food_other_title">Outras preferências</string>
     <string name="profile_food_quick_recipes">Receber receitas rápidas</string>
     <string name="profile_food_economical_recipes">Receber receitas econômicas</string>
-    <string name="profile_units_intro">Escolha as unidades que prefere usar no Frigus:</string>
+    <string name="profile_units_intro">Escolha as unidades que prefere usar no Frigus.</string>
     <string name="profile_units_weight">Peso</string>
     <string name="profile_units_kg">Quilogramas (kg)</string>
     <string name="profile_units_g">Gramas (g)</string>

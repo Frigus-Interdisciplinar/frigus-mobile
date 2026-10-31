@@ -6,6 +6,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
+    val subscriptionService: SubscriptionApiService get() = retrofit.create(SubscriptionApiService::class.java)
+    val moneySavingService: MoneySavingApiService get() = retrofit.create(MoneySavingApiService::class.java)
     @Volatile private var session: SessionState? = null
     fun setSession(state: SessionState) { session = state }
 

@@ -41,5 +41,25 @@
             android:gravity="center" android:textColor="@color/darkBlue"
             android:textSize="14sp" android:textStyle="bold"
             tools:text="usuario@email.com" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="72dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:text="@string/settings_verification_missing"
+            android:textColor="@color/gray" android:textSize="13sp" />
+        <TextView android:id="@+id/btnResendVerificationEmail"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="6dp" android:fontFamily="@font/sarabun"
+            android:gravity="center" android:background="?attr/selectableItemBackground"
+            android:clickable="true" android:focusable="true"
+            android:text="@string/settings_verification_resend"
+            android:textColor="@color/profile_primary" android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView android:id="@+id/btnChangeVerificationEmail"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:fontFamily="@font/sarabun" android:gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true" android:focusable="true"
+            android:text="@string/settings_verification_change"
+            android:textColor="@color/profile_primary" android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

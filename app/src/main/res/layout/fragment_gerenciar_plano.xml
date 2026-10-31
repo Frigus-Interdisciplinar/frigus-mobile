@@ -1,276 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/pure_white"
-    android:fillViewport="true">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="32dp">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp">
-            <ImageButton
-                android:id="@+id/btnVoltar"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_alignParentStart="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/profile_back"
-                android:src="@drawable/ic_chevron_left"
-                app:tint="@color/darkBlue"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/darkBlue"
-                android:textSize="18sp"
-                android:text="@string/profile_manage_plan"
-                android:textStyle="bold"
-                android:layout_centerInParent="true"
-                android:maxLines="1"
-                android:ellipsize="end"/>
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp" android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_manage_plan" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
         </RelativeLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:orientation="horizontal"
-            android:padding="18dp"
-            android:background="@drawable/bg_card_white_rounded">
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_crown"
-                android:contentDescription="@null"
-                android:layout_marginTop="2dp"/>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/tvPlanoNome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-                <TextView
-                    android:id="@+id/tvPlanoPreco"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:layout_marginTop="4dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-                <TextView
-                    android:id="@+id/tvPlanoValidade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:layout_marginTop="6dp"
-                    android:textSize="10sp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_card_white_rounded" android:padding="18dp" android:layout_marginTop="24dp" android:minHeight="126dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <ImageView android:layout_width="35dp" android:layout_height="35dp" android:src="@drawable/ic_profile_figma_gift" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1" android:layout_marginStart="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="16sp" android:id="@+id/tvPlanoNome" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvPlanoPreco" android:textStyle="bold" android:layout_marginTop="5dp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="11sp" android:id="@+id/tvPlanoValidade" android:layout_marginTop="8dp" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:textColor="@color/darkBlue"
-            android:textSize="13sp"
-            android:text="@string/profile_about_plan"
-            android:textStyle="bold"
-            android:layout_marginTop="28dp"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card_white_rounded"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:layout_marginTop="10dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:minHeight="40dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
-                    android:text="@string/profile_renewal"
-                    android:textStyle="bold"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:id="@+id/tvRenovacao"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_about_plan" android:textStyle="bold" android:layout_marginTop="36dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_card_white_rounded" android:padding="18dp" android:layout_marginTop="10dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="46dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_renewal" android:textStyle="bold" android:layout_weight="1" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvRenovacao" android:gravity="end" android:layout_weight="1" />
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:minHeight="40dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
-                    android:text="@string/profile_next_charge"
-                    android:textStyle="bold"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:id="@+id/tvProximaCobranca"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="46dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_next_charge" android:textStyle="bold" android:layout_weight="1" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvProximaCobranca" android:gravity="end" android:layout_weight="1" />
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:minHeight="40dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
-                    android:text="@string/profile_next_charge_amount"
-                    android:textStyle="bold"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:id="@+id/tvValorProximaCobranca"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="46dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_next_charge_amount" android:textStyle="bold" android:layout_weight="1" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvValorProximaCobranca" android:gravity="end" android:layout_weight="1" />
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:minHeight="40dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
-                    android:text="@string/profile_payment_method"
-                    android:textStyle="bold"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:id="@+id/tvFormaPagamento"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="46dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="14sp" android:text="@string/profile_payment_method" android:textStyle="bold" android:layout_weight="1" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:id="@+id/tvFormaPagamento" android:gravity="end" android:layout_weight="1" />
             </LinearLayout>
         </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:textColor="@color/darkBlue"
-            android:textSize="13sp"
-            android:text="@string/profile_actions"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"/>
-        <LinearLayout
-            android:id="@+id/btnAlterarPlano"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/bg_card_white_rounded"
-            android:layout_marginTop="10dp"
-            android:paddingHorizontal="16dp"
-            android:clickable="true"
-            android:focusable="true">
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_profile_figma_subscription"
-                android:contentDescription="@null"/>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/darkBlue"
-                android:textSize="12sp"
-                android:text="@string/profile_change_plan"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"/>
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="@null"
-                app:tint="@color/darkBlue"/>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/btnCancelarAssinatura"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/bg_card_white_rounded"
-            android:layout_marginTop="12dp"
-            android:paddingHorizontal="16dp"
-            android:clickable="true"
-            android:focusable="true">
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_profile_figma_cancel"
-                android:contentDescription="@null"/>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/color_red"
-                android:textSize="12sp"
-                android:text="@string/profile_cancel_subscription"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"/>
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="@null"
-                app:tint="@color/color_red"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_actions" android:textStyle="bold" android:layout_marginTop="24dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:id="@+id/btnAlterarPlano" android:background="@drawable/bg_card_white_rounded" android:layout_marginTop="12dp" android:minHeight="58dp" android:paddingHorizontal="18dp" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile_figma_subscription" android:contentDescription="@null" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="13sp" android:text="@string/profile_change_plan" android:layout_weight="1" android:layout_marginStart="16dp" />
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" android:contentDescription="@null" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

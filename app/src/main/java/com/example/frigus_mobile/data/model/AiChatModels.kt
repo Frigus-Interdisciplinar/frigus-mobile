@@ -1,14 +1,13 @@
 package com.example.frigus_mobile.data.model
 
 import com.google.gson.annotations.SerializedName
-import java.util.UUID
 
 data class AiRecipeChatRequest(
     @SerializedName("message")
     val message: String,
 
     @SerializedName("stockId")
-    val stockId: Int = 1,
+    val stockId: Int,
 
     @SerializedName("sessionId")
     val sessionId: String? = null
@@ -45,40 +44,16 @@ data class AiRecipeChatResponse(
     @SerializedName("score")
     val score: Double? = null,
 
-    @SerializedName("nearestExpireDate")
-    val nearestExpireDate: String? = null,
-
     @SerializedName("ingredients")
-    val ingredients: List<AiIngredientItem>? = null
-)
+    val ingredients: List<RecipeIngredientItem>? = null,
 
-data class AiIngredientItem(
-    @SerializedName("id")
-    val id: Int? = null,
-
-    @SerializedName("productId")
-    val productId: Int? = null,
-
-    @SerializedName("productName")
-    val productName: String? = null,
-
-    @SerializedName("quantity")
-    val quantity: Double? = null,
-
-    @SerializedName("unit")
-    val unit: String? = null,
-
-    @SerializedName("inStock")
-    val inStock: Boolean? = null,
-
-    @SerializedName("expireDate")
-    val expireDate: String? = null
+    @SerializedName("nearestExpireDate")
+    val nearestExpireDate: String? = null
 )
 
 data class ChatUiMessage(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String = java.util.UUID.randomUUID().toString(),
     val text: String,
     val isUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis(),
-    val isLoading: Boolean = false
+    val timestamp: Long = System.currentTimeMillis()
 )
