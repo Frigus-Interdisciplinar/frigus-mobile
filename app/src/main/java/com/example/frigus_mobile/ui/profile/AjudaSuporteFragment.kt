@@ -50,7 +50,7 @@ class AjudaSuporteFragment : Fragment() {
         view.findViewById<View>(R.id.btnFaqMoneySaving).setOnClickListener {
             exibirRespostaFaq(
                 "Como funciona o MoneySaving",
-                "O MoneySaving calcula a economia gerada ao consumir alimentos antes do vencimento e aponta o desperdício evitado mês a mês."
+                getString(R.string.money_saving_faq)
             )
         }
 
