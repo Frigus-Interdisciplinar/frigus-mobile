@@ -117,8 +117,8 @@ class MoneySavingViewModel(
     }
 
     private fun userMessage(error: Exception, fallback: String): String = when {
-        error is BffException && error.error.status == 403 ->
-            accessDeniedMessage
+        error is BffException && error.error.code == "MONEY_SAVING_PLAN_REQUIRED" -> accessDeniedMessage
+        error is BffException -> error.error.userMessage(fallback)
         else -> error.message ?: fallback
     }
 
