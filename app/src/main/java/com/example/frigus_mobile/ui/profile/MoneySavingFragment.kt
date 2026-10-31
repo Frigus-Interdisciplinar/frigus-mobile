@@ -4,112 +4,111 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
-import java.text.NumberFormat
-import java.text.SimpleDateFormat
+import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.utils.NetworkGuard
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MoneySavingFragment : Fragment() {
-    private val model: MoneySavingViewModel by lazy {
-        ViewModelProvider(this, MoneySavingViewModel.Factory(requireContext().applicationContext))[MoneySavingViewModel::class.java]
-    }
-    private val money = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
-    private val categories = listOf(null, "HORTIFRUTI", "MEAT", "DAIRY", "GRAIN", "BEVERAGE")
-    private val kinds = listOf(null, "PURCHASE", "CONSUMED", "DISCARDED")
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_money_saving, container, false)
+    private lateinit var stockRepository: StockRepository
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_money_saving, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.btnVoltar).setOnClickListener { parentFragmentManager.popBackStack() }
-        view.findViewById<View>(R.id.previousMonth).setOnClickListener { model.changeMonth(-1) }
-        view.findViewById<View>(R.id.nextMonth).setOnClickListener { model.changeMonth(1) }
-        view.findViewById<View>(R.id.retry).setOnClickListener { model.load() }
-        view.findViewById<View>(R.id.loadMore).setOnClickListener { model.nextPage() }
-        bindFilter(view.findViewById(R.id.categoryFilter),
-            listOf("Todas as categorias", "Hortifruti", "Carnes", "Laticínios", "Grãos", "Bebidas")) {
-            model.filter(categories[it], model.state.value?.kind)
+
+        stockRepository = StockRepository(requireContext())
+
+        view.findViewById<View>(R.id.btnVoltar).setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
-        bindFilter(view.findViewById(R.id.kindFilter),
-            listOf("Todos os tipos", "Compras", "Consumo", "Descarte")) {
-            model.filter(model.state.value?.category, kinds[it])
+
+        view.findViewById<View>(R.id.btnInfo).setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Sobre o MoneySaving")
+                .setMessage("O MoneySaving analisa seus hábitos de consumo alimentar, calculando o valor poupado ao evitar o descarte de itens e fornecendo relatórios de economia.")
+                .setPositiveButton("Entendi", null)
+                .show()
         }
-        model.state.observe(viewLifecycleOwner) { render(view, it) }
-        if (model.state.value?.summary == null) model.load()
+
+        view.findViewById<View>(R.id.btnGastosAlimentacao).setOnClickListener {
+            Toast.makeText(requireContext(), "Relatório detalhado de gastos com alimentação", Toast.LENGTH_SHORT).show()
+        }
+
+        view.findViewById<View>(R.id.btnEconomiaDesperdicio).setOnClickListener {
+            Toast.makeText(requireContext(), "Análise de economia e desperdício evitado", Toast.LENGTH_SHORT).show()
+        }
+
+        view.findViewById<View>(R.id.btnHistoricoFinanceiro).setOnClickListener {
+            Toast.makeText(requireContext(), "Histórico financeiro completo", Toast.LENGTH_SHORT).show()
+        }
+
+        view.findViewById<View>(R.id.btnComoValoresCalculados).setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Cálculo dos Valores")
+                .setMessage("A economia obtida corresponde ao valor dos produtos mantidos dentro do prazo de validade no seu estoque. O desperdício considera itens vencidos.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
+        carregarMetricasReais()
     }
 
-    private fun bindFilter(spinner: Spinner, labels: List<String>, changed: (Int) -> Unit) {
-        spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, labels)
-        spinner.setSelection(if (spinner.id == R.id.categoryFilter)
-            categories.indexOf(model.state.value?.category).coerceAtLeast(0)
-            else kinds.indexOf(model.state.value?.kind).coerceAtLeast(0))
-        var first = true
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-            override fun onItemSelected(parent: AdapterView<*>?, selected: View?, position: Int, id: Long) {
-                if (first) { first = false; return }
-                changed(position)
+    private fun formatarMoeda(valor: Double): String {
+        return "R$ " + String.format(Locale.US, "%.2f", valor).replace(".", ",")
+    }
+
+    private fun carregarMetricasReais() {
+        if (!NetworkGuard.ensureConnected(activity) { carregarMetricasReais() }) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val produtos = stockRepository.getStockProducts()
+
+                var gastoTotal = 0.0
+                var desperdicioTotal = 0.0
+                var economiaTotal = 0.0
+                var qtdEmDia = 0
+                var qtdVencidos = 0
+
+                for (item in produtos) {
+                    val unitPrice = item.purchaseUnitPrice ?: item.product?.unitPrice ?: 0.0
+                    val subtotal = unitPrice
+                    gastoTotal += subtotal
+                    if (item.productStatus.equals("EXPIRED", ignoreCase = true)) {
+                        desperdicioTotal += subtotal
+                        qtdVencidos++
+                    } else {
+                        economiaTotal += subtotal
+                        qtdEmDia++
+                    }
+                }
+
+                view?.findViewById<TextView>(R.id.tvEconomiaObtida)?.text = formatarMoeda(economiaTotal)
+                view?.findViewById<TextView>(R.id.tvGastoAlimentacao)?.text = formatarMoeda(gastoTotal)
+                view?.findViewById<TextView>(R.id.tvDesperdicio)?.text = formatarMoeda(desperdicioTotal)
+                view?.findViewById<TextView>(R.id.tvComparadoGastos)?.text =
+                    if (qtdEmDia == 1) "1 item conservado" else "$qtdEmDia itens conservados"
+                view?.findViewById<TextView>(R.id.tvComparadoDesperdicio)?.text =
+                    if (qtdVencidos == 1) "1 item vencido" else "$qtdVencidos itens vencidos"
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(activity, e.message) {
+                    carregarMetricasReais()
+                }
             }
         }
-    }
-
-    private fun render(view: View, state: MoneySavingState) {
-        listOf(R.id.categoryFilter, R.id.kindFilter, R.id.previousMonth, R.id.nextMonth, R.id.retry)
-            .forEach { view.findViewById<View>(it).isEnabled = !state.loading }
-        view.findViewById<TextView>(R.id.periodLabel).text =
-            SimpleDateFormat("MMMM yyyy", Locale("pt", "BR")).format(state.month.time)
-        val status = view.findViewById<TextView>(R.id.status)
-        status.text = when {
-            state.loading -> "Carregando dados do grupo..."
-            state.error != null -> state.error
-            state.summary == null -> "Nenhum dado disponível."
-            !state.summary.hasFinancialData -> "Sem valores financeiros confirmados neste período."
-            else -> ""
-        }
-        view.findViewById<Button>(R.id.retry).visibility = if (state.error != null) View.VISIBLE else View.GONE
-        view.findViewById<Button>(R.id.loadMore).visibility = if (state.hasMore && !state.loading) View.VISIBLE else View.GONE
-        val summary = state.summary
-        val confirmed = summary?.hasFinancialData == true
-        fun confirmedAmount(value: Double?): String = if (confirmed) amount(value) else "Valor não confirmado"
-        view.findViewById<TextView>(R.id.summary).text = if (summary == null) "" else buildString {
-            appendLine("Gastos: ${confirmedAmount(summary.spending?.amount)}")
-            appendLine("Economia: ${confirmedAmount(summary.saving?.amount)}")
-            appendLine("Perdas: ${confirmedAmount(summary.loss?.amount)}")
-            if (confirmed) summary.spendingChangePercent?.let { append("Variação de gastos: ${it}%") }
-        }
-        view.findViewById<TextView>(R.id.categories).text =
-            summary?.categories?.takeIf { confirmed && it.isNotEmpty() }?.joinToString("\n") {
-                "${it.category ?: "Categoria"}: gastos ${confirmedAmount(it.spent)}, economia ${confirmedAmount(it.saved)}, perdas ${confirmedAmount(it.lost)}"
-            }?.let { "Categorias\n$it" } ?: ""
-        view.findViewById<TextView>(R.id.months).text =
-            summary?.months?.takeIf { confirmed && it.isNotEmpty() }?.joinToString("\n") {
-                "${it.month ?: "Mês"}: ${confirmedAmount(it.spent)} gastos · ${confirmedAmount(it.saved)} economia · ${confirmedAmount(it.lost)} perdas"
-            }?.let { "Últimos meses\n$it" } ?: ""
-        val eventList = view.findViewById<LinearLayout>(R.id.events)
-        eventList.removeAllViews()
-        if (state.events.isEmpty() && !state.loading && state.error == null) {
-            eventList.addView(row("Nenhum evento para os filtros selecionados."))
-        }
-        state.events.forEach { event ->
-            val value = if (event.verifiedValue && event.amount != null) amount(event.amount)
-                else "Valor não confirmado"
-            eventList.addView(row("${event.date.orEmpty()} · ${event.productName ?: "Produto"}\n${event.kind ?: "Evento"} · ${event.quantity ?: "—"} ${event.unitOfMeasure.orEmpty()} · $value${event.reasonCode?.let { " · $it" } ?: ""}"))
-        }
-    }
-
-    private fun amount(value: Double?): String = value?.let { money.format(it) } ?: "Valor não confirmado"
-    private fun row(value: String) = TextView(requireContext()).apply {
-        text = value
-        textSize = 15f
-        setPadding(8, 14, 8, 14)
     }
 }

@@ -48,7 +48,6 @@ class PerfilFragment : Fragment(R.layout.fragment_perfil) {
             })
         }
         action("Assinatura e família") { AssinaturaPlanosFragment() }
-        action("MoneySaving") { MoneySavingFragment() }
         (view.findViewById<View>(R.id.accountFields) as? android.view.ViewGroup)?.addView(actions)
     }
 

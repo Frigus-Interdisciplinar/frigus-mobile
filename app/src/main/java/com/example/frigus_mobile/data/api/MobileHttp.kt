@@ -43,7 +43,6 @@ object MobileHttp {
         "GET" to "/mobile/core/groups/$uuid",
         "GET|POST" to "/mobile/core/groups/$uuid/invitations",
         "DELETE" to "/mobile/core/groups/$uuid/invitations/$uuid",
-        "GET" to "/mobile/commercial/groups/$uuid/money-saving/(summary|events)"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
     fun allowed(method: String, path: String): Boolean = routes.any { it.matches("$method $path") } &&
