@@ -28,7 +28,8 @@ data class MoneySavingState(
 )
 
 class MoneySavingViewModel(
-    private val repository: MoneySavingRepository
+    private val repository: MoneySavingRepository,
+    private val accessDeniedMessage: String
 ) : ViewModel() {
     val state = MutableLiveData(MoneySavingState())
     private var groupId: String? = null
@@ -112,6 +113,7 @@ class MoneySavingViewModel(
     private fun userMessage(error: Exception, fallback: String): String {
         if (error is BffException) {
             val apiError = error.error
+            if (apiError.code == "MONEY_SAVING_PLAN_REQUIRED") return accessDeniedMessage
             val status = apiError.status?.let { "HTTP $it" } ?: "HTTP desconhecido"
             apiError.displayMessage?.takeIf { it.isNotBlank() }?.let { return "$it ($status)" }
             apiError.message?.takeIf { it.isNotBlank() }?.let { message ->
@@ -128,7 +130,8 @@ class MoneySavingViewModel(
             require(modelClass.isAssignableFrom(MoneySavingViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
             return MoneySavingViewModel(
-                MoneySavingRepository(com.example.frigus_mobile.data.local.SessionManager(context))
+                MoneySavingRepository(com.example.frigus_mobile.data.local.SessionManager(context)),
+                context.getString(com.example.frigus_mobile.R.string.money_saving_access_denied)
             ) as T
         }
     }
