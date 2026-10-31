@@ -28,8 +28,7 @@ data class MoneySavingState(
 )
 
 class MoneySavingViewModel(
-    private val repository: MoneySavingRepository,
-    private val accessDeniedMessage: String
+    private val repository: MoneySavingRepository
 ) : ViewModel() {
     val state = MutableLiveData(MoneySavingState())
     private var groupId: String? = null
@@ -106,20 +105,22 @@ class MoneySavingViewModel(
             set(Calendar.DAY_OF_MONTH, 1)
         }
         val end = (start.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
-        val today = Calendar.getInstance()
-        if (start.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-            start.get(Calendar.MONTH) == today.get(Calendar.MONTH)) {
-            end.time = today.time
-            end.add(Calendar.DAY_OF_MONTH, 1)
-        }
         val format = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         return format.format(start.time) to format.format(end.time)
     }
 
-    private fun userMessage(error: Exception, fallback: String): String = when {
-        error is BffException && error.error.status == 403 ->
-            accessDeniedMessage
-        else -> error.message ?: fallback
+    private fun userMessage(error: Exception, fallback: String): String {
+        if (error is BffException) {
+            val apiError = error.error
+            val status = apiError.status?.let { "HTTP $it" } ?: "HTTP desconhecido"
+            apiError.displayMessage?.takeIf { it.isNotBlank() }?.let { return "$it ($status)" }
+            apiError.message?.takeIf { it.isNotBlank() }?.let { message ->
+                val code = apiError.code?.takeIf { it.isNotBlank() }?.let { " · $it" }.orEmpty()
+                return "$message$code ($status)"
+            }
+            apiError.code?.takeIf { it.isNotBlank() }?.let { return "$it ($status)" }
+        }
+        return error.message?.takeIf { it.isNotBlank() } ?: fallback
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
@@ -127,8 +128,7 @@ class MoneySavingViewModel(
             require(modelClass.isAssignableFrom(MoneySavingViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
             return MoneySavingViewModel(
-                MoneySavingRepository(com.example.frigus_mobile.data.local.SessionManager(context)),
-                context.getString(com.example.frigus_mobile.R.string.money_saving_access_denied)
+                MoneySavingRepository(com.example.frigus_mobile.data.local.SessionManager(context))
             ) as T
         }
     }

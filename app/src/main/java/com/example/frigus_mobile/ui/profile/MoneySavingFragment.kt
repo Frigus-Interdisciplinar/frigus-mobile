@@ -62,6 +62,8 @@ class MoneySavingFragment : Fragment() {
     private fun render(view: View, state: MoneySavingState) {
         view.findViewById<TextView>(R.id.periodLabel).text =
             SimpleDateFormat("MMMM yyyy", Locale("pt", "BR")).format(state.month.time)
+        listOf(R.id.previousMonth, R.id.nextMonth, R.id.categoryFilter, R.id.kindFilter, R.id.retry, R.id.loadMore)
+            .forEach { view.findViewById<View>(it).isEnabled = !state.loading }
         val status = view.findViewById<TextView>(R.id.status)
         status.text = when {
             state.loading -> "Carregando dados do grupo..."
