@@ -6,6 +6,7 @@
     android:fillViewport="true"
     android:clipToPadding="false">
     <LinearLayout
+        android:id="@+id/subscriptionContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -38,10 +39,11 @@
         </RelativeLayout>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="126dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:orientation="horizontal"
             android:padding="18dp"
+            android:minHeight="126dp"
             android:background="@drawable/bg_profile_plan">
             <ImageView
                 android:layout_width="35dp"
@@ -50,9 +52,10 @@
                 android:contentDescription="@null"
                 android:layout_marginTop="4dp"/>
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="18dp"
+                android:layout_weight="1"
                 android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
@@ -85,6 +88,7 @@
             </LinearLayout>
         </LinearLayout>
         <TextView
+            android:id="@+id/profilePlanActionsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
@@ -95,6 +99,7 @@
             android:textSize="14sp"
             android:textStyle="bold"/>
         <LinearLayout
+            android:id="@+id/profilePlanActionsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -358,16 +363,6 @@
                     app:tint="@color/darkBlue"
                     android:layout_marginEnd="4dp"/>
             </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <View
-                android:id="@+id/btnCancelarAssinatura"
-                android:layout_width="0dp"
-                android:layout_height="0dp"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

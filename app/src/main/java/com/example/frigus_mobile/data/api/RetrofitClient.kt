@@ -6,6 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
+    val subscriptionService: SubscriptionApiService get() = retrofit.create(SubscriptionApiService::class.java)
     @Volatile private var session: SessionState? = null
     fun setSession(state: SessionState) { session = state }
 
@@ -21,6 +22,8 @@ object RetrofitClient {
     val stockService: StockApiService get() = retrofit.create(StockApiService::class.java)
     val notificationService: NotificationApiService get() = retrofit.create(NotificationApiService::class.java)
     val aiRecipeService: AiRecipeApiService get() = retrofit.create(AiRecipeApiService::class.java)
+    val bffAiService: AiRecipeApiService get() = aiRecipeService
+    val coreAiService: AiRecipeApiService get() = aiRecipeService
     val advertisementService: AdvertisementApiService get() = retrofit.create(AdvertisementApiService::class.java)
     val receiptService: ReceiptApiService get() = retrofit.create(ReceiptApiService::class.java)
 }

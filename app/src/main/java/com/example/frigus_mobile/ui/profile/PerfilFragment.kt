@@ -35,6 +35,20 @@ class PerfilFragment : Fragment(R.layout.fragment_perfil) {
             if (state.user != null) host.refreshSessionIdentity()
         }
         model.loadIfNeeded()
+        val actions = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+        }
+        fun action(label: String, fragment: () -> Fragment) {
+            actions.addView(android.widget.Button(requireContext()).apply {
+                text = label
+                setOnClickListener {
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment()).addToBackStack(null).commit()
+                }
+            })
+        }
+        action("Assinatura e família") { AssinaturaPlanosFragment() }
+        (view.findViewById<View>(R.id.accountFields) as? android.view.ViewGroup)?.addView(actions)
     }
 
     private fun render(view: View, state: ProfileUiState) {
@@ -73,7 +87,10 @@ class PerfilFragment : Fragment(R.layout.fragment_perfil) {
     private fun birthDate(value: String?): String {
         if (value.isNullOrBlank()) return getString(R.string.account_not_informed)
         return try {
-            LocalDate.parse(value).format(
+            val parsed = runCatching { LocalDate.parse(value) }.getOrElse {
+                LocalDate.parse(value, DateTimeFormatter.ofPattern("dd/MM/uuuu"))
+            }
+            parsed.format(
                 DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(resources.configuration.locales[0])
             )
         } catch (_: DateTimeParseException) {

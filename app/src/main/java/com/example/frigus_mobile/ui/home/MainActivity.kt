@@ -38,7 +38,10 @@ class MainActivity : AppCompatActivity() {
     private var unavailableTitle = 0
     private var pendingNavigation: Bundle? = null
     private val backToHome = object : OnBackPressedCallback(false) {
-        override fun handleOnBackPressed() { showHome() }
+        override fun handleOnBackPressed() {
+            if (supportFragmentManager.backStackEntryCount > 0) supportFragmentManager.popBackStack()
+            else showHome()
+        }
     }
     private val stockLotResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (::session.isInitialized && session.isLoggedIn && result.resultCode == RESULT_OK) {
@@ -94,6 +97,16 @@ class MainActivity : AppCompatActivity() {
         navigation.menu.findItem(validSelected).isChecked = true
         val pendingTitle = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
         if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
+        if (validSelected == R.id.nav_perfil) {
+            val section = when (navigationState?.getString(PROFILE_SECTION)) {
+                "subscription" -> com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment()
+                else -> null
+            }
+            section?.let {
+                supportFragmentManager.beginTransaction().replace(R.id.fragment_container, it)
+                    .addToBackStack(null).commit()
+            }
+        }
         consumeReceiptImport(intent)
 
         updatePermissionAction()
@@ -119,6 +132,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openTab(id: Int) {
+        if (supportFragmentManager.backStackEntryCount > 0)
+            supportFragmentManager.popBackStackImmediate(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
         val title = when (id) {
 
             R.id.nav_lista -> R.string.home_shopping_list
@@ -149,6 +164,9 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::navigation.isInitialized) outState.putInt(SELECTED_TAB, navigation.selectedItemId)
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
+        when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
+            is com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment -> outState.putString(PROFILE_SECTION, "subscription")
+        }
         if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
         outState.putBundle(ACTIVITY_RESULTS, Bundle().also(activityResultRegistry::onSaveInstanceState))
         super.onSaveInstanceState(outState)
@@ -220,6 +238,8 @@ class MainActivity : AppCompatActivity() {
                 R.string.home_conversations, R.string.home_qr, R.string.home_ai)
             putInt(UNAVAILABLE_TITLE, title.takeIf { it in safeTitles } ?: 0)
             putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
+            source.getString(PROFILE_SECTION)?.takeIf { it == "subscription" }
+                ?.let { putString(PROFILE_SECTION, it) }
         }
     }
 
@@ -245,5 +265,6 @@ class MainActivity : AppCompatActivity() {
         private const val INVENTORY_NAVIGATION = "inventory_navigation"
         private const val SELECTED_TAB = "selected_tab"
         private const val UNAVAILABLE_TITLE = "unavailable_title"
+        private const val PROFILE_SECTION = "profile_section"
     }
 }
