@@ -7,6 +7,7 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
+    <!-- Top Bar -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,13 +32,14 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/ai_space_8"
             android:layout_toEndOf="@id/btnVoltar"
+            android:layout_toStartOf="@id/btnSavedAiSuggestions"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/ai_title"
+                android:text="@string/ai_chat_title"
                 android:textColor="@color/pure_white"
                 android:textSize="@dimen/ai_text_18"
                 android:textStyle="bold" />
@@ -46,18 +48,43 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/ai_subtitle"
+                android:id="@+id/chatContextSubtitle" android:text="@string/ai_chat_subtitle"
                 android:textColor="@color/ai_subtitle"
                 android:textSize="@dimen/ai_text_12" />
         </LinearLayout>
+        <ImageButton
+            android:id="@+id/btnSavedAiSuggestions"
+            android:layout_width="@dimen/ai_back_size"
+            android:layout_height="@dimen/ai_back_size"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/ai_chat_check_saved"
+            android:src="@drawable/ic_history"
+            app:tint="@color/pure_white" />
     </RelativeLayout>
+    <TextView
+        android:id="@+id/chatContextStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/ai_space_20"
+        android:paddingBottom="@dimen/ai_space_8"
+        android:textColor="@color/ai_subtitle"
+        android:fontFamily="@font/sarabun"
+        android:textSize="@dimen/ai_text_13"
+        android:accessibilityLiveRegion="polite"
+        android:visibility="gone" />
 
+    <!-- Área de Conteúdo / Chat -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollChat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:clipToPadding="false"
         android:fillViewport="true"
         android:paddingHorizontal="@dimen/ai_space_20"
+        android:paddingTop="@dimen/ai_space_12"
         android:paddingBottom="@dimen/ai_space_16">
 
         <LinearLayout
@@ -65,130 +92,202 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Card de Sugestões Rápidas -->
             <LinearLayout
+                android:id="@+id/cardSugestoesRapidas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/ai_space_16"
                 android:background="@drawable/bg_card_white_rounded"
                 android:orientation="vertical"
                 android:padding="@dimen/ai_space_16">
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/ai_select_stock_label"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="@dimen/ai_text_16"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_4"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/ai_stock_note"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="@dimen/ai_text_13" />
-
-                <Spinner
-                    android:id="@+id/aiStockSelector"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/ai_selector_height"
-                    android:layout_marginTop="@dimen/ai_space_12"
-                    android:contentDescription="@string/ai_select_stock_label" />
-
-                <ProgressBar
-                    android:id="@+id/aiStockProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/ai_space_4"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/aiStockStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_8"
-                    android:fontFamily="@font/sarabun"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="@dimen/ai_text_13" />
-
-                <Button
-                    android:id="@+id/aiStockRetry"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ai_retry"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ai_space_16"
-                android:background="@drawable/bg_card_white_rounded"
-                android:orientation="vertical"
-                android:padding="@dimen/ai_space_16">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/ai_space_12"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/ai_suggestions_title"
+                    android:text="@string/ai_chat_quick_suggestions"
                     android:textColor="@color/darkBlue"
-                    android:textSize="@dimen/ai_text_16"
+                    android:textSize="@dimen/ai_chat_text_14"
                     android:textStyle="bold" />
 
-                <TextView
+                <!-- Sugestão 1 -->
+                <LinearLayout
+                    android:id="@+id/sugestaoCozinhar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_4"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/ai_suggestions_note"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="@dimen/ai_text_13" />
+                    android:layout_marginBottom="@dimen/ai_space_8"
+                    android:background="@drawable/bg_card_blue_tint"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/ai_space_12">
 
-                <Button
-                    android:id="@+id/aiRefresh"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_8"
-                    android:enabled="false"
-                    android:text="@string/ai_refresh" />
+                    <ImageView
+                        android:layout_width="@dimen/ai_space_20"
+                        android:layout_height="@dimen/ai_space_20"
+                        android:src="@drawable/ic_restaurant"
+                        app:tint="@color/blue_primary" />
 
-                <ProgressBar
-                    android:id="@+id/aiSuggestionsProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/ai_space_4"
-                    android:visibility="gone" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/ai_chat_gap_10"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/ai_chat_cook"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="@dimen/ai_text_13" />
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/aiSuggestionsStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_8"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/ai_choose_stock"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="@dimen/ai_text_13" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/aiSuggestionsList"
+                <!-- Sugestão 2 -->
+                <LinearLayout
+                    android:id="@+id/sugestaoVencimento"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ai_space_8"
-                    android:nestedScrollingEnabled="false" />
+                    android:layout_marginBottom="@dimen/ai_space_8"
+                    android:background="@drawable/bg_card_blue_tint"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/ai_space_12">
+
+                    <ImageView
+                        android:layout_width="@dimen/ai_space_20"
+                        android:layout_height="@dimen/ai_space_20"
+                        android:src="@drawable/ic_cancel"
+                        app:tint="@color/color_red" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/ai_chat_gap_10"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/ai_chat_expiration"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="@dimen/ai_text_13" />
+                </LinearLayout>
+
+                <!-- Sugestão 3 -->
+                <LinearLayout
+                    android:id="@+id/sugestaoListaCompras"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/ai_space_8"
+                    android:background="@drawable/bg_card_blue_tint"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/ai_space_12">
+
+                    <ImageView
+                        android:layout_width="@dimen/ai_space_20"
+                        android:layout_height="@dimen/ai_space_20"
+                        android:src="@drawable/ic_receipt_long"
+                        app:tint="@color/blue_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/ai_chat_gap_10"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/ai_chat_shopping"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="@dimen/ai_text_13" />
+                </LinearLayout>
+
+                <!-- Sugestão 4 -->
+                <LinearLayout
+                    android:id="@+id/sugestaoEconomia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card_blue_tint"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/ai_space_12">
+
+                    <ImageView
+                        android:layout_width="@dimen/ai_space_20"
+                        android:layout_height="@dimen/ai_space_20"
+                        android:src="@drawable/ic_savings"
+                        app:tint="@color/color_gold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/ai_chat_gap_10"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/ai_chat_saving"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="@dimen/ai_text_13" />
+                </LinearLayout>
             </LinearLayout>
 
-            <TextView
+            <!-- Lista de Mensagens de Chat -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvChatMessages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ai_space_16"
-                android:fontFamily="@font/sarabun"
-                android:gravity="center"
-                android:text="@string/ai_chat_unavailable"
-                android:textColor="@color/pure_white"
-                android:textSize="@dimen/ai_text_12" />
+                android:nestedScrollingEnabled="false" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Input Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/ai_space_16"
+        android:paddingVertical="@dimen/ai_space_12">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ai_chat_input_height"
+            android:background="@drawable/bg_card_white_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/ai_chat_input_padding">
+
+            <EditText
+                android:id="@+id/etChatInput"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:fontFamily="@font/sarabun"
+                android:hint="@string/ai_chat_input_hint" android:maxLength="3000" android:saveEnabled="false"
+                android:imeOptions="actionSend"
+                android:inputType="text"
+                android:textColor="@color/color_text_primary"
+                android:textColorHint="@color/color_text_secondary"
+                android:textSize="@dimen/ai_chat_text_14" />
+
+            <FrameLayout
+                android:id="@+id/btnEnviarMensagem" android:contentDescription="@string/ai_chat_send"
+                android:layout_width="@dimen/ai_chat_send_size"
+                android:layout_height="@dimen/ai_chat_send_size"
+                android:background="@drawable/bg_tab_selected"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="@dimen/ai_chat_send_icon"
+                    android:layout_height="@dimen/ai_chat_send_icon"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_send_white" />
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>
