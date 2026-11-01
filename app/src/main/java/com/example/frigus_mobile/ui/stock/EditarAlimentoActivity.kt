@@ -331,11 +331,13 @@ class EditarAlimentoActivity : AppCompatActivity() {
             try {
                 repository.updateStockProduct(
                     id = prodId,
-                    quantity = novaQtd,
-                    expireDate = novaValidade,
-                    storagePlace = localSelecionado,
-                    name = novoNome,
-                    category = categoriaCodigo
+                    request = com.example.frigus_mobile.data.model.StockProductUpdateRequest(
+                        name = novoNome,
+                        category = categoriaCodigo,
+                        quantity = novaQtd,
+                        expireDate = novaValidade.takeIf(String::isNotBlank)?.let(StockRepository::isoDate),
+                        storagePlace = localSelecionado
+                    )
                 )
 
                 // Salva nome rastreado localmente para persistência imediata

@@ -2,18 +2,14 @@ package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import com.example.frigus_mobile.data.model.PageResponse
-import com.example.frigus_mobile.data.model.ProductCreateRequest
 import com.example.frigus_mobile.data.model.StockMovementRequest
 import com.example.frigus_mobile.data.model.StockMovementResponse
-import com.example.frigus_mobile.data.model.StockProductCreateRequest
-import com.example.frigus_mobile.data.model.StockProductProductResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.*
 
-/** Published /mobile/inventory contract on frigus-bff/dev + catalog & direct lot endpoints. */
+/** Published /mobile/inventory contract on frigus-bff/dev. */
 interface StockApiService {
 
     @GET("mobile/inventory/home")
@@ -64,21 +60,4 @@ interface StockApiService {
 
     @POST("mobile/inventory/stock-products/{id}/movements")
     fun createMovement(@Path("id") id: Int, @Body request: StockMovementRequest): Call<StockMovementResponse>
-
-    @GET("products")
-    suspend fun getCatalogProducts(
-        @Query("page") page: Int = 0,
-        @Query("size") size: Int = 100,
-        @Query("groupId") groupId: String? = null
-    ): Response<PageResponse<StockProductProductResponse>>
-
-    @POST("products")
-    suspend fun createProduct(
-        @Body request: ProductCreateRequest
-    ): Response<StockProductProductResponse>
-
-    @POST("stock-products")
-    suspend fun createStockProduct(
-        @Body request: StockProductCreateRequest
-    ): Response<StockProductResponse>
 }

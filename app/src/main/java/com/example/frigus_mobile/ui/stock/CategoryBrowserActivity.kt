@@ -22,9 +22,6 @@ import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.ui.stock.adapter.EstoqueProdutoAdapter
 import java.util.Locale
 
-class TodasCategoriasActivity : CategoryBrowserActivity()
-class CategoriaItensActivity : CategoryBrowserActivity()
-
 /** Reuses the original category layouts; network and filtering state belong to the ViewModel. */
 abstract class CategoryBrowserActivity : AppCompatActivity() {
     private val model by lazy { ViewModelProvider(this)[CategoryBrowserViewModel::class.java] }

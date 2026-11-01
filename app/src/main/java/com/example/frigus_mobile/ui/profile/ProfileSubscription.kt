@@ -108,7 +108,7 @@ object PlanoAtual {
         var proxima: String? = null
         try {
             val sub = withContext(Dispatchers.IO) {
-                val resp = RetrofitClient.authService.getMySubscription().execute()
+                val resp = RetrofitClient.subscriptionService.subscription().execute()
                 if (resp.isSuccessful) resp.body() else null
             }
             if (sub?.plan != null && sub.status == "ACTIVE") {

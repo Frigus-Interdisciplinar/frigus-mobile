@@ -87,26 +87,6 @@ data class StockProductResponse(
     val batch: String? = null
 ) : Serializable
 
-data class StockProductCreateRequest(
-    @SerializedName("productId")
-    val productId: Int,
-
-    @SerializedName("stockId")
-    val stockId: Int,
-
-    @SerializedName("quantity")
-    val quantity: Int,
-
-    @SerializedName("minimalQuantity")
-    val minimalQuantity: Int = 1,
-
-    @SerializedName("purchaseUnitPrice")
-    val purchaseUnitPrice: Double = 0.0,
-
-    @SerializedName("expireDate")
-    val expireDate: String? = null
-)
-
 data class StockProductUpdateRequest(
     @SerializedName("name")
     val name: String? = null,
@@ -131,30 +111,4 @@ data class StockProductUpdateRequest(
 
     @SerializedName("batch")
     val batch: String? = null
-)
-
-data class ProductCreateRequest(
-    @SerializedName("name")
-    val name: String,
-
-    @SerializedName("category")
-    val category: String,
-
-    @SerializedName("storagePlace")
-    val storagePlace: String,
-
-    @SerializedName("unitPrice")
-    val unitPrice: Double = 1.0,
-
-    @SerializedName("unitOfMeasure")
-    val unitOfMeasure: String = "UNIT",
-
-    @SerializedName("brand")
-    val brand: String? = null,
-
-    @SerializedName("imageUrl")
-    val imageUrl: String? = null,
-
-    @SerializedName("ownerGroupId")
-    val ownerGroupId: String? = null
 )
