@@ -3,6 +3,7 @@ package com.example.frigus_mobile.ui.home
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -10,19 +11,20 @@ import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import com.example.frigus_mobile.ui.ai.ChatIaActivity
+import com.example.frigus_mobile.ui.conversation.ConversationsActivity
 import com.example.frigus_mobile.ui.notifications.NotificacoesActivity
 import com.example.frigus_mobile.ui.qrcode.QrCodeScannerActivity
-import com.google.android.material.button.MaterialButton
+import com.example.frigus_mobile.ui.recipes.RecipesViewModel
+import com.example.frigus_mobile.utils.NetworkGuard
 import java.text.NumberFormat
 
+/** The original 93933ee cards, connected to the current BFF-backed state. */
 class HomeFragment : Fragment(R.layout.fragment_home) {
+    private var displayedError: com.example.frigus_mobile.data.model.ApiError? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val session = SessionManager(requireContext())
-        val name = session.userName?.trim()?.split(Regex("\\s+"))?.firstOrNull()?.takeIf { it.isNotBlank() }
-        view.findViewById<TextView>(R.id.tvGreeting).text = if (name == null)
-            getString(R.string.home_greeting) else getString(R.string.home_named_greeting, name)
-
+        updateGreeting(view)
         val main = requireActivity() as MainActivity
         view.findViewById<View>(R.id.cardQuickEstoque).setOnClickListener { main.openInventory() }
         mapOf(
@@ -35,70 +37,97 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         view.findViewById<View>(R.id.cardAlertaVencendo).setOnClickListener {
             main.openInventory(showAllStatusesNotice = true)
         }
-        view.findViewById<View>(R.id.cardQuickReceitas).setOnClickListener { main.selectTab(R.id.nav_receitas) }
+        listOf(R.id.cardQuickReceitas, R.id.cardSugestaoReceita).forEach { id ->
+            view.findViewById<View>(id).setOnClickListener { main.selectTab(R.id.nav_receitas) }
+        }
         view.findViewById<View>(R.id.btnNotificacoes).setOnClickListener {
             startActivity(Intent(requireContext(), NotificacoesActivity::class.java))
         }
         view.findViewById<View>(R.id.cardFaleComIa).setOnClickListener {
             startActivity(Intent(requireContext(), ChatIaActivity::class.java))
         }
+        view.findViewById<View>(R.id.cardChats).setOnClickListener {
+            startActivity(Intent(requireContext(), ConversationsActivity::class.java))
+        }
+        view.findViewById<View>(R.id.cardMoneySaving).setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, com.example.frigus_mobile.ui.profile.MoneySavingFragment())
+                .addToBackStack(null).commit()
+        }
         view.findViewById<View>(R.id.cardEscanearQrCode).setOnClickListener {
             startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))
         }
-        mapOf(R.id.cardChats to R.string.home_conversations).forEach { (id, title) ->
-            view.findViewById<View>(id).setOnClickListener { main.showUnavailable(title) }
-        }
 
         val model = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
-        view.findViewById<View>(R.id.homeReloadButton).setOnClickListener { model.reload() }
-        model.state.observe(viewLifecycleOwner) { state -> render(view, state) }
-        model.loadIfNeeded()
-    }
-
-    private fun render(view: View, state: HomeUiState) {
-        view.findViewById<View>(R.id.homeProgress).visibility = if (state.loading) View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.homeSummary).visibility = if (state.home != null) View.VISIBLE else View.GONE
-        view.findViewById<MaterialButton>(R.id.homeReloadButton).apply {
-            isEnabled = !state.loading
-            setText(if (state.error == null) R.string.home_refresh else R.string.home_retry)
-        }
-        view.findViewById<TextView>(R.id.homeStatus).apply {
-            visibility = if (state.loading || state.error != null) View.VISIBLE else View.GONE
-            text = when {
-                state.loading -> getString(R.string.home_loading)
-                state.error?.code == "NETWORK_ERROR" -> getString(R.string.home_network_error)
-                state.error?.code == "INVALID_RESPONSE" -> getString(R.string.home_invalid_response)
-                state.error != null -> state.error.userMessage(getString(
-                    if (state.error.status == 403) R.string.home_forbidden else R.string.home_load_error))
-                else -> ""
+        model.state.observe(viewLifecycleOwner) { state ->
+            if (state.home != null) renderSummary(view, state.home) else clearSummary(view)
+            val error = state.error
+            if (error == null) displayedError = null
+            else if (displayedError !== error) {
+                displayedError = error
+                val message = error.userMessage(getString(when {
+                    error.code == "NETWORK_ERROR" -> R.string.home_network_error
+                    error.code == "INVALID_RESPONSE" -> R.string.home_invalid_response
+                    error.status == 403 -> R.string.home_forbidden
+                    else -> R.string.home_load_error
+                }))
+                NetworkGuard.showBlockingError(activity, message) { model.reload() }
             }
         }
-        state.home?.let { renderSummary(view, it) }
+        model.loadIfNeeded()
+
+        val recipes = ViewModelProvider(requireActivity())[RecipesViewModel::class.java]
+        view.findViewById<ImageView>(R.id.homeSuggestedImage).apply {
+            setImageResource(R.drawable.ic_restaurant)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+        }
+        recipes.suggestions.observe(viewLifecycleOwner) { state ->
+            val recipe = state.items.firstOrNull()
+            view.findViewById<TextView>(R.id.homeSuggestedTitle).text =
+                recipe?.recipeName?.takeIf(String::isNotBlank) ?: getString(R.string.home_suggestion_empty)
+            view.findViewById<TextView>(R.id.homeSuggestedSubtitle).text = getString(when {
+                state.loading -> R.string.recipe_browser_loading
+                state.error != null -> R.string.home_suggestion_load_error
+                else -> R.string.home_suggestion_description
+            })
+        }
+        if (recipes.suggestions.value == null) recipes.refreshSuggestions()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        view?.let(::updateGreeting)
+    }
+
+    private fun updateGreeting(view: View) {
+        val name = SessionManager(requireContext()).userName?.trim()?.split(Regex("\\s+"))
+            ?.firstOrNull()?.takeIf(String::isNotBlank)
+        view.findViewById<TextView>(R.id.tvGreeting).text =
+            if (name == null) getString(R.string.home_greeting) else getString(R.string.home_named_greeting, name)
+    }
+
+    private fun clearSummary(view: View) {
+        listOf(R.id.tvQuickEstoqueQtd, R.id.tvQtdGeladeira, R.id.tvQtdFreezer, R.id.tvQtdDespensa)
+            .forEach { view.findViewById<TextView>(it).setText(R.string.home_unknown_count) }
+        view.findViewById<View>(R.id.cardAlertaVencendo).visibility = View.GONE
     }
 
     private fun renderSummary(view: View, home: InventoryHomeResponse) {
-        val total = home.summary?.itemCount
-        view.findViewById<TextView>(R.id.tvQuickEstoqueQtd).text = itemCount(total)
+        view.findViewById<TextView>(R.id.tvQuickEstoqueQtd).text = itemCount(home.summary?.itemCount)
         val places = home.summary?.itemsByStoragePlace
         mapOf(R.id.tvQtdGeladeira to "FRIDGE", R.id.tvQtdFreezer to "FREEZER", R.id.tvQtdDespensa to "PANTRY")
             .forEach { (id, place) ->
                 val count = if (places == null) null else if (places.containsKey(place)) places[place] else 0L
                 view.findViewById<TextView>(id).text = itemCount(count)
             }
-        view.findViewById<TextView>(R.id.homeEmptyState).apply {
-            visibility = if (home.stocks.isNullOrEmpty() || total == 0L) View.VISIBLE else View.GONE
-            setText(if (home.stocks.isNullOrEmpty()) R.string.home_no_stocks else R.string.home_empty_stock)
-        }
         val near = home.statusCounts?.nearExpiration?.takeIf { it >= 0 }
         val expired = home.statusCounts?.expired?.takeIf { it >= 0 }
-        val hasAlerts = (near != null && near > 0) || (expired != null && expired > 0)
-        view.findViewById<View>(R.id.cardAlertaVencendo).visibility = if (hasAlerts) View.VISIBLE else View.GONE
-        view.findViewById<TextView>(R.id.tvAlertaVencendoTitulo).text =
+        val total = if (near != null && expired != null) near + expired else null
+        view.findViewById<View>(R.id.cardAlertaVencendo).visibility =
+            if ((near ?: 0) > 0 || (expired ?: 0) > 0) View.VISIBLE else View.GONE
+        view.findViewById<TextView>(R.id.tvAlertaVencendoTitulo).text = if (total == null)
             getString(R.string.home_expiration_counts, number(near), number(expired))
-        view.findViewById<TextView>(R.id.homeStatusNote).apply {
-            visibility = if (near == null || expired == null) View.VISIBLE else View.GONE
-            setText(R.string.home_expiration_unknown)
-        }
+        else resources.getQuantityString(R.plurals.home_expiring_food_count, if (total == 1L) 1 else 2, number(total))
     }
 
     private fun itemCount(value: Long?): String {

@@ -38,9 +38,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if (!session.isLoggedIn || mutableState.value?.loading == true) return
         needsRefresh = false
         val generation = session.state.generation
+        val groupId = session.activeGroupId
         mutableState.value = HomeUiState(loading = true)
-        pending = repository.load { home, error ->
-            if (session.isLoggedIn && session.state.generation == generation) {
+        pending = repository.load(groupId) { home, error ->
+            if (session.isLoggedIn && session.state.generation == generation && session.activeGroupId == groupId) {
                 mutableState.value = HomeUiState(home = home, error = error)
             }
         }

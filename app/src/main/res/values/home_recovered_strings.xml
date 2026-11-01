@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_view_details">Ver detalhes</string>
+    <string name="home_for_you">Para você</string>
+    <string name="home_suggestions">Sugestões para você</string>
+    <string name="home_suggestion_empty">Descubra receitas para você</string>
+    <string name="home_suggestion_description">Use ingredientes que você já tem!</string>
+    <string name="home_suggestion_load_error">Abra Receitas para atualizar suas sugestões.</string>
+    <string name="home_conversation_chats">Chats de conversas</string>
+    <string name="home_conversation_description">Converse com o Frigus</string>
+    <string name="home_receipt_title">Estoque mais produtos</string>
+    <string name="home_receipt_subtitle">Escaneie o QR Code de nota fiscal e adicione ao seu estoque.</string>
+    <string name="home_ai_title">Converse com o Frigulino</string>
+    <string name="home_ai_subtitle">Tire dúvidas, peça receitas e muito mais!</string>
+    <plurals name="home_expiring_food_count">
+        <item quantity="one">%1$s alimento vencendo</item>
+        <item quantity="other">%1$s alimentos vencendo</item>
+    </plurals>
+    <string name="home_money_saving_subtitle">Economia, gastos e controle de desperdício</string>
+</resources>
