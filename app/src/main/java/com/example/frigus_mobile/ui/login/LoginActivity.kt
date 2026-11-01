@@ -24,7 +24,6 @@ import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
 import com.example.frigus_mobile.ui.home.MainActivity
-import com.example.frigus_mobile.ui.shopping.OfflineShoppingActivity
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.utils.CustomTypefaceSpan
 import com.example.frigus_mobile.utils.ValidationUtils
@@ -92,15 +91,6 @@ class LoginActivity : AppCompatActivity() {
             iniciarLoginGoogle()
         }
         findViewById<View>(R.id.btnEntrar).setOnClickListener { fazerLogin() }
-        findViewById<View>(R.id.btnAbrirListaOffline).setOnClickListener {
-            if (session.canReadCachedShopping) {
-                isAutoRevalidating = false
-                viewModel.pauseForOfflineShopping()
-                startActivity(Intent(this, OfflineShoppingActivity::class.java))
-            }
-        }
-        SessionManager.authenticated.observe(this) { updateOfflineShoppingButton() }
-        updateOfflineShoppingButton()
         findViewById<View>(R.id.tvCriarConta).setOnClickListener {
             discardPendingNavigation()
             startActivity(Intent(this, CreateAccountActivity::class.java))
@@ -149,12 +139,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (::session.isInitialized) updateOfflineShoppingButton()
-    }
-
-    private fun updateOfflineShoppingButton() {
-        findViewById<View>(R.id.btnAbrirListaOffline).visibility =
-            if (session.canReadCachedShopping) View.VISIBLE else View.GONE
     }
 
     private fun tentarAutoLogin(sessionManager: SessionManager) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="auth_sign_in">Entrar</string>
+    <string name="auth_create_account_link">Criar conta</string>
     <string name="auth_register">Cadastrar</string>
     <string name="auth_google_unavailable">Google indisponível</string>
     <string name="auth_password_reset_unavailable">A recuperação de senha ainda não está disponível nesta versão. Nenhum e-mail foi enviado.</string>
