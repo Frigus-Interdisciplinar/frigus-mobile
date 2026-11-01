@@ -1,182 +1,157 @@
 package com.example.frigus_mobile.data.repository
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
-import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.model.ShoppingListItem
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.PersistentCacheSettings
+import com.example.frigus_mobile.data.api.BffException
+import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.model.*
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.withContext
+import retrofit2.Call
+import java.math.BigDecimal
+import java.util.UUID
 
+data class ShoppingContext(val groupId: String, val stocks: List<StockResponse>)
+
+/** List CRUD is strictly local. BFF operations exist only for explicitly requested stock transfers. */
 class ShoppingListRepository(context: Context) {
-
-    private val sessionManager = SessionManager(context)
-    private val userId: String
-        get() = sessionManager.userId?.takeIf { it.isNotBlank() } ?: "local_user"
-
-    private val prefs: SharedPreferences =
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val application = context.applicationContext
+    private val localPreferences = context.applicationContext.getSharedPreferences("shopping_list_prefs", Context.MODE_PRIVATE)
+    private val local = ShoppingLocalStore(
+        read = { localPreferences.getString(it, null) },
+        write = { key, json -> shoppingDurablePreferenceWrite(key, json,
+            { localPreferences.getString(it, null) },
+            { storedKey, value -> localPreferences.edit().putString(storedKey, value).commit() }) }
+    )
+    private val mutations = context.applicationContext.getSharedPreferences("shopping_mutation_checkpoints", Context.MODE_PRIVATE)
     private val gson = Gson()
+    private val api get() = RetrofitClient.shoppingListService
+    private var firebaseSync: ShoppingFirebaseSync? = null
 
-    private val firestore: FirebaseFirestore by lazy {
-        val db = FirebaseFirestore.getInstance()
-        try {
-            val settings = FirebaseFirestoreSettings.Builder()
-                .setLocalCacheSettings(
-                    PersistentCacheSettings.newBuilder()
-                        .setSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
-                        .build()
-                )
-                .build()
-            db.firestoreSettings = settings
-        } catch (_: Exception) {}
-        db
+    fun startSync(owner: String, scope: CoroutineScope, guard: () -> Boolean,
+                  report: (ShoppingSyncStatus, Int, ApiError?) -> Unit) {
+        val sync = firebaseSync ?: ShoppingFirebaseSync(application, local, scope).also { firebaseSync = it }
+        sync.start(owner, guard, report)
+    }
+    fun syncNow() { firebaseSync?.syncNow() }
+    fun stopSync() { firebaseSync?.stop() }
+    fun close() { firebaseSync?.close() }
+
+    fun localItems(owner: String): List<ShoppingListItem> = local.items(owner)
+    fun localPendingCount(owner: String): Int = local.document(owner).pending.size
+    fun saveLocalItem(owner: String, item: ShoppingListItem): List<ShoppingListItem> = local.mutate(owner) { items ->
+        val index = items.indexOfFirst { it.id == item.id }
+        if (index < 0) listOf(item) + items else items.toMutableList().apply { set(index, item) }
+    }
+    fun deleteLocalItem(owner: String, id: String): List<ShoppingListItem> =
+        local.mutate(owner) { items -> items.filterNot { it.id == id } }
+
+    suspend fun context(groupId: String?): ShoppingContext {
+        val home = request(RetrofitClient.stockService.getInventoryHome(groupId))
+        val id = home.groupId
+        valid(uuid(id) && (groupId == null || groupId.equals(id, true)))
+        val stocks = home.stocks
+        valid(stocks != null && stocks.all { it != null && it.id > 0 &&
+            (it.groupId == null || it.groupId.equals(id, true)) })
+        return ShoppingContext(id!!, stocks.orEmpty().filterNotNull())
     }
 
-    private val itemsCollection
-        get() = firestore.collection("users").document(userId).collection("shopping_list")
-
-    /**
-     * Retorna os itens do cache local (rápido e síncrono).
-     */
-    fun getItems(): List<ShoppingListItem> {
-        val userKey = "$KEY_ITEMS-$userId"
-        val json = prefs.getString(userKey, null) ?: prefs.getString(KEY_ITEMS, null)
-        if (json.isNullOrBlank()) {
-            return emptyList()
-        }
-        return try {
-            val type = object : TypeToken<List<ShoppingListItem>>() {}.type
-            gson.fromJson<List<ShoppingListItem>>(json, type) ?: emptyList()
-        } catch (_: Exception) {
-            emptyList()
-        }
+    suspend fun catalog(groupId: String, guard: () -> Unit): List<ShoppingCatalogProduct> {
+        val products = mutableListOf<ShoppingCatalogProduct>()
+        var page = 0
+        do {
+            guard()
+            val response = request(api.catalog(groupId, page))
+            validatePage(response, page)
+            valid(response.content.all { (it.id ?: 0) > 0 && !it.name.isNullOrBlank() &&
+                (it.ownerGroupId == null || it.ownerGroupId.equals(groupId, true)) })
+            products += response.content
+            page++
+        } while (page < response.totalPages)
+        return products.distinctBy { it.id }
     }
 
-    fun saveItems(items: List<ShoppingListItem>) {
-        val userKey = "$KEY_ITEMS-$userId"
-        val json = gson.toJson(items)
-        prefs.edit().putString(userKey, json).apply()
-    }
-
-    /**
-     * Adiciona um item na lista: salva no cache local e persiste no Firestore.
-     */
-    fun addItem(item: ShoppingListItem) {
-        val current = getItems().toMutableList()
-        current.add(0, item)
-        saveItems(current)
-
-        try {
-            itemsCollection.document(item.id).set(item)
-                .addOnFailureListener { e ->
-                    Log.w("ShoppingListRepo", "Falha ao sincronizar item no Firestore: ${e.message}")
-                }
-        } catch (e: Exception) {
-            Log.w("ShoppingListRepo", "Firestore indisponível temporariamente: ${e.message}")
-        }
-    }
-
-    /**
-     * Atualiza um item localmente e no Firestore.
-     */
-    fun updateItem(item: ShoppingListItem) {
-        val current = getItems().toMutableList()
-        val index = current.indexOfFirst { it.id == item.id }
-        if (index != -1) {
-            current[index] = item
-            saveItems(current)
+    suspend fun createProduct(body: ShoppingCreateProduct): ShoppingCatalogProduct =
+        request(api.createProduct(body), 201).also {
+            valid((it.id ?: 0) > 0 && it.name == body.name && it.ownerGroupId == body.ownerGroupId &&
+                it.category == body.category && it.unitOfMeasure == body.unitOfMeasure)
         }
 
-        try {
-            itemsCollection.document(item.id).set(item)
-                .addOnFailureListener { e ->
-                    Log.w("ShoppingListRepo", "Falha ao atualizar no Firestore: ${e.message}")
-                }
-        } catch (e: Exception) {
-            Log.w("ShoppingListRepo", "Firestore indisponível: ${e.message}")
+    suspend fun createLot(stockId: Int, groupId: String, productId: Int, quantity: Int,
+                          expiry: String, price: BigDecimal): StockProductResponse =
+        request(api.createLot(stockId, groupId, ShoppingCreateLot(productId, quantity, expiry, price)), 201).also {
+            valid((it.id ?: 0) > 0 && it.stockId == stockId && it.productId == productId &&
+                it.quantity == quantity && it.expireDate?.take(10) == expiry && it.hasShoppingPrice(price))
         }
-    }
 
-    /**
-     * Deleta um item localmente e no Firestore.
-     */
-    fun deleteItem(id: String) {
-        val current = getItems().toMutableList()
-        current.removeAll { it.id == id }
-        saveItems(current)
-
-        try {
-            itemsCollection.document(id).delete()
-                .addOnFailureListener { e ->
-                    Log.w("ShoppingListRepo", "Falha ao deletar no Firestore: ${e.message}")
-                }
-        } catch (e: Exception) {
-            Log.w("ShoppingListRepo", "Firestore indisponível: ${e.message}")
+    suspend fun setLotPlace(id: Int, place: String, price: BigDecimal): StockProductResponse =
+        request(api.setLotPlace(id, StockProductUpdateRequest(storagePlace = place))).also {
+            valid(it.id == id && it.shoppingPlace() == place && it.hasShoppingPrice(price))
         }
+
+    suspend fun lots(stockId: Int, guard: () -> Unit): List<StockProductResponse> {
+        val lots = mutableListOf<StockProductResponse>()
+        var page = 0
+        do {
+            guard()
+            val response = request(api.lots(stockId, page))
+            validatePage(response, page)
+            valid(response.content.all { (it.id ?: 0) > 0 && it.stockId == stockId })
+            lots += response.content
+            page++
+        } while (page < response.totalPages)
+        return lots
     }
 
-    /**
-     * Alterna o estado checked do item.
-     */
-    fun toggleChecked(id: String, isChecked: Boolean) {
-        val current = getItems().toMutableList()
-        val index = current.indexOfFirst { it.id == id }
-        if (index != -1) {
-            val updated = current[index].copy(isChecked = isChecked)
-            current[index] = updated
-            saveItems(current)
+    fun hasPending(owner: String): Boolean = mutations.contains("pending/$owner")
+    fun pending(owner: String): ShoppingPendingMutation? {
+        val json = mutations.getString("pending/$owner", null) ?: return null
+        val result = runCatching { gson.fromJson(json, ShoppingPendingMutation::class.java) }.getOrNull()
+        valid(result != null && uuid(result.groupId) && result.stockId > 0)
+        return result
+    }
 
-            try {
-                itemsCollection.document(id).update("checked", isChecked)
-                    .addOnFailureListener {
-                        itemsCollection.document(id).set(updated)
-                    }
-            } catch (_: Exception) {}
+    fun savePending(owner: String, pending: ShoppingPendingMutation) {
+        mutationWrite("pending/$owner", gson.toJson(pending))
+    }
+    fun clearPending(owner: String) { mutationWrite("pending/$owner", null) }
+
+    fun lotCheckpoint(owner: String, key: String): StockProductResponse? =
+        mutations.getString("lot/$owner/$key", null)?.let {
+            val lot = runCatching { gson.fromJson(it, StockProductResponse::class.java) }.getOrNull()
+            valid(lot != null && (lot.id ?: 0) > 0)
+            lot
         }
+
+    fun saveLotCheckpoint(owner: String, key: String, lot: StockProductResponse) {
+        mutationWrite("lot/$owner/$key", gson.toJson(lot))
+    }
+    fun clearLotCheckpoint(owner: String, key: String) {
+        mutationWrite("lot/$owner/$key", null)
     }
 
-    fun getItemById(id: String): ShoppingListItem? {
-        return getItems().firstOrNull { it.id == id }
+    private fun mutationWrite(key: String, json: String?) {
+        valid(shoppingDurablePreferenceWrite(key, json, { mutations.getString(it, null) },
+            { storedKey, value -> mutations.edit().putString(storedKey, value).commit() }))
     }
 
-    fun clearAll() {
-        val userKey = "$KEY_ITEMS-$userId"
-        prefs.edit().remove(userKey).apply()
+    private fun <T> validatePage(response: PageResponse<T>, page: Int) {
+        valid(response.number == page && response.size > 0 && response.totalPages >= 0 &&
+            response.totalElements >= response.content.size && response.content.size <= response.size &&
+            (if (response.totalPages == 0) response.content.isEmpty() && response.totalElements == 0L
+                else page < response.totalPages))
     }
-
-    /**
-     * Escuta alterações em tempo real do Firestore para atualizar a lista local automaticamente.
-     */
-    fun listenToChanges(onItemsUpdated: (List<ShoppingListItem>) -> Unit): ListenerRegistration? {
-        return try {
-            itemsCollection.addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.w("ShoppingListRepo", "Erro ao escutar Firestore: ${error.message}")
-                    return@addSnapshotListener
-                }
-                if (snapshot != null) {
-                    val remoteItems = snapshot.documents.mapNotNull { doc ->
-                        doc.toObject(ShoppingListItem::class.java)
-                    }
-                    if (remoteItems.isNotEmpty()) {
-                        saveItems(remoteItems)
-                        onItemsUpdated(remoteItems)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.w("ShoppingListRepo", "Não foi possível registrar listener: ${e.message}")
-            null
-        }
+    private fun uuid(id: String?): Boolean = id != null &&
+        runCatching { UUID.fromString(id).toString().equals(id, true) }.getOrDefault(false)
+    private fun valid(condition: Boolean) {
+        if (!condition) throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
     }
-
-    companion object {
-        private const val PREFS_NAME = "shopping_list_prefs"
-        private const val KEY_ITEMS = "shopping_list_user_items"
+    private suspend fun <T> request(call: Call<T>, expected: Int = 200): T = withContext(Dispatchers.IO) {
+        val response = call.execute()
+        if (!response.isSuccessful) throw BffException(ApiError.parse(response), "")
+        if (response.code() != expected || response.body() == null)
+            throw BffException(ApiError(status = response.code(), code = "INVALID_RESPONSE"), "")
+        response.body()!!
     }
 }

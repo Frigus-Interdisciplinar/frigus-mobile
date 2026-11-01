@@ -12,7 +12,12 @@ data class ShoppingListItem(
     val observation: String = "",
     val addedBy: String = "Adicionado por você",
     var isChecked: Boolean = false,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val remoteId: Int? = null,
+    val listId: String? = null,
+    val productId: Int? = null,
+    val unitCode: String? = null,
+    val stockId: Int? = null
 ) : Serializable {
 
     companion object {
