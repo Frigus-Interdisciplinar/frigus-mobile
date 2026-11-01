@@ -1,47 +1,38 @@
 package com.example.frigus_mobile.ui.profile
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.model.FoodPreference
+import com.google.android.material.snackbar.Snackbar
 
-/** Preferências de alimentos: tudo persistido localmente via [ProfileStore]. */
-class PreferenciasAlimentosFragment : Fragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_preferencias_alimentos, container, false)
-
+/** The recovered controls persist per account and feed the assistant's request context. */
+class PreferenciasAlimentosFragment : Fragment(R.layout.fragment_preferencias_alimentos) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configurarVoltar(view)
-
-        val store = ProfileStore(requireContext())
-        // id do botão -> (chave, valor padrão)
-        val opcoes = listOf(
-            Triple(R.id.checkVegetarian, "food_vegetarian", false),
-            Triple(R.id.checkVegan, "food_vegan", false),
-            Triple(R.id.checkNoRedMeat, "food_no_red_meat", false),
-            Triple(R.id.checkNoSeafood, "food_no_seafood", false),
-            Triple(R.id.checkNoLactose, "food_no_lactose", false),
-            Triple(R.id.checkNoGluten, "food_no_gluten", false),
-            Triple(R.id.checkNoSugar, "food_no_sugar", false),
-            Triple(R.id.switchQuickRecipes, "food_quick_recipes", true),
-            Triple(R.id.switchEconomicalRecipes, "food_economical_recipes", true)
+        val model = ViewModelProvider(this)[FoodPreferencesViewModel::class.java]
+        val choices = mapOf(
+            R.id.checkVegetarian to FoodPreference.VEGETARIAN,
+            R.id.checkVegan to FoodPreference.VEGAN,
+            R.id.checkNoRedMeat to FoodPreference.NO_RED_MEAT,
+            R.id.checkNoSeafood to FoodPreference.NO_SEAFOOD,
+            R.id.checkNoLactose to FoodPreference.NO_LACTOSE,
+            R.id.checkNoGluten to FoodPreference.NO_GLUTEN,
+            R.id.checkNoSugar to FoodPreference.NO_SUGAR,
+            R.id.switchQuickRecipes to FoodPreference.QUICK_RECIPES,
+            R.id.switchEconomicalRecipes to FoodPreference.ECONOMICAL_RECIPES
         )
-        for ((id, chave, padrao) in opcoes) {
-            val botao = view.findViewById<CompoundButton>(id)
-            botao.isChecked = store.getBoolean(chave, padrao)
-            botao.setOnCheckedChangeListener { _, marcado -> store.putBoolean(chave, marcado) }
+        var rendering = false
+        choices.forEach { (id, preference) ->
+            view.findViewById<CompoundButton>(id).setOnCheckedChangeListener { _, checked ->
+                if (!rendering) model.update(preference, checked)
+            }
         }
-
-        // Clicar na linha inteira alterna o checkbox.
-        listOf(
+        val rows = mapOf(
             R.id.rowVegetarian to R.id.checkVegetarian,
             R.id.rowVegan to R.id.checkVegan,
             R.id.rowNoRedMeat to R.id.checkNoRedMeat,
@@ -49,10 +40,23 @@ class PreferenciasAlimentosFragment : Fragment() {
             R.id.rowNoLactose to R.id.checkNoLactose,
             R.id.rowNoGluten to R.id.checkNoGluten,
             R.id.rowNoSugar to R.id.checkNoSugar
-        ).forEach { (linha, check) ->
-            view.findViewById<View>(linha).setOnClickListener {
-                view.findViewById<CompoundButton>(check).toggle()
+        )
+        rows.forEach { (row, check) ->
+            view.findViewById<View>(row).setOnClickListener {
+                view.findViewById<CompoundButton>(check).let { if (it.isEnabled) it.toggle() }
             }
+        }
+        model.state.observe(viewLifecycleOwner) { state ->
+            rendering = true
+            choices.forEach { (id, preference) ->
+                view.findViewById<CompoundButton>(id).apply {
+                    isChecked = state.preferences?.isEnabled(preference) ?: preference.defaultValue
+                    isEnabled = state.preferences != null && !state.saving
+                }
+            }
+            rows.keys.forEach { view.findViewById<View>(it).isEnabled = state.preferences != null && !state.saving }
+            rendering = false
+            if (state.failed) Snackbar.make(view, R.string.profile_food_save_failed, Snackbar.LENGTH_LONG).show()
         }
     }
 }

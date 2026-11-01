@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_two_factor_not_integrated">Verificação em duas etapas indisponível nesta versão.</string>
+    <string name="profile_support_not_integrated">O envio de solicitações ainda não está disponível nesta versão. Nenhuma solicitação foi enviada.</string>
+    <string name="profile_password_not_integrated">A alteração de senha ainda não está integrada nesta versão. Sua senha não foi alterada.</string>
+</resources>

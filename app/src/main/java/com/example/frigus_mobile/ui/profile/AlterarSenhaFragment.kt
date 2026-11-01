@@ -80,9 +80,7 @@ class AlterarSenhaFragment : Fragment() {
 
             if (tilAtual.error != null || tilNova.error != null || tilConfirma.error != null) return@setOnClickListener
 
-            // TODO: o BFF mobile ainda não tem endpoint de troca de senha (e AuthRepository.sendPasswordReset
-            //  está indisponível); por enquanto o fluxo é só local, seguindo para a tela de verificação de e-mail.
-            abrirTela(VerificacaoEmailFragment())
+            mostrarToast(getString(R.string.profile_password_not_integrated))
         }
     }
 

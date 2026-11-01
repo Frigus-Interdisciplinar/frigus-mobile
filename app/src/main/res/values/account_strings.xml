@@ -11,7 +11,7 @@
     <string name="account_commercial">Comercial</string>
     <string name="account_security_title">Conta e segurança</string>
     <string name="account_security_unavailable">Alteração de dados, troca e recuperação de senha, autenticação Google, verificação em duas etapas e gerenciamento de dispositivos ainda não estão disponíveis nesta versão.</string>
-    <string name="account_other_unavailable">Família, assinatura, pagamentos, preferências e economia alimentar ainda não estão disponíveis nesta versão.</string>
+    <string name="account_other_unavailable">Contratação paga, cartões e preferências da conta ainda não estão disponíveis pelo serviço mobile.</string>
     <string name="account_loading">Consultando seus dados…</string>
     <string name="account_refresh">Atualizar dados</string>
     <string name="account_retry">Tentar novamente</string>
