@@ -12,11 +12,22 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.api.ChangePasswordBody
+import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.model.ApiError
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 /** Alterar senha: validação local e requisitos em tempo real. */
 class AlterarSenhaFragment : Fragment() {
+    private var changeCall: Call<Void>? = null
+    private var changing = false
+    private var uncertain = false
+    private var feedbackSnackbar: Snackbar? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,7 +91,42 @@ class AlterarSenhaFragment : Fragment() {
 
             if (tilAtual.error != null || tilNova.error != null || tilConfirma.error != null) return@setOnClickListener
 
-            mostrarToast(getString(R.string.profile_password_not_integrated))
+            changePassword(atual, nova, view.findViewById(R.id.btnSaveNewPassword))
+        }
+    }
+
+    private fun changePassword(current: String, new: String, save: View) {
+        if (changing || uncertain) return
+        changing = true
+        save.isEnabled = false
+        changeCall = RetrofitClient.accountSecurityService.changePassword(ChangePasswordBody(current, new)).also { request ->
+            request.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (call.isCanceled || view == null) return
+                    changing = false
+                    when {
+                        response.code() == 204 || response.code() == 200 -> {
+                            showFeedback("Senha alterada pelo servidor.", Snackbar.LENGTH_LONG)
+                            parentFragmentManager.popBackStack()
+                        }
+                        response.code() >= 500 || response.isSuccessful -> {
+                            uncertain = true
+                            showFeedback("Resultado incerto. O pedido não será repetido; entre novamente para confirmar a nova senha.", Snackbar.LENGTH_INDEFINITE)
+                        }
+                        else -> {
+                            save.isEnabled = true
+                            showFeedback(ApiError.parse(response).userMessage("Não foi possível alterar a senha (${response.code()})."), Snackbar.LENGTH_LONG)
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, error: Throwable) {
+                    if (call.isCanceled || view == null) return
+                    changing = false
+                    uncertain = true
+                    showFeedback("Resultado incerto. O pedido não será repetido; entre novamente para confirmar a nova senha.", Snackbar.LENGTH_INDEFINITE)
+                }
+            })
         }
     }
 
@@ -96,5 +142,19 @@ class AlterarSenhaFragment : Fragment() {
         (icone.parent as ViewGroup).let { linha ->
             (linha.getChildAt(1) as? TextView)?.setTextColor(cor)
         }
+    }
+
+    private fun showFeedback(message: String, duration: Int) {
+        feedbackSnackbar?.dismiss()
+        feedbackSnackbar = Snackbar.make(requireView(), message, duration).also { it.show() }
+    }
+
+    override fun onDestroyView() {
+        changeCall?.cancel()
+        feedbackSnackbar?.dismiss()
+        changeCall = null
+        feedbackSnackbar = null
+        changing = false
+        super.onDestroyView()
     }
 }

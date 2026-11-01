@@ -18,7 +18,13 @@
     <string name="settings_save_new_password">Salvar nova senha</string>
     <string name="settings_verification_title">Verificação de e-mail</string>
     <string name="settings_verification_heading">Verifique seu e-mail</string>
-    <string name="settings_verification_sent">Enviamos um link de redefinição para</string>
+    <string name="settings_verification_sent">Consulte o status do seu endereço e confirme usando o código de verificação.</string>
+    <string name="settings_verification_status_loading">Consultando status do e-mail...</string>
+    <string name="settings_verification_status_verified">E-mail confirmado pelo servidor.</string>
+    <string name="settings_verification_status_pending">Este endereço ainda não foi verificado.</string>
+    <string name="settings_verification_send_code">Enviar código</string>
+    <string name="settings_verification_enter_code">Informar código</string>
+    <string name="settings_verification_code_sent">Código solicitado. Verifique sua caixa de entrada.</string>
     <string name="settings_account_title">Informações da Conta</string>
     <string name="settings_account_name">Nome completo</string>
     <string name="settings_account_email">E-mail</string>
@@ -33,4 +39,5 @@
     <string name="settings_password_new_invalid">A nova senha não atende aos requisitos</string>
     <string name="settings_password_mismatch">As senhas não coincidem</string>
     <string name="settings_password_same">A nova senha deve ser diferente da atual</string>
+    <string name="profile_connected_sessions">Sessões conectadas</string>
 </resources>

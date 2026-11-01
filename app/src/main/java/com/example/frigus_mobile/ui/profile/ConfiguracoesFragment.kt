@@ -23,13 +23,13 @@ class ConfiguracoesFragment : Fragment() {
         configurarVoltar(view)
 
         view.findViewById<View>(R.id.btnPreferenciasAlimentos).setOnClickListener {
-            abrirTela(PreferenciasAlimentosFragment())
+            abrirTela(AppSettingsSectionFragment.newInstance(AppSettingsSectionFragment.FOOD))
         }
         view.findViewById<View>(R.id.btnUnidadesMedidas).setOnClickListener {
-            abrirTela(UnidadesMedidasFragment())
+            abrirTela(AppSettingsSectionFragment.newInstance(AppSettingsSectionFragment.UNITS))
         }
         view.findViewById<View>(R.id.btnPrivacidade).setOnClickListener {
-            abrirTela(PrivacidadeFragment())
+            abrirTela(AppSettingsSectionFragment.newInstance(AppSettingsSectionFragment.PRIVACY))
         }
         view.findViewById<View>(R.id.btnAlterarSenha).setOnClickListener {
             abrirTela(AlterarSenhaFragment())
