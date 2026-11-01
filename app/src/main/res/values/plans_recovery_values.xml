@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="plans_cancel_color">#ED4747</color>
+    <color name="plans_secondary_text">#667385</color>
+    <dimen name="plans_page_padding">24dp</dimen>
+    <dimen name="plans_top_padding">29dp</dimen>
+    <dimen name="plans_header_height">48dp</dimen>
+    <dimen name="plans_card_gap">21dp</dimen>
+    <dimen name="plans_current_card_height">126dp</dimen>
+    <dimen name="plans_current_padding">20dp</dimen>
+    <dimen name="plans_current_icon">32dp</dimen>
+    <dimen name="plans_current_text_gap">20dp</dimen>
+    <dimen name="plans_menu_padding">12dp</dimen>
+    <dimen name="plans_menu_row">54dp</dimen>
+    <dimen name="plans_menu_height">228dp</dimen>
+    <dimen name="plans_menu_icon">20dp</dimen>
+    <dimen name="plans_menu_left">10dp</dimen>
+    <dimen name="plans_menu_right">6dp</dimen>
+    <dimen name="plans_menu_text_gap">18dp</dimen>
+    <dimen name="plans_next_width">10dp</dimen>
+    <dimen name="plans_next_height">20dp</dimen>
+    <dimen name="plans_cancel_height">58dp</dimen>
+    <dimen name="plans_cancel_gap">51dp</dimen>
+    <dimen name="plans_card_width">208dp</dimen>
+    <dimen name="plans_card_height">626dp</dimen>
+    <dimen name="plans_card_icon">56dp</dimen>
+    <dimen name="plans_card_glyph">35dp</dimen>
+    <dimen name="plans_carousel_height">650dp</dimen>
+    <dimen name="plans_carousel_padding">20dp</dimen>
+    <dimen name="plans_card_inner_padding">12dp</dimen>
+    <dimen name="plans_card_top">29dp</dimen>
+    <dimen name="plans_card_bottom">14dp</dimen>
+    <dimen name="plans_card_title_gap">23dp</dimen>
+    <dimen name="plans_card_features_gap">34dp</dimen>
+    <dimen name="plans_card_feature_row">48dp</dimen>
+    <dimen name="plans_card_feature_text">12sp</dimen>
+    <dimen name="plans_card_button_height">44dp</dimen>
+    <dimen name="plans_header_text">18sp</dimen>
+    <dimen name="plans_name_text">16sp</dimen>
+    <dimen name="plans_price_text">13sp</dimen>
+    <dimen name="plans_valid_text">11sp</dimen>
+    <dimen name="plans_menu_text">13sp</dimen>
+    <string name="plans_choose_subtitle">Mais recursos para facilitar sua rotina\ne reduzir desperdícios.</string>
+    <string name="plans_per_year">%1$s/ano</string>
+    <string name="plans_yearly">Anual</string>
+    <string name="plans_current">Plano atual</string>
+    <string name="plans_choose_named">Escolher %1$s</string>
+    <string name="plans_choose_paid">Ver %1$s</string>
+    <string name="plans_limits_members">Até %1$d membros</string>
+    <string name="plans_limits_products">Até %1$d produtos por estoque</string>
+    <string name="plans_limits_stocks">Até %1$d estoques</string>
+    <string name="plans_no_upcoming_charge">Sem renovação automática</string>
+    <string name="plans_charge_unconfirmed">A confirmar</string>
+    <string name="plans_features_details">Benefícios e limites</string>
+    <string name="plans_no_group_selected">Selecione um grupo para consultar estoque, membros e convites.</string>
+    <string name="plans_select_group">Selecionar grupo</string>
+    <string name="plans_load_invitations">Consulte os convites do grupo selecionado.</string>
+    <string name="plans_reactivate_label">Reativar assinatura</string>
+    <string name="plans_check_yes">✓</string>
+    <string name="plans_check_no">✗</string>
+    <string name="plans_check_unknown">—</string>
+    <string name="plans_page_position">Plano %1$d de %2$d</string>
+    <style name="RecoveredPlanText">
+        <item name="android:fontFamily">@font/sarabun</item>
+        <item name="android:textColor">@color/darkBlue</item>
+        <item name="android:textSize">@dimen/plans_menu_text</item>
+    </style>
+    <style name="RecoveredPlanTitle" parent="RecoveredPlanText">
+        <item name="android:textSize">@dimen/plans_header_text</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

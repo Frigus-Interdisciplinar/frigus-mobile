@@ -10,11 +10,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
-        android:paddingTop="32dp"
-        android:paddingBottom="32dp">
+        android:paddingTop="@dimen/plans_top_padding"
+        android:paddingBottom="32dp" android:clipChildren="false">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp">
+            android:layout_height="48dp" android:clipChildren="false">
             <ImageButton
                 android:id="@+id/btnVoltar"
                 android:layout_width="48dp"
@@ -22,8 +22,11 @@
                 android:layout_alignParentStart="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/profile_back"
-                android:src="@drawable/ic_chevron_left"
-                app:tint="@color/darkBlue"/>
+                android:src="@drawable/plan_figma_back"
+                android:rotation="180" android:scaleType="fitCenter"
+                android:layout_marginStart="-20dp"
+                android:paddingHorizontal="15.5dp" android:paddingVertical="6.5dp"
+                />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,20 +42,25 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="@dimen/plans_card_gap"
             android:orientation="horizontal"
-            android:padding="18dp"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="20dp"
+            android:minHeight="@dimen/plans_current_card_height"
+            android:id="@+id/subscriptionManageCard"
+            android:clickable="true" android:focusable="true"
+            android:contentDescription="@string/plans_features_details"
             android:background="@drawable/bg_card_white_rounded">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_crown"
+                android:layout_width="@dimen/plans_current_icon"
+                android:layout_height="@dimen/plans_current_icon"
+                android:src="@drawable/plan_figma_crown"
                 android:contentDescription="@null"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="10dp"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
+                android:layout_marginStart="22dp"
                 android:orientation="vertical">
                 <TextView
                     android:id="@+id/tvPlanoNome"
@@ -60,7 +68,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/plans_name_text"
                     android:textStyle="bold"/>
                 <TextView
                     android:id="@+id/tvPlanoPreco"
@@ -69,7 +77,7 @@
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
                     android:layout_marginTop="4dp"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/plans_price_text"
                     android:textStyle="bold"/>
                 <TextView
                     android:id="@+id/tvPlanoValidade"
@@ -78,7 +86,7 @@
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/gray"
                     android:layout_marginTop="6dp"
-                    android:textSize="10sp"/>
+                    android:textSize="@dimen/plans_valid_text"/>
             </LinearLayout>
         </LinearLayout>
         <TextView
@@ -86,41 +94,41 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
             android:textColor="@color/darkBlue"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:text="@string/profile_about_plan"
             android:textStyle="bold"
-            android:layout_marginTop="28dp"/>
+            android:layout_marginTop="32dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card_white_rounded"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:layout_marginTop="10dp">
+            android:paddingStart="18dp" android:paddingEnd="28dp"
+            android:paddingVertical="18dp"
+            android:layout_marginTop="14dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:minHeight="40dp">
+                android:minHeight="46dp">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
+                    android:textColor="@color/plans_secondary_text"
+                    android:textSize="15sp"
                     android:text="@string/profile_renewal"
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
                     android:id="@+id/tvRenovacao"
-                    android:layout_width="wrap_content"
+                    android:layout_width="140dp" android:layout_marginStart="18dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
                     android:gravity="end"/>
             </LinearLayout>
             <LinearLayout
@@ -128,24 +136,24 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:minHeight="40dp">
+                android:minHeight="46dp">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
+                    android:textColor="@color/plans_secondary_text"
+                    android:textSize="15sp"
                     android:text="@string/profile_next_charge"
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
                     android:id="@+id/tvProximaCobranca"
-                    android:layout_width="wrap_content"
+                    android:layout_width="140dp" android:layout_marginStart="18dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
                     android:gravity="end"/>
             </LinearLayout>
             <LinearLayout
@@ -153,24 +161,24 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:minHeight="40dp">
+                android:minHeight="46dp">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
+                    android:textColor="@color/plans_secondary_text"
+                    android:textSize="15sp"
                     android:text="@string/profile_next_charge_amount"
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
                     android:id="@+id/tvValorProximaCobranca"
-                    android:layout_width="wrap_content"
+                    android:layout_width="140dp" android:layout_marginStart="18dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
                     android:gravity="end"/>
             </LinearLayout>
             <LinearLayout
@@ -178,24 +186,24 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:minHeight="40dp">
+                android:minHeight="46dp">
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray"
-                    android:textSize="12sp"
+                    android:textColor="@color/plans_secondary_text"
+                    android:textSize="15sp"
                     android:text="@string/profile_payment_method"
                     android:textStyle="bold"
                     android:layout_weight="1"/>
                 <TextView
                     android:id="@+id/tvFormaPagamento"
-                    android:layout_width="wrap_content"
+                    android:layout_width="140dp" android:layout_marginStart="18dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textStyle="normal"
                     android:gravity="end"/>
             </LinearLayout>
         </LinearLayout>
@@ -204,73 +212,74 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/sarabun"
             android:textColor="@color/darkBlue"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:text="@string/profile_actions"
             android:textStyle="bold"
-            android:layout_marginTop="24dp"/>
+            android:layout_marginTop="18dp"/>
         <LinearLayout
             android:id="@+id/btnAlterarPlano"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="@dimen/plans_cancel_height"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/bg_card_white_rounded"
-            android:layout_marginTop="10dp"
-            android:paddingHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:paddingStart="20dp" android:paddingEnd="18dp"
             android:clickable="true"
             android:focusable="true">
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_profile_figma_subscription"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/plan_figma_manage"
                 android:contentDescription="@null"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
                 android:textColor="@color/darkBlue"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:text="@string/profile_change_plan"
                 android:layout_weight="1"
-                android:layout_marginStart="14dp"/>
+                android:layout_marginStart="16dp"/>
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
+                android:layout_width="@dimen/plans_next_width"
+                android:layout_height="@dimen/plans_next_height"
+                android:src="@drawable/plan_figma_next"
                 android:contentDescription="@null"
-                app:tint="@color/darkBlue"/>
+                />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/btnCancelarAssinatura"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="@dimen/plans_cancel_height"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/bg_card_white_rounded"
-            android:layout_marginTop="12dp"
-            android:paddingHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:paddingStart="20dp" android:paddingEnd="18dp"
             android:clickable="true"
             android:focusable="true">
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_profile_figma_cancel"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/plan_figma_cancel_manage"
                 android:contentDescription="@null"/>
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:textColor="@color/color_red"
-                android:textSize="12sp"
+                android:textColor="@color/plans_cancel_color"
+                android:textSize="13sp"
                 android:text="@string/profile_cancel_subscription"
+                android:id="@+id/tvCancelManage"
                 android:layout_weight="1"
-                android:layout_marginStart="14dp"/>
+                android:layout_marginStart="16dp"/>
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
+                android:layout_width="@dimen/plans_next_width"
+                android:layout_height="@dimen/plans_next_height"
+                android:src="@drawable/plan_figma_next"
                 android:contentDescription="@null"
-                app:tint="@color/color_red"/>
+                />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
