@@ -8,34 +8,63 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.RecipeIngredientItem
-import java.text.NumberFormat
 
-class RecipeIngredientAdapter(private var ingredients: List<RecipeIngredientItem>) :
-    RecyclerView.Adapter<RecipeIngredientAdapter.IngredientViewHolder>() {
+class RecipeIngredientAdapter(
+    private var ingredients: List<RecipeIngredientItem>
+) : RecyclerView.Adapter<RecipeIngredientAdapter.IngredientViewHolder>() {
+
     fun updateList(newList: List<RecipeIngredientItem>) {
-        if (ingredients == newList) return
-        ingredients = newList
+        this.ingredients = newList
         notifyDataSetChanged()
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = IngredientViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.item_recipe_ingredient, parent, false)
-    )
-    override fun onBindViewHolder(holder: IngredientViewHolder, position: Int) =
-        holder.bind(ingredients[position], position == ingredients.lastIndex)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IngredientViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_recipe_ingredient, parent, false)
+        return IngredientViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: IngredientViewHolder, position: Int) {
+        val isLast = position == ingredients.size - 1
+        holder.bind(ingredients[position], isLast)
+    }
+
     override fun getItemCount(): Int = ingredients.size
 
-    class IngredientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(item: RecipeIngredientItem, last: Boolean) {
-            val context = itemView.context
-            val quantity = item.quantity?.let { NumberFormat.getNumberInstance().format(it) }
-                ?: context.getString(R.string.recipe_browser_not_informed)
-            val unit = item.unit?.takeIf(String::isNotBlank)
-            itemView.findViewById<TextView>(R.id.txtIngredientQuantity).text =
-                if (unit == null) quantity else context.getString(R.string.recipe_browser_quantity_unit, quantity, unit)
-            itemView.findViewById<TextView>(R.id.txtIngredientName).text =
-                item.productName?.takeIf(String::isNotBlank) ?: context.getString(R.string.recipe_browser_unnamed_ingredient)
-            itemView.findViewById<ImageView>(R.id.imgIngredientIcon).setImageResource(R.drawable.ic_food_package)
-            itemView.findViewById<View>(R.id.viewDivider).visibility = if (last) View.GONE else View.VISIBLE
+    inner class IngredientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val imgIcon: ImageView = itemView.findViewById(R.id.imgIngredientIcon)
+        private val txtQuantity: TextView = itemView.findViewById(R.id.txtIngredientQuantity)
+        private val txtName: TextView = itemView.findViewById(R.id.txtIngredientName)
+        private val viewDivider: View = itemView.findViewById(R.id.viewDivider)
+
+        fun bind(item: RecipeIngredientItem, isLast: Boolean) {
+            txtQuantity.text = item.formattedQuantity.ifBlank { itemView.context.getString(R.string.recipe_browser_not_informed) }
+            txtName.text = item.productName ?: itemView.context.getString(R.string.recipe_browser_unnamed_ingredient)
+            viewDivider.visibility = if (isLast) View.GONE else View.VISIBLE
+
+            val iconRes = resolveIngredientIcon(item)
+            imgIcon.setImageResource(iconRes)
+        }
+
+        private fun resolveIngredientIcon(item: RecipeIngredientItem): Int {
+            val name = (item.productName ?: "").lowercase()
+            val category = (item.productCategory ?: "").uppercase()
+
+            return when {
+                name.contains("frango") || name.contains("carne") || name.contains("peito") || category.contains("CARNE") -> {
+                    R.drawable.ic_food_meat
+                }
+                name.contains("creme") || name.contains("leite") || name.contains("caixa") || name.contains("queijo") || category.contains("LATICINIO") -> {
+                    R.drawable.ic_food_package
+                }
+                name.contains("alho") || name.contains("tempero") || category.contains("TEMPERO") -> {
+                    R.drawable.ic_food_garlic
+                }
+                name.contains("tomate") || name.contains("cebola") || name.contains("legume") || category.contains("HORTIFRUTI") -> {
+                    R.drawable.ic_food_veggie
+                }
+                else -> R.drawable.ic_food_package
+            }
         }
     }
 }

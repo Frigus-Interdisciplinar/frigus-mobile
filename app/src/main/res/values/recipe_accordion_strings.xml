@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recipe_accordion_for_you">Para você</string>
+    <string name="recipe_accordion_expand">Expandir %1$s</string>
+    <string name="recipe_accordion_collapse">Recolher %1$s</string>
+    <string name="recipe_accordion_expanded">Expandido</string>
+    <string name="recipe_accordion_collapsed">Recolhido</string>
+</resources>

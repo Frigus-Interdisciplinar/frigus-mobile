@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="recipe_recovery_filter">Receitas</string>
+    <string name="recipe_recovery_popular">Mais populares</string>
+    <string name="recipe_recovery_photo_unknown">Foto da receita não informada</string>
+    <string name="recipe_recovery_ingredient_count">Ingredientes (%1$s)</string>
+    <string-array name="recipe_recovery_actions">
+        <item>Catálogo</item><item>Favoritas</item><item>Carregar mais</item><item>Atualizar</item>
+    </string-array>
     <string
         name="recipe_browser_title">Receitas</string>
     <string
