@@ -9,6 +9,9 @@
     <string name="profile_request_subject_hint">Coloque o assunto</string>
     <string name="profile_request_description">Descrição</string>
     <string name="profile_request_description_hint">Explique seu problema ou dúvida</string>
+    <string name="profile_request_required_fields">Informe o assunto e a descrição.</string>
+    <string name="profile_request_subject_length">O assunto deve ter entre %1$d e %2$d caracteres.</string>
+    <string name="profile_request_description_length">A descrição deve ter entre %1$d e %2$d caracteres.</string>
     <string name="profile_request_info">Após o envio, você verá a confirmação e receberá um número de protocolo.</string>
     <string name="profile_request_send">Enviar solicitação</string>
 </resources>
