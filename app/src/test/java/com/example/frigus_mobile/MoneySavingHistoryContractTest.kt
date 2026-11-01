@@ -16,13 +16,14 @@ import okhttp3.Response
 import okhttp3.ResponseBody
 import org.junit.Assert.*
 import org.junit.Test
+import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MoneySavingHistoryContractTest {
     private val group = "c39671e5-a166-473a-b9a2-f82ff13831d1"
     private val purchase = "d9c3ce6c-769a-475b-8b8d-e2842c3f6117"
-    private val request = FoodPurchaseRequest("2026-11-01", lines = listOf(
+    private val request: FoodPurchaseRequest = FoodPurchaseRequest("2026-11-01", lines = listOf(
         FoodPurchaseLineRequest(42, 7, "2026-12-31", 2, 4.59)))
 
     private fun repository(status: Int, body: String = "", observed: (Request) -> Unit = {}): MoneySavingRepository {
@@ -84,7 +85,7 @@ class MoneySavingHistoryContractTest {
     @Test fun recoveredPurchaseRoutesUseOnlyThePublishedBffPaths() {
         val api = Retrofit.Builder().baseUrl("https://bff.invalid/")
             .addConverterFactory(GsonConverterFactory.create()).build().create(MoneySavingApiService::class.java)
-        val calls = listOf(api.createFoodPurchase(group, "persisted-key", request),
+        val calls: List<Call<*>> = listOf(api.createFoodPurchase(group, "persisted-key", request),
             api.getFoodPurchase(group, purchase),
             api.updateFoodPurchase(group, purchase, FoodPurchaseUpdateRequest("2026-11-01", version = 0,
                 lines = listOf(FoodPurchaseUpdateLineRequest(11, 2, 4.59)))),
