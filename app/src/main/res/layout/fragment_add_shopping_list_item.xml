@@ -290,6 +290,39 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layoutPrecoLista"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/shopping_unit_price_label"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etPrecoLista"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/bg_shopping_list_field"
+                    android:fontFamily="@font/sarabun"
+                    android:hint="@string/shopping_unit_price_hint"
+                    android:inputType="numberDecimal"
+                    android:paddingHorizontal="14dp"
+                    android:singleLine="true"
+                    android:textColor="@color/darkBlue"
+                    android:textColorHint="@color/color_text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
             <!-- Validade (Exibido apenas quando Estoque selecionado) -->
             <LinearLayout
                 android:id="@+id/layoutValidade"

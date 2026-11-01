@@ -20,7 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.ShoppingListItem
-import com.example.frigus_mobile.data.repository.ShoppingListRepository
+import com.example.frigus_mobile.data.model.ShoppingDraft
+import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.utils.ProductCategoryHelper
 import com.google.android.material.button.MaterialButton
 
@@ -36,15 +37,17 @@ class EditShoppingListItemFragment : Fragment() {
     private lateinit var btnRemover: View
     private lateinit var btnSalvar: MaterialButton
 
-    private lateinit var shoppingRepo: ShoppingListRepository
+    private val model by lazy { ViewModelProvider(requireActivity())[ShoppingListViewModel::class.java] }
+    private var lastError: com.example.frigus_mobile.data.model.ApiError? = null
     private var currentItem: ShoppingListItem? = null
     private var customImageUri: Uri? = null
 
-    private val categorias = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas", "Grãos")
-    private val unidades = listOf("Gramas", "Quilos", "Litros", "Mililitros", "Unidades")
+    private val categorias get() = resources.getStringArray(R.array.shopping_form_categories).toList()
+    private val unidades get() = resources.getStringArray(R.array.shopping_remote_unit_labels).toList()
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) {
+            runCatching { requireContext().contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             customImageUri = uri
             imgProduto.setPadding(0, 0, 0, 0)
             imgProduto.clearColorFilter()
@@ -63,16 +66,7 @@ class EditShoppingListItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        shoppingRepo = ShoppingListRepository(requireContext())
-
         val itemId = arguments?.getString(ARG_ITEM_ID)
-        currentItem = itemId?.let { shoppingRepo.getItemById(it) }
-
-        if (currentItem == null) {
-            Toast.makeText(requireContext(), "Item não encontrado", Toast.LENGTH_SHORT).show()
-            parentFragmentManager.popBackStack()
-            return
-        }
 
         imgProduto = view.findViewById(R.id.imgProdutoEditarLista)
         btnCamera = view.findViewById(R.id.btnCameraEditarItemLista)
@@ -89,11 +83,37 @@ class EditShoppingListItemFragment : Fragment() {
         }
 
         btnCamera.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            pickImageLauncher.launch(arrayOf("image/*"))
         }
 
         configurarSpinners()
-        preencherDados()
+        etObservacoes.setHint(R.string.shopping_remote_note_hint)
+        btnCamera.contentDescription = getString(R.string.shopping_remote_metadata_local)
+        etNome.contentDescription = getString(R.string.shopping_remote_edit_metadata)
+        model.state.observe(viewLifecycleOwner) { state ->
+            if (state.error == null && !state.uncertain) lastError = null
+            val item = itemId?.let(model::item)
+            if (currentItem == null && item != null) {
+                currentItem = item
+                customImageUri = item.imageUrl?.let(Uri::parse)
+                preencherDados()
+            }
+            btnSalvar.isEnabled = item != null
+            btnRemover.isEnabled = item != null
+            state.completion?.takeIf { it.kind in setOf(ShoppingCompletionKind.UPDATED, ShoppingCompletionKind.REMOVED) }?.let {
+                model.consumeCompletion(it.id)
+                Toast.makeText(requireContext(), if (it.kind == ShoppingCompletionKind.REMOVED)
+                    R.string.shopping_local_removed else R.string.shopping_local_updated, Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
+            }
+            if (state.error != null && state.error != lastError && !state.loading) {
+                lastError = state.error
+                AlertDialog.Builder(requireContext()).setMessage(shoppingErrorMessage(requireContext(), state))
+                    .setPositiveButton(R.string.shopping_remote_refresh) { _, _ -> model.reload(true) }
+                    .setNegativeButton(R.string.shopping_remote_cancel, null).show()
+            }
+        }
+        model.loadIfNeeded()
 
         etNome.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -132,31 +152,17 @@ class EditShoppingListItemFragment : Fragment() {
     }
 
     private fun atualizarImagemProduto() {
-        if (customImageUri != null) return
-
-        val nome = etNome.text.toString().trim()
-        val categoria = spinnerCategoria.selectedItem?.toString()
-
-        if (nome.contains("frango", ignoreCase = true)) {
-            imgProduto.setPadding(0, 0, 0, 0)
-            imgProduto.clearColorFilter()
-            imgProduto.setImageResource(R.drawable.img_frango)
-        } else {
-            val savedImageUrl = currentItem?.imageUrl
-            if (!savedImageUrl.isNullOrBlank() && (savedImageUrl.startsWith("content://") || savedImageUrl.startsWith("file://"))) {
-                try {
-                    imgProduto.setPadding(0, 0, 0, 0)
-                    imgProduto.clearColorFilter()
-                    imgProduto.setImageURI(Uri.parse(savedImageUrl))
-                    return
-                } catch (_: Exception) {
-                    // fallback para ícone da categoria
-                }
-            }
-            imgProduto.setPadding(28, 28, 28, 28)
-            imgProduto.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
-            imgProduto.setImageResource(ProductCategoryHelper.getIconeCategoria(categoria))
+        customImageUri?.let { uri ->
+            val shown = runCatching {
+                imgProduto.setPadding(0, 0, 0, 0)
+                imgProduto.clearColorFilter()
+                imgProduto.setImageURI(uri)
+            }.isSuccess
+            if (shown) return
         }
+        imgProduto.setPadding(28, 28, 28, 28)
+        imgProduto.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
+        imgProduto.setImageResource(ProductCategoryHelper.getIconeCategoria(spinnerCategoria.selectedItem?.toString()))
     }
 
     private fun preencherDados() {
@@ -171,26 +177,13 @@ class EditShoppingListItemFragment : Fragment() {
         } else {
             ShoppingListItem.mapCodeToCategory(item.categoryCode)
         }
-        val catIndex = categorias.indexOfFirst { it.equals(catMapped, ignoreCase = true) }
-        if (catIndex != -1) {
-            spinnerCategoria.setSelection(catIndex)
-        } else {
-            spinnerCategoria.setSelection(0)
-        }
-
-        val uniNormalized = when (item.unit.lowercase()) {
-            "g", "gramas" -> "Gramas"
-            "kg", "quilos" -> "Quilos"
-            "l", "litros" -> "Litros"
-            "ml", "mililitros" -> "Mililitros"
-            else -> "Unidades"
-        }
-        val uniIndex = unidades.indexOfFirst { it.equals(uniNormalized, ignoreCase = true) }
-        if (uniIndex != -1) {
-            spinnerUnidade.setSelection(uniIndex)
-        } else {
-            spinnerUnidade.setSelection(unidades.indexOf("Unidades").coerceAtLeast(0))
-        }
+        val categoryLabels = (categorias + catMapped).distinct()
+        spinnerCategoria.adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_selected, categoryLabels)
+        spinnerCategoria.setSelection(categoryLabels.indexOf(catMapped).coerceAtLeast(0))
+        val unitLabel = shoppingUnitLabel(requireContext(), item.unitCode ?: item.unit)
+        val unitLabels = (unidades + unitLabel).distinct()
+        spinnerUnidade.adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_selected, unitLabels)
+        spinnerUnidade.setSelection(unitLabels.indexOf(unitLabel).coerceAtLeast(0))
 
         atualizarImagemProduto()
     }
@@ -200,50 +193,39 @@ class EditShoppingListItemFragment : Fragment() {
 
         val novoNome = etNome.text.toString().trim()
         if (novoNome.isBlank()) {
-            etNome.error = "Informe o nome do alimento"
+            etNome.error = getString(R.string.shopping_form_name_required)
             etNome.requestFocus()
             return
         }
 
         val qtdStr = etQuantidade.text.toString().trim()
-        val quantidade = qtdStr.toIntOrNull() ?: item.quantity
-        if (quantidade <= 0) {
-            etQuantidade.error = "Quantidade deve ser maior que zero"
+        val quantidade = qtdStr.toIntOrNull()
+        if (quantidade == null || quantidade <= 0) {
+            etQuantidade.error = getString(R.string.shopping_quantity_positive)
             etQuantidade.requestFocus()
             return
         }
 
-        val categoriaSelecionada = spinnerCategoria.selectedItem?.toString() ?: item.category
-        val unidadeSelecionada = spinnerUnidade.selectedItem?.toString() ?: item.unit
         val observacoes = etObservacoes.text.toString().trim()
         val imageToSave = customImageUri?.toString() ?: item.imageUrl
 
-        val updated = item.copy(
-            name = novoNome,
-            quantity = quantidade,
-            unit = unidadeSelecionada,
-            category = categoriaSelecionada,
-            categoryCode = ShoppingListItem.mapCategoryToCode(categoriaSelecionada),
-            observation = observacoes,
-            imageUrl = imageToSave
-        )
-
-        shoppingRepo.updateItem(updated)
-        Toast.makeText(requireContext(), "Item atualizado!", Toast.LENGTH_SHORT).show()
-        parentFragmentManager.popBackStack()
+        val unitCodes = resources.getStringArray(R.array.shopping_remote_unit_codes)
+        val categoryCode = ShoppingListItem.mapCategoryToCode(spinnerCategoria.selectedItem.toString())
+        val unitCode = unitCodes.getOrNull(spinnerUnidade.selectedItemPosition) ?: item.unitCode ?: "UNIT"
+        model.updateItem(item, ShoppingDraft(name = novoNome, quantity = quantidade,
+            unitCode = unitCode, categoryCode = categoryCode,
+            observation = observacoes, imageUri = imageToSave))
     }
 
     private fun confirmarRemocao() {
         val item = currentItem ?: return
         AlertDialog.Builder(requireContext())
-            .setTitle("Remover item")
-            .setMessage("Deseja remover \"${item.name}\" da sua lista de compras?")
-            .setPositiveButton("Remover") { _, _ ->
-                shoppingRepo.deleteItem(item.id)
-                Toast.makeText(requireContext(), "Item removido!", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
+            .setTitle(R.string.shopping_remote_remove_title)
+            .setMessage(getString(R.string.shopping_remote_remove_message, item.name))
+            .setPositiveButton(R.string.shopping_remote_remove) { _, _ ->
+                model.deleteItem(item)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(R.string.shopping_remote_cancel, null)
             .show()
     }
 

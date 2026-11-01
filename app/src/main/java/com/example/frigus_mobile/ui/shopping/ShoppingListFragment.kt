@@ -1,298 +1,198 @@
 package com.example.frigus_mobile.ui.shopping
 
 import android.app.DatePickerDialog
-import android.content.DialogInterface
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.ShoppingListItem
-import com.example.frigus_mobile.data.model.StockProductProductResponse
-import com.example.frigus_mobile.data.model.StockProductResponse
-import com.example.frigus_mobile.data.repository.ShoppingListRepository
-import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.data.model.ShoppingSyncStatus
+import com.example.frigus_mobile.data.model.validShoppingPrice
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.launch
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.ResolverStyle
 
-class ShoppingListFragment : Fragment() {
-
-    private lateinit var shoppingRepo: ShoppingListRepository
+/** The recovered composition displays an account-scoped local list; only stock transfer uses the network. */
+class ShoppingListFragment : Fragment(R.layout.fragment_shopping_list) {
+    private val model by lazy { ViewModelProvider(requireActivity())[ShoppingListViewModel::class.java] }
     private lateinit var adapter: ShoppingListAdapter
-    private var allItems: List<ShoppingListItem> = emptyList()
-    private var firestoreListener: com.google.firebase.firestore.ListenerRegistration? = null
-
-    private lateinit var etBuscarAdicionar: EditText
-    private lateinit var rvLista: RecyclerView
-    private lateinit var tvVazia: TextView
-    private lateinit var fabAdicionar: FloatingActionButton
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_shopping_list, container, false)
-    }
+    private var transferDialog: AlertDialog? = null
+    private var stockDialog: AlertDialog? = null
+    private var stockSelectionError: com.example.frigus_mobile.data.model.ApiError? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        shoppingRepo = ShoppingListRepository(requireContext())
-
-        etBuscarAdicionar = view.findViewById(R.id.etAdicionarProdutoLista)
-        rvLista = view.findViewById(R.id.rvListaCompras)
-        tvVazia = view.findViewById(R.id.tvListaComprasVazia)
-        fabAdicionar = view.findViewById(R.id.btnAdicionarItemLista)
-
         view.findViewById<View>(R.id.btnVoltarListaCompras).setOnClickListener {
-            val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
-            bottomNav?.selectedItemId = R.id.nav_home
+            if (requireActivity() is OfflineShoppingActivity) requireActivity().finish()
+            else requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId = R.id.nav_home
         }
-
-        setupRecyclerView()
-
-        fabAdicionar.setOnClickListener {
-            abrirAdicionarItem(etBuscarAdicionar.text.toString().trim().takeIf { it.isNotBlank() })
-        }
-
-        etBuscarAdicionar.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
-                val texto = etBuscarAdicionar.text.toString().trim()
-                if (texto.isNotBlank()) {
-                    abrirAdicionarItem(texto)
-                    true
-                } else false
+        val search = view.findViewById<EditText>(R.id.etAdicionarProdutoLista)
+        search.setHint(R.string.shopping_local_search)
+        search.setText(model.query)
+        search.doAfterTextChanged { model.setQuery(it?.toString().orEmpty()); render(view, model.state.value ?: ShoppingState()) }
+        search.setOnEditorActionListener { _, action, _ ->
+            if (action == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH && search.text.isNotBlank()) {
+                openAdd(search.text.toString().trim()); true
             } else false
         }
-
-        etBuscarAdicionar.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filtrarItens(s.toString())
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
-
-        carregarItens()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        carregarItens()
-        firestoreListener?.remove()
-        firestoreListener = shoppingRepo.listenToChanges { remoteItems ->
-            allItems = remoteItems
-            filtrarItens(etBuscarAdicionar.text.toString())
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        firestoreListener?.remove()
-        firestoreListener = null
-    }
-
-    private fun setupRecyclerView() {
-        rvLista.layoutManager = LinearLayoutManager(requireContext())
         adapter = ShoppingListAdapter(
             onItemClick = { item ->
-                abrirEditarItem(item.id)
+                parentFragmentManager.beginTransaction().replace(R.id.fragment_container,
+                    EditShoppingListItemFragment.newInstance(item.id)).addToBackStack(null).commit()
             },
-            onCheckChanged = { item, isChecked ->
-                if (isChecked) {
-                    mostrarPopupAdicionarAoEstoque(item)
-                } else {
-                    shoppingRepo.toggleChecked(item.id, false)
-                    carregarItens()
-                }
+            onCheckChanged = { item, checked ->
+                adapter.setItems(model.state.value?.items.orEmpty().filter(::matches))
+                if (checked) offerStock(item) else model.checkItem(item, false)
             }
         )
-        rvLista.adapter = adapter
+        view.findViewById<RecyclerView>(R.id.rvListaCompras).apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@ShoppingListFragment.adapter
+        }
+        view.findViewById<View>(R.id.btnAdicionarItemLista).setOnClickListener { openAdd(search.text.toString().trim().takeIf(String::isNotEmpty)) }
+        view.findViewById<View>(R.id.btnTentarNovamenteListaCompras).setOnClickListener { model.reload(true) }
+        view.findViewById<View>(R.id.btnShoppingSync).setOnClickListener { model.syncNow() }
+        view.findViewById<View>(R.id.headerListaCompras).setOnClickListener {
+            AlertDialog.Builder(requireContext()).setTitle(R.string.shopping_remote_controls)
+                .setMessage(R.string.shopping_local_only)
+                .setPositiveButton(android.R.string.ok, null).show()
+        }
+        model.state.observe(viewLifecycleOwner) { render(view, it) }
+        model.loadIfNeeded()
     }
 
-    private fun mostrarPopupAdicionarAoEstoque(item: ShoppingListItem) {
-        val locais = arrayOf("Geladeira", "Freezer", "Despensa")
+    private fun matches(item: ShoppingListItem) = item.name.contains(model.query.trim(), ignoreCase = true)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val stockRepo = StockRepository(requireContext())
-            val catalog = try { stockRepo.getCatalogProducts() } catch (_: Exception) { emptyList() }
-            val matched = catalog.firstOrNull { it.name.equals(item.name, ignoreCase = true) }
-                ?: catalog.firstOrNull { it.name?.contains(item.name, ignoreCase = true) == true }
-
-            val localPadraoIdx = when (matched?.storagePlace?.uppercase()) {
-                "FREEZER" -> 1
-                "PANTRY" -> 2
-                else -> 0
+    private fun render(view: View, state: ShoppingState) {
+        if (!::adapter.isInitialized) return
+        adapter.setEnabled(true)
+        val items = state.items.filter(::matches)
+        adapter.setItems(items)
+        view.findViewById<TextView>(R.id.tvShoppingSyncStatus).text = when (state.syncStatus) {
+            ShoppingSyncStatus.LOCAL_PENDING -> if (state.syncPendingCount > 0)
+                getString(R.string.shopping_sync_pending_count, state.syncPendingCount)
+                else getString(R.string.shopping_sync_pending)
+            ShoppingSyncStatus.SYNCING -> getString(R.string.shopping_sync_sending)
+            ShoppingSyncStatus.SYNCED -> getString(R.string.shopping_sync_done)
+            ShoppingSyncStatus.AUTH_REQUIRED -> getString(R.string.shopping_sync_auth)
+            ShoppingSyncStatus.ERROR -> getString(R.string.shopping_sync_error)
+        }
+        view.findViewById<View>(R.id.btnShoppingSync).isEnabled = state.syncStatus != ShoppingSyncStatus.SYNCING
+        view.findViewById<View>(R.id.progressListaCompras).visibility = if (state.transferring) View.VISIBLE else View.GONE
+        val failed = state.error != null || state.uncertain
+        view.findViewById<View>(R.id.estadoErroListaCompras).visibility = if (failed) View.VISIBLE else View.GONE
+        view.findViewById<TextView>(R.id.tvErroListaCompras).text = shoppingErrorMessage(requireContext(), state)
+        view.findViewById<View>(R.id.rvListaCompras).visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+        view.findViewById<TextView>(R.id.tvListaComprasVazia).apply {
+            visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            setText(R.string.shopping_local_empty)
+        }
+        view.findViewById<View>(R.id.btnAdicionarItemLista).isEnabled = true
+        view.findViewById<View>(R.id.btnTentarNovamenteListaCompras).isEnabled = !state.transferring
+        if (state.error?.code != "SHOPPING_CHOOSE_STOCK") stockSelectionError = null
+        else if (state.error !== stockSelectionError && state.stock == null && state.stocks.size > 1) {
+            stockSelectionError = state.error
+            stockDialog = showShoppingStockSelection(requireContext(), state) {
+                model.selectStock(it)
+                Toast.makeText(requireContext(), R.string.shopping_stock_selected, Toast.LENGTH_LONG).show()
             }
-
-            var localEscolhidoIdx = localPadraoIdx
-
-            AlertDialog.Builder(requireContext())
-                .setTitle("Adicionar ao estoque")
-                .setSingleChoiceItems(locais, localPadraoIdx) { _, which ->
-                    localEscolhidoIdx = which
-                }
-                .setPositiveButton("Continuar") { _, _ ->
-                    val localEscolhido = locais[localEscolhidoIdx]
-                    val storagePlaceCode = when (localEscolhido) {
-                        "Freezer" -> "FREEZER"
-                        "Despensa" -> "PANTRY"
-                        else -> "FRIDGE"
-                    }
-                    solicitarDataValidadeEEnviar(item, storagePlaceCode, localEscolhido)
-                }
-                .setNegativeButton("Apenas marcar") { _, _ ->
-                    shoppingRepo.toggleChecked(item.id, true)
-                    carregarItens()
-                }
-                .setOnCancelListener {
-                    shoppingRepo.toggleChecked(item.id, true)
-                    carregarItens()
-                }
-                .show()
+        }
+        state.completion?.takeIf { it.kind in setOf(ShoppingCompletionKind.MARKED, ShoppingCompletionKind.TRANSFERRED) }?.let {
+            model.consumeCompletion(it.id)
+            Toast.makeText(requireContext(), if (it.kind == ShoppingCompletionKind.TRANSFERRED)
+                R.string.shopping_remote_transferred else R.string.shopping_checked_local, Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun solicitarDataValidadeEEnviar(item: ShoppingListItem, storagePlaceCode: String, localNome: String) {
-        val calendario = Calendar.getInstance()
-        val datePicker = DatePickerDialog(
-            requireContext(),
-            { _, year, month, dayOfMonth ->
-                val expireDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
-                adicionarAoEstoque(item, expireDate, storagePlaceCode, localNome)
-            },
-            calendario.get(Calendar.YEAR),
-            calendario.get(Calendar.MONTH),
-            calendario.get(Calendar.DAY_OF_MONTH)
-        )
-        datePicker.setTitle("Validade ($localNome) *")
-        datePicker.datePicker.minDate = calendario.timeInMillis
-        datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancelar") { _, _ ->
-            shoppingRepo.toggleChecked(item.id, true)
-            carregarItens()
-        }
-        datePicker.show()
+    private fun offerStock(item: ShoppingListItem) {
+        AlertDialog.Builder(requireContext()).setTitle(R.string.shopping_remote_mark_title)
+            .setMessage(getString(R.string.shopping_transfer_question, item.name))
+            .setPositiveButton(R.string.shopping_transfer_yes) { _, _ -> showTransferForm(item) }
+            .setNegativeButton(R.string.shopping_transfer_no) { _, _ -> model.checkItem(item, true) }
+            .show()
     }
 
-    private fun adicionarAoEstoque(item: ShoppingListItem, expireDate: String, storagePlaceCode: String, localNome: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val stockRepo = StockRepository(requireContext())
-                val catalog = stockRepo.getCatalogProducts()
-                val matched = catalog.firstOrNull {
-                    it.name.equals(item.name, ignoreCase = true) && it.storagePlace.equals(storagePlaceCode, ignoreCase = true)
-                } ?: catalog.firstOrNull {
-                    it.name.equals(item.name, ignoreCase = true)
-                } ?: catalog.firstOrNull {
-                    it.name?.contains(item.name, ignoreCase = true) == true
+    private fun showTransferForm(item: ShoppingListItem) {
+        val state = model.state.value ?: return
+        if (state.transferring || state.uncertain) {
+            val message = if (state.transferring) getString(R.string.shopping_stock_sending)
+                else shoppingErrorMessage(requireContext(), state)
+            AlertDialog.Builder(requireContext()).setMessage(message)
+                .setPositiveButton(R.string.shopping_remote_refresh) { _, _ -> model.reload(true) }
+                .setNegativeButton(android.R.string.cancel, null).show()
+            return
+        }
+        if (transferDialog?.isShowing == true) return
+        val form = layoutInflater.inflate(R.layout.dialog_shopping_stock_transfer, null)
+        val place = form.findViewById<Spinner>(R.id.spinnerTransferPlace)
+        val expiry = form.findViewById<EditText>(R.id.etTransferExpiry)
+        val price = form.findViewById<EditText>(R.id.etTransferPrice)
+        val allCodes = resources.getStringArray(R.array.shopping_remote_place_codes).toList()
+        val allLabels = resources.getStringArray(R.array.shopping_remote_place_labels).toList()
+        val codes = if (item.categoryCode == "GRAIN") listOf("PANTRY") else allCodes
+        val labels = codes.map { allLabels[allCodes.indexOf(it)] }
+        place.adapter = ArrayAdapter(requireContext(), R.layout.item_spinner_selected, labels).apply {
+            setDropDownViewResource(R.layout.item_spinner_dropdown)
+        }
+        form.findViewById<View>(R.id.tvTransferGrainHint).visibility =
+            if (item.categoryCode == "GRAIN") View.VISIBLE else View.GONE
+        expiry.setOnClickListener {
+            val today = LocalDate.now()
+            DatePickerDialog(requireContext(), { _, year, month, day ->
+                expiry.setText(LocalDate.of(year, month + 1, day).format(DateTimeFormatter.ofPattern("dd/MM/uuuu")))
+                expiry.error = null
+            }, today.year, today.monthValue - 1, today.dayOfMonth).apply {
+                datePicker.minDate = System.currentTimeMillis()
+            }.show()
+        }
+        val dialog = AlertDialog.Builder(requireContext()).setTitle(R.string.shopping_remote_transfer)
+            .setView(form).setPositiveButton(R.string.shopping_remote_transfer, null)
+            .setNegativeButton(android.R.string.cancel, null).create()
+        transferDialog = dialog
+        dialog.setOnDismissListener { transferDialog = null }
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val date = runCatching { LocalDate.parse(expiry.text.toString().trim(),
+                    DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT)) }.getOrNull()
+                if (date == null || date.isBefore(LocalDate.now())) {
+                    expiry.error = getString(R.string.lista_validade_obrigatoria_erro)
+                    return@setOnClickListener
                 }
-
-                val productToUse: StockProductProductResponse = if (matched != null && matched.id != null) {
-                    matched
-                } else {
-                    stockRepo.createProduct(
-                        name = item.name,
-                        category = item.categoryCode,
-                        storagePlace = storagePlaceCode,
-                        unitPrice = 1.0,
-                        unitOfMeasure = ShoppingListItem.mapUnitToCode(item.unit)
-                    )
+                val unitPrice = price.text.toString().trim().replace(',', '.').toBigDecimalOrNull()
+                if (!validShoppingPrice(unitPrice)) {
+                    price.error = getString(R.string.shopping_remote_price_invalid)
+                    price.requestFocus()
+                    return@setOnClickListener
                 }
-
-                val targetProductId = productToUse.id ?: throw IllegalStateException("ID do produto indisponível.")
-                val validPrice = productToUse.unitPrice ?: 1.0
-
-                val stockItem = StockProductResponse(
-                    productId = targetProductId,
-                    product = StockProductProductResponse(
-                        id = targetProductId,
-                        name = productToUse.name ?: item.name,
-                        category = productToUse.category ?: item.categoryCode,
-                        storagePlace = storagePlaceCode,
-                        unitPrice = validPrice,
-                        unitOfMeasure = productToUse.unitOfMeasure ?: ShoppingListItem.mapUnitToCode(item.unit)
-                    ),
-                    quantity = item.quantity,
-                    minimalQuantity = 1,
-                    purchaseUnitPrice = validPrice,
-                    expireDate = expireDate,
-                    productStatus = "FRESH",
-                    category = productToUse.category ?: item.categoryCode,
-                    storagePlace = storagePlaceCode
-                )
-
-                stockRepo.addStockProduct(stockItem)
-                shoppingRepo.toggleChecked(item.id, true)
-
-                val localDisplay = when (storagePlaceCode) {
-                    "FREEZER" -> "ao seu freezer"
-                    "PANTRY" -> "à sua despensa"
-                    else -> "à sua geladeira"
-                }
-                Toast.makeText(requireContext(), "\"${item.name}\" foi adicionado $localDisplay!", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                shoppingRepo.toggleChecked(item.id, true)
-                val msg = e.message ?: "Conexão indisponível"
-                Toast.makeText(requireContext(), "Item marcado na lista. (Estoque: $msg)", Toast.LENGTH_LONG).show()
+                dialog.dismiss()
+                model.transferItem(item, date.toString(), codes[place.selectedItemPosition], requireNotNull(unitPrice))
             }
-            carregarItens()
         }
+        dialog.show()
     }
 
-    private fun carregarItens() {
-        allItems = shoppingRepo.getItems()
-        filtrarItens(etBuscarAdicionar.text.toString())
+    private fun openAdd(initialName: String?) {
+        parentFragmentManager.beginTransaction().replace(R.id.fragment_container,
+            AddShoppingListItemFragment.newInstance(initialName, AddShoppingListItemFragment.DESTINATION_SHOPPING_LIST))
+            .addToBackStack(null).commit()
     }
 
-    private fun filtrarItens(query: String) {
-        val q = query.trim().lowercase()
-        val filtered = if (q.isEmpty()) {
-            allItems
-        } else {
-            allItems.filter { it.name.lowercase().contains(q) }
-        }
-
-        adapter.setItems(filtered)
-
-        if (filtered.isEmpty()) {
-            tvVazia.visibility = View.VISIBLE
-            rvLista.visibility = View.GONE
-        } else {
-            tvVazia.visibility = View.GONE
-            rvLista.visibility = View.VISIBLE
-        }
-    }
-
-    private fun abrirAdicionarItem(initialName: String?) {
-        val fragment = AddShoppingListItemFragment.newInstance(
-            initialName = initialName,
-            initialDestination = AddShoppingListItemFragment.DESTINATION_SHOPPING_LIST
-        )
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    private fun abrirEditarItem(itemId: String) {
-        val fragment = EditShoppingListItemFragment.newInstance(itemId)
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
+    override fun onDestroyView() {
+        transferDialog?.dismiss()
+        transferDialog = null
+        stockDialog?.dismiss()
+        stockDialog = null
+        super.onDestroyView()
     }
 }

@@ -22,17 +22,17 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AlertDialog
+import com.example.frigus_mobile.data.model.ShoppingDraft
+import com.example.frigus_mobile.data.model.validShoppingPrice
+import com.google.android.material.snackbar.Snackbar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.ResolverStyle
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.model.ShoppingListItem
-import com.example.frigus_mobile.data.model.StockProductProductResponse
-import com.example.frigus_mobile.data.model.StockProductResponse
-import com.example.frigus_mobile.data.repository.ShoppingListRepository
-import com.example.frigus_mobile.data.repository.StockRepository
-import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ProductCategoryHelper
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class AddShoppingListItemFragment : Fragment() {
@@ -58,25 +58,25 @@ class AddShoppingListItemFragment : Fragment() {
     private lateinit var progressSalvar: View
     private lateinit var imgProduto: ImageView
 
-    private lateinit var shoppingRepo: ShoppingListRepository
-    private lateinit var stockRepo: StockRepository
-
-    private var allCatalogProducts: List<StockProductProductResponse> = emptyList()
+    private lateinit var model: ShoppingListViewModel
+    private lateinit var layoutPreco: View
+    private lateinit var etPreco: EditText
+    private var shownError: com.example.frigus_mobile.data.model.ApiError? = null
+    private var stockDialog: AlertDialog? = null
 
     private var currentDestination = DESTINATION_SHOPPING_LIST
     private var customImageUri: Uri? = null
 
-    private val lugaresEstoque = listOf("Geladeira", "Freezer", "Despensa")
-    private val unidades = listOf("Gramas", "Quilos", "Litros", "Mililitros", "Unidades")
+    private val lugaresEstoque get() = resources.getStringArray(R.array.shopping_remote_place_labels).toList()
+    private val unidades get() = resources.getStringArray(R.array.shopping_remote_unit_labels).toList()
+    private val categoriasGeladeira get() = resources.getStringArray(R.array.shopping_form_categories).take(4)
+    private val categoriasFreezer get() = categoriasGeladeira
+    private val categoriasDespensa get() = resources.getStringArray(R.array.shopping_form_categories).toList()
+    private val categoriasListaCompras get() = categoriasDespensa
 
-    // Categorias correspondentes a cada local do estoque
-    private val categoriasGeladeira = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
-    private val categoriasFreezer = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
-    private val categoriasDespensa = listOf("Grãos", "Hortifruti", "Laticínios", "Bebidas")
-    private val categoriasListaCompras = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas", "Grãos")
-
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri != null) {
+            runCatching { requireContext().contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             customImageUri = uri
             imgProduto.setPadding(0, 0, 0, 0)
             imgProduto.clearColorFilter()
@@ -95,8 +95,7 @@ class AddShoppingListItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        shoppingRepo = ShoppingListRepository(requireContext())
-        stockRepo = StockRepository(requireContext())
+        model = ViewModelProvider(requireActivity())[ShoppingListViewModel::class.java]
 
         rgDestino = view.findViewById(R.id.rgDestinoAdicionarLista)
         rbEstoque = view.findViewById(R.id.rbDestinoEstoqueLista)
@@ -113,6 +112,8 @@ class AddShoppingListItemFragment : Fragment() {
         etValidade = view.findViewById(R.id.etValidadeLista)
         ivValidadeCalendario = view.findViewById(R.id.ivValidadeCalendario)
 
+        layoutPreco = view.findViewById(R.id.layoutPrecoLista)
+        etPreco = view.findViewById(R.id.etPrecoLista)
         spinnerCategoria = view.findViewById(R.id.spinnerCategoriaLista)
         etObservacoes = view.findViewById(R.id.etObservacoesLista)
         btnSalvar = view.findViewById(R.id.btnSalvarItemLista)
@@ -124,7 +125,7 @@ class AddShoppingListItemFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.btnCameraAdicionarItemLista).setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            pickImageLauncher.launch(arrayOf("image/*"))
         }
 
         configurarDestinoToggle()
@@ -132,7 +133,7 @@ class AddShoppingListItemFragment : Fragment() {
         configurarUnidadeSpinner()
         configurarValidadePicker()
         configurarNomeInput()
-        carregarSugestoesCatalogo()
+
 
         val initialName = arguments?.getString(ARG_INITIAL_NAME)
         if (!initialName.isNullOrBlank()) {
@@ -143,9 +144,35 @@ class AddShoppingListItemFragment : Fragment() {
         val initialDestination = arguments?.getString(ARG_INITIAL_DESTINATION) ?: DESTINATION_SHOPPING_LIST
         selecionarDestino(initialDestination)
 
-        btnSalvar.setOnClickListener {
-            salvarItem()
+        btnSalvar.setOnClickListener { salvarItem() }
+        etObservacoes.setHint(R.string.shopping_remote_note_hint)
+        model.state.observe(viewLifecycleOwner) { state ->
+            val remote = currentDestination == DESTINATION_STOCK
+            setLoading(remote && state.transferring)
+            btnSalvar.isEnabled = !remote || (!state.transferring && !state.uncertain)
+            val error = state.error
+            if (error == null) shownError = null
+            else if (shownError !== error) {
+                shownError = error
+                if (error.code == "SHOPPING_CHOOSE_STOCK" && state.stock == null && state.stocks.size > 1) {
+                    stockDialog = showShoppingStockSelection(requireContext(), state) {
+                        model.selectStock(it)
+                        Toast.makeText(requireContext(), R.string.shopping_stock_selected, Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Snackbar.make(view, shoppingErrorMessage(requireContext(), state), Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.shopping_remote_refresh) { model.reload(explicit = true) }.show()
+                }
+            }
+            state.completion?.takeIf { it.kind == ShoppingCompletionKind.ADDED ||
+                it.kind == ShoppingCompletionKind.TRANSFERRED }?.let { completion ->
+                model.consumeCompletion(completion.id)
+                Toast.makeText(requireContext(), if (completion.kind == ShoppingCompletionKind.ADDED)
+                    R.string.shopping_local_added else R.string.shopping_form_stock_added, Toast.LENGTH_LONG).show()
+                parentFragmentManager.popBackStack()
+            }
         }
+        model.loadIfNeeded()
     }
 
     private fun configurarDestinoToggle() {
@@ -167,6 +194,7 @@ class AddShoppingListItemFragment : Fragment() {
     private fun selecionarDestino(destino: String) {
         currentDestination = destino
         val isEstoque = destino == DESTINATION_STOCK
+        btnSalvar.setText(R.string.lista_salvar)
 
         if (isEstoque) {
             if (rgDestino.checkedRadioButtonId != R.id.rbDestinoEstoqueLista) {
@@ -184,8 +212,8 @@ class AddShoppingListItemFragment : Fragment() {
 
             layoutLugarEstoque.visibility = View.VISIBLE
             layoutValidade.visibility = View.VISIBLE
-            atualizarCategoriasPorLocal(spinnerLugarEstoque.selectedItem?.toString() ?: "Geladeira")
-            atualizarSugestoesNome()
+            layoutPreco.visibility = View.VISIBLE
+            atualizarCategoriasPorLocal(spinnerLugarEstoque.selectedItem?.toString().orEmpty())
         } else {
             if (rgDestino.checkedRadioButtonId != R.id.rbDestinoListaCompras) {
                 rgDestino.check(R.id.rbDestinoListaCompras)
@@ -202,11 +230,15 @@ class AddShoppingListItemFragment : Fragment() {
 
             layoutLugarEstoque.visibility = View.GONE
             layoutValidade.visibility = View.GONE
+            layoutPreco.visibility = View.GONE
+            etPreco.error = null
             etValidade.error = null
             ivValidadeCalendario?.visibility = View.VISIBLE
             carregarCategorias(categoriasListaCompras)
-            atualizarSugestoesNome()
         }
+        val state = model.state.value
+        setLoading(isEstoque && state?.transferring == true)
+        btnSalvar.isEnabled = !isEstoque || (state?.transferring != true && state?.uncertain != true)
     }
 
     private fun configurarLugarEstoqueSpinner() {
@@ -226,13 +258,12 @@ class AddShoppingListItemFragment : Fragment() {
     }
 
     private fun atualizarCategoriasPorLocal(local: String) {
-        val cats = when (local.lowercase()) {
-            "freezer" -> categoriasFreezer
-            "despensa" -> categoriasDespensa
+        val cats = when (lugaresEstoque.indexOf(local)) {
+            1 -> categoriasFreezer
+            2 -> categoriasDespensa
             else -> categoriasGeladeira
         }
         carregarCategorias(cats)
-        atualizarSugestoesNome()
     }
 
     private fun carregarCategorias(categorias: List<String>) {
@@ -312,70 +343,16 @@ class AddShoppingListItemFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
-
-        etNome.setOnItemClickListener { parent, _, position, _ ->
-            val selecionado = parent.getItemAtPosition(position) as? String ?: return@setOnItemClickListener
-            val prod = allCatalogProducts.firstOrNull { it.name.equals(selecionado, ignoreCase = true) }
-            if (prod != null) {
-                val catLabel = ShoppingListItem.mapCodeToCategory(prod.category ?: "")
-                for (i in 0 until spinnerCategoria.count) {
-                    if (spinnerCategoria.getItemAtPosition(i).toString().equals(catLabel, ignoreCase = true)) {
-                        spinnerCategoria.setSelection(i)
-                        break
-                    }
-                }
-            }
-        }
-    }
-
-    private fun carregarSugestoesCatalogo() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                allCatalogProducts = stockRepo.getCatalogProducts()
-                atualizarSugestoesNome()
-            } catch (_: Exception) {}
-        }
-    }
-
-    private fun atualizarSugestoesNome() {
-        if (!isAdded || currentDestination != DESTINATION_STOCK || allCatalogProducts.isEmpty()) {
-            etNome.setAdapter(null)
-            return
-        }
-
-        val lugarEstoqueNome = spinnerLugarEstoque.selectedItem?.toString() ?: "Geladeira"
-        val storagePlaceCode = when (lugarEstoqueNome.lowercase()) {
-            "freezer" -> "FREEZER"
-            "despensa" -> "PANTRY"
-            else -> "FRIDGE"
-        }
-
-        val nomes = allCatalogProducts
-            .filter { it.storagePlace.equals(storagePlaceCode, ignoreCase = true) }
-            .mapNotNull { it.name }
-            .distinct()
-            .sorted()
-
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, nomes)
-        etNome.setAdapter(adapter)
-        etNome.threshold = 1
     }
 
     private fun atualizarImagemProduto() {
         if (customImageUri != null) return
 
-        val nome = etNome.text.toString().trim()
         val categoria = spinnerCategoria.selectedItem?.toString()
 
-        if (nome.contains("frango", ignoreCase = true)) {
-            imgProduto.setPadding(0, 0, 0, 0)
-            imgProduto.clearColorFilter()
-            imgProduto.setImageResource(R.drawable.img_frango)
-        } else {
-            imgProduto.setPadding(28, 28, 28, 28)
-            imgProduto.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
-            imgProduto.setImageResource(ProductCategoryHelper.getIconeCategoria(categoria))
-        }
+        imgProduto.setPadding(28, 28, 28, 28)
+        imgProduto.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_primary))
+        imgProduto.setImageResource(ProductCategoryHelper.getIconeCategoria(categoria))
     }
 
     private fun setLoading(loading: Boolean) {
@@ -390,224 +367,50 @@ class AddShoppingListItemFragment : Fragment() {
     }
 
     private fun salvarItem() {
-        val nome = etNome.text.toString().trim()
-        if (nome.isBlank()) {
-            etNome.error = "Informe o nome do item"
+        val name = etNome.text.toString().trim()
+        if (name.isBlank()) {
+            etNome.error = getString(R.string.shopping_form_name_required)
             etNome.requestFocus()
             return
         }
-
-        val quantidade = etQuantidade.text.toString().toIntOrNull() ?: 1
-        val unidadeSelecionada = spinnerUnidade.selectedItem?.toString() ?: "Unidades"
-        val categoriaSelecionada = spinnerCategoria.selectedItem?.toString() ?: "Outros"
-        val categoriaCodigo = ShoppingListItem.mapCategoryToCode(categoriaSelecionada)
-        val observacoes = etObservacoes.text.toString().trim()
-
-        if (currentDestination == DESTINATION_STOCK) {
-            val dataValidadeTexto = etValidade.text.toString().trim()
-            if (dataValidadeTexto.isBlank()) {
-                etValidade.error = "A data de validade é obrigatória"
-                ivValidadeCalendario?.visibility = View.INVISIBLE
-                Toast.makeText(requireContext(), "Informe a data de validade do alimento.", Toast.LENGTH_SHORT).show()
-                return
-            }
-            salvarItemEstoque(nome, quantidade, unidadeSelecionada, categoriaSelecionada, categoriaCodigo)
-        } else {
-            salvarItemListaCompras(nome, quantidade, unidadeSelecionada, categoriaSelecionada, categoriaCodigo, observacoes)
-        }
-    }
-
-    private fun salvarItemListaCompras(
-        nome: String,
-        quantidade: Int,
-        unidade: String,
-        categoria: String,
-        categoriaCodigo: String,
-        observacoes: String
-    ) {
-        val item = ShoppingListItem(
-            name = nome,
-            quantity = quantidade,
-            unit = unidade,
-            category = categoria,
-            categoryCode = categoriaCodigo,
-            observation = observacoes
-        )
-        shoppingRepo.addItem(item)
-        Toast.makeText(requireContext(), "Item adicionado à sua lista de compras!", Toast.LENGTH_SHORT).show()
-        parentFragmentManager.popBackStack()
-    }
-
-    private fun salvarItemEstoque(
-        nome: String,
-        quantidade: Int,
-        unidade: String,
-        categoria: String,
-        categoriaCodigo: String
-    ) {
-        val dataValidadeTexto = etValidade.text.toString().trim()
-        if (dataValidadeTexto.isBlank()) {
-            etValidade.error = "A data de validade é obrigatória"
-            ivValidadeCalendario?.visibility = View.INVISIBLE
-            Toast.makeText(requireContext(), "Informe a data de validade do alimento.", Toast.LENGTH_SHORT).show()
+        val quantity = etQuantidade.text.toString().toIntOrNull()
+        if (quantity == null || quantity <= 0) {
+            etQuantidade.error = getString(R.string.shopping_quantity_positive)
             return
         }
-
-        val context = requireContext()
-        if (!NetworkGuard.ensureConnected(requireActivity()) {
-            salvarItemEstoque(nome, quantidade, unidade, categoria, categoriaCodigo)
-        }) return
-
-        setLoading(true)
-
-        val lugarEstoqueNome = spinnerLugarEstoque.selectedItem?.toString() ?: "Geladeira"
-        val storagePlaceCode = when (lugarEstoqueNome.lowercase()) {
-            "freezer" -> "FREEZER"
-            "despensa" -> "PANTRY"
-            else -> "FRIDGE"
-        }
-
-        val isoExpireDate = if (dataValidadeTexto.contains("/")) {
-            val parts = dataValidadeTexto.split("/")
-            if (parts.size == 3) {
-                "${parts[2]}-${parts[1]}-${parts[0]}"
-            } else {
-                dataValidadeTexto
-            }
-        } else {
-            dataValidadeTexto
-        }
-
-        val parsedDate = try { java.time.LocalDate.parse(isoExpireDate) } catch (e: Exception) { null }
-        if (parsedDate != null && parsedDate.isBefore(java.time.LocalDate.now())) {
-            etValidade.error = "A validade não pode ser no passado"
-            ivValidadeCalendario?.visibility = View.INVISIBLE
-            Toast.makeText(context, "A data de validade deve ser hoje ou uma data futura.", Toast.LENGTH_SHORT).show()
+        val toStock = currentDestination == DESTINATION_STOCK
+        val expiry = if (toStock) runCatching {
+            LocalDate.parse(etValidade.text.toString().trim(),
+                DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT))
+        }.getOrNull() else null
+        if (toStock && (expiry == null || expiry.isBefore(LocalDate.now()))) {
+            etValidade.error = getString(R.string.lista_validade_obrigatoria_erro)
             return
         }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val catalog = if (allCatalogProducts.isNotEmpty()) allCatalogProducts else stockRepo.getCatalogProducts()
-                val targetPlace = storagePlaceCode.uppercase().trim()
-
-                // Filtra o catálogo estritamente para o local selecionado (FRIDGE, FREEZER ou PANTRY)
-                val placeCatalog = catalog.filter { it.storagePlace.equals(targetPlace, ignoreCase = true) }
-
-                // Busca produto pelo nome no catálogo do local selecionado
-                val matched = placeCatalog.firstOrNull {
-                    it.name.equals(nome, ignoreCase = true)
-                } ?: placeCatalog.firstOrNull {
-                    it.name?.contains(nome, ignoreCase = true) == true
-                }
-
-                                if (matched == null || matched.id == null) {
-                    criarEAdicionarAoEstoque(nome, quantidade, unidade, categoria, categoriaCodigo, storagePlaceCode, isoExpireDate, lugarEstoqueNome)
-                    return@launch
-                }
-
-                val targetProductId = matched.id
-                val validPrice = matched.unitPrice ?: 1.0
-
-                val stockItem = StockProductResponse(
-                    productId = targetProductId,
-                    product = StockProductProductResponse(
-                        id = targetProductId,
-                        name = matched.name ?: nome,
-                        category = matched.category ?: categoriaCodigo,
-                        storagePlace = matched.storagePlace ?: storagePlaceCode,
-                        unitPrice = validPrice,
-                        unitOfMeasure = matched.unitOfMeasure ?: ShoppingListItem.mapUnitToCode(unidade)
-                    ),
-                    quantity = quantidade,
-                    minimalQuantity = 1,
-                    purchaseUnitPrice = validPrice,
-                    expireDate = isoExpireDate,
-                    productStatus = "FRESH",
-                    category = matched.category ?: categoriaCodigo,
-                    storagePlace = matched.storagePlace ?: storagePlaceCode
-                )
-
-                stockRepo.addStockProduct(stockItem)
-
-                val localDisplay = when (storagePlaceCode) {
-                    "FREEZER" -> "no freezer"
-                    "PANTRY" -> "na despensa"
-                    else -> "na geladeira"
-                }
-
-                setLoading(false)
-                Toast.makeText(context, "\"$nome\" adicionado com sucesso $localDisplay!", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
-            } catch (e: Exception) {
-                setLoading(false)
-                val msg = e.message ?: "Ocorreu um erro ao salvar o produto no estoque."
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Atenção")
-                    .setMessage(msg)
-                    .setPositiveButton("OK", null)
-                    .show()
-            }
+        val unitCodes = resources.getStringArray(R.array.shopping_remote_unit_codes)
+        val categoryCodes = resources.getStringArray(R.array.shopping_form_category_codes)
+        val places = resources.getStringArray(R.array.shopping_remote_place_codes)
+        val price = if (toStock) etPreco.text.toString().trim().replace(',', '.').toBigDecimalOrNull() else null
+        if (toStock && !validShoppingPrice(price)) {
+            etPreco.error = getString(R.string.shopping_remote_price_invalid)
+            etPreco.requestFocus()
+            return
         }
+        model.submitDraft(ShoppingDraft(
+            name = name, quantity = quantity,
+            unitCode = unitCodes[spinnerUnidade.selectedItemPosition],
+            categoryCode = categoryCodes[spinnerCategoria.selectedItemPosition],
+            storagePlace = places[spinnerLugarEstoque.selectedItemPosition],
+            expireDate = expiry?.toString(),
+            observation = etObservacoes.text.toString().trim(),
+            imageUri = customImageUri?.toString(), unitPrice = price
+        ), toStock)
     }
 
-    private fun criarEAdicionarAoEstoque(
-        nome: String,
-        quantidade: Int,
-        unidade: String,
-        categoria: String,
-        categoriaCodigo: String,
-        storagePlaceCode: String,
-        isoExpireDate: String,
-        lugarEstoqueNome: String
-    ) {
-        val context = requireContext()
-        setLoading(true)
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val novoProduto = stockRepo.createProduct(
-                    name = nome,
-                    category = categoriaCodigo,
-                    storagePlace = storagePlaceCode,
-                    unitPrice = 1.0,
-                    unitOfMeasure = ShoppingListItem.mapUnitToCode(unidade)
-                )
-
-                val targetProductId = novoProduto.id ?: throw IllegalStateException("ID do novo produto não retornado.")
-
-                val stockItem = StockProductResponse(
-                    productId = targetProductId,
-                    product = novoProduto,
-                    quantity = quantidade,
-                    minimalQuantity = 1,
-                    purchaseUnitPrice = 1.0,
-                    expireDate = isoExpireDate,
-                    productStatus = "FRESH",
-                    category = categoriaCodigo,
-                    storagePlace = storagePlaceCode
-                )
-
-                stockRepo.addStockProduct(stockItem)
-
-                val localDisplay = when (storagePlaceCode) {
-                    "FREEZER" -> "no freezer"
-                    "PANTRY" -> "na despensa"
-                    else -> "na geladeira"
-                }
-
-                setLoading(false)
-                Toast.makeText(context, "\"$nome\" cadastrado e adicionado com sucesso $localDisplay!", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
-            } catch (e: Exception) {
-                setLoading(false)
-                val msg = e.message ?: "Ocorreu um erro ao cadastrar o alimento."
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Atenção")
-                    .setMessage(msg)
-                    .setPositiveButton("OK", null)
-                    .show()
-            }
-        }
+    override fun onDestroyView() {
+        stockDialog?.dismiss()
+        stockDialog = null
+        super.onDestroyView()
     }
 
     companion object {

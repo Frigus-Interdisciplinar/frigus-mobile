@@ -21,6 +21,12 @@ class ShoppingListAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val rows = mutableListOf<ShoppingListRow>()
+    private var enabled = true
+    fun setEnabled(value: Boolean) {
+        if (enabled == value) return
+        enabled = value
+        notifyDataSetChanged()
+    }
 
     fun setItems(items: List<ShoppingListItem>) {
         rows.clear()
@@ -78,16 +84,16 @@ class ShoppingListAdapter(
         fun bind(item: ShoppingListItem) {
             tvName.text = item.name
 
-            val detailText = if (item.observation.isNotBlank()) {
-                "${item.quantity} ${item.unit} • ${item.observation}"
-            } else {
-                "${item.quantity} ${item.unit} • ${item.addedBy}"
-            }
+            val detailText = itemView.context.getString(if (item.observation.isNotBlank())
+                R.string.shopping_remote_details_note else R.string.shopping_remote_details,
+                item.quantity.toString(), shoppingUnitLabel(itemView.context, item.unitCode ?: item.unit), item.observation)
             tvDetails.text = detailText
             tvDetails.visibility = View.VISIBLE
 
             checkBox.setOnCheckedChangeListener(null)
             checkBox.isChecked = item.isChecked
+            checkBox.isEnabled = enabled
+            card.isEnabled = enabled
 
             applyCheckedStyle(item.isChecked)
 
