@@ -46,6 +46,7 @@ object MobileHttp {
         "GET|DELETE" to "/mobile/notifications",
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
+        "GET|PUT" to "/mobile/core/profile/preferences",
         "GET" to "/mobile/advertisements/active",
         "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)",
         "GET" to "/mobile/core/plans/(active|me/limits)",

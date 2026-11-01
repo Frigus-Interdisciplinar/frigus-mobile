@@ -23,6 +23,7 @@ object RetrofitClient {
     val recipeService: RecipeApiService get() = retrofit.create(RecipeApiService::class.java)
     val stockService: StockApiService get() = retrofit.create(StockApiService::class.java)
     val notificationService: NotificationApiService get() = retrofit.create(NotificationApiService::class.java)
+    val notificationSettingsService: NotificationSettingsApiService get() = retrofit.create(NotificationSettingsApiService::class.java)
     val aiRecipeService: AiRecipeApiService get() = retrofit.create(AiRecipeApiService::class.java)
     val bffAiService: AiRecipeApiService get() = aiRecipeService
     val coreAiService: AiRecipeApiService get() = aiRecipeService

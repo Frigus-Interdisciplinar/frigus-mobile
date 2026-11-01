@@ -41,21 +41,5 @@
             android:gravity="center" android:textColor="@color/darkBlue"
             android:textSize="14sp" android:textStyle="bold"
             tools:text="usuario@email.com" />
-        <TextView android:id="@+id/tvVerificationStatus"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" android:fontFamily="@font/sarabun"
-            android:gravity="center" android:accessibilityLiveRegion="polite"
-            android:textColor="@color/color_text_secondary" android:textSize="13sp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRequestVerificationCode"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="20dp" android:text="@string/settings_verification_send_code"
-            android:textAllCaps="false" app:backgroundTint="@color/profile_primary" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnVerifyEmailCode"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:text="@string/settings_verification_enter_code"
-            android:textAllCaps="false" android:visibility="gone"
-            app:backgroundTint="@color/profile_primary" />
     </LinearLayout>
 </ScrollView>

@@ -89,9 +89,6 @@ object NetworkGuard {
     }
 }
 
-/**
- * Extensão para Activity que encapsula verificação de rede, escopo de corrotina e tratamento de erros.
- */
 fun AppCompatActivity.launchSafeNetwork(
     onRetry: () -> Unit,
     block: suspend CoroutineScope.() -> Unit
@@ -100,32 +97,27 @@ fun AppCompatActivity.launchSafeNetwork(
     return lifecycleScope.launch {
         try {
             block()
-        } catch (e: CancellationException) {
-            // Cancelamento normal quando a tela é destruída ou encerrada
-            throw e
-        } catch (e: Exception) {
-            NetworkGuard.showBlockingError(this@launchSafeNetwork, e.message, onRetry)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            NetworkGuard.showBlockingError(this@launchSafeNetwork, error.message, onRetry)
         }
     }
 }
 
-/**
- * Extensão para Fragment que encapsula verificação de rede, escopo de corrotina e tratamento de erros.
- */
 fun Fragment.launchSafeNetwork(
     onRetry: () -> Unit,
     block: suspend CoroutineScope.() -> Unit
 ): Job? {
-    val act = activity ?: return null
-    if (!NetworkGuard.ensureConnected(act, onRetry)) return null
+    val host = activity ?: return null
+    if (!NetworkGuard.ensureConnected(host, onRetry)) return null
     return viewLifecycleOwner.lifecycleScope.launch {
         try {
             block()
-        } catch (e: CancellationException) {
-            // Cancelamento normal quando o usuário troca de aba ou navega para outra tela
-            throw e
-        } catch (e: Exception) {
-            NetworkGuard.showBlockingError(activity, e.message, onRetry)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            NetworkGuard.showBlockingError(activity, error.message, onRetry)
         }
     }
 }

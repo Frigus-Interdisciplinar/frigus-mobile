@@ -43,13 +43,12 @@ class SessionManager(context: Context) {
                     user = null
                     preferences.edit().clear().apply()
                 }
-                sharedState = SessionState(
-                    initialToken = token,
-                    initialUser = user,
+                sharedState = SessionState(token, user,
                     persist = { access, profile ->
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        cipher.init(Cipher.ENCRYPT_MODE, key())
                         val encrypted = cipher.doFinal(access.toByteArray(Charsets.UTF_8))
-                        check(preferences.edit()
+                        check(preferences.edit().clear()
                             .putString("origin", BuildConfig.BFF_BASE_URL)
                             .putString("access", Base64.encodeToString(encrypted, Base64.NO_WRAP))
                             .putString("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
@@ -104,39 +103,16 @@ class SessionManager(context: Context) {
     }
 
     fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
-
-    fun clearSession() {
-        state.clear()
-        preferences.edit()
-            .remove("group")
-            .remove("stock")
-            .remove("google_photo_url")
-            .remove("origin")
-            .remove("access")
-            .remove("iv")
-            .remove("profile")
-            .clear()
-            .apply()
-    }
-
+    fun clearSession() = state.clear()
     fun saveActiveGroupAndStock(groupId: String?, stockId: Int?) {
-        val editor = preferences.edit()
-        if (!groupId.isNullOrBlank()) {
-            editor.putString("group", groupId)
-        } else {
-            editor.remove("group")
-        }
-        if (stockId != null && stockId > 0) {
-            editor.putInt("stock", stockId)
-        } else {
-            editor.remove("stock")
-        }
-        editor.apply()
+        preferences.edit().putString("group", groupId).apply {
+            if (stockId != null) putInt("stock", stockId) else remove("stock")
+        }.apply()
     }
 
     companion object {
         const val PREF_NAME = "mobile_bff_session"
-        val authenticated = MutableLiveData<Boolean>()
+        val authenticated = MutableLiveData(false)
         private var sharedState: SessionState? = null
         private const val KEY_ALIAS = "frigus_mobile_bff_access_v1"
 

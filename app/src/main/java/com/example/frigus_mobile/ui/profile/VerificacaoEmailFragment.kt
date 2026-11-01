@@ -13,7 +13,6 @@ import com.example.frigus_mobile.data.api.EmailCodeBody
 import com.example.frigus_mobile.data.api.EmailVerificationState
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.model.ApiError
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,22 +26,33 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
     private var busy = false
     private var requestUncertain = false
     private var verified = false
+    private var codeRequested = false
     private var feedbackSnackbar: Snackbar? = null
     private lateinit var emailView: TextView
-    private lateinit var statusView: TextView
-    private lateinit var requestButton: MaterialButton
-    private lateinit var verifyButton: MaterialButton
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         emailView = view.findViewById(R.id.tvVerificationEmail)
-        statusView = view.findViewById(R.id.tvVerificationStatus)
-        requestButton = view.findViewById(R.id.btnRequestVerificationCode)
-        verifyButton = view.findViewById(R.id.btnVerifyEmailCode)
         view.findViewById<View>(R.id.btnVoltar).setOnClickListener { parentFragmentManager.popBackStack() }
-        requestButton.setOnClickListener { requestCode() }
-        verifyButton.setOnClickListener { showCodeDialog() }
+        emailView.isClickable = true
+        emailView.isFocusable = true
+        emailView.setOnClickListener { onEmailTapped() }
         loadStatus()
+    }
+
+    private fun onEmailTapped() {
+        if (busy || verified) return
+        when {
+            emailView.text.isNullOrBlank() -> loadStatus()
+            requestUncertain -> showStatusRetry("O envio do código ainda não foi confirmado. Atualize o status antes de tentar novamente.")
+            codeRequested -> showCodeDialog()
+            else -> AlertDialog.Builder(requireContext())
+                .setTitle("Verificar e-mail")
+                .setMessage("Enviar um código de verificação para ${emailView.text}?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Enviar código") { _, _ -> requestCode() }
+                .show()
+        }
     }
 
     private fun loadStatus() {
@@ -50,8 +60,7 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
         feedbackSnackbar?.dismiss()
         feedbackSnackbar = null
         busy = true
-        statusView.text = getString(R.string.settings_verification_status_loading)
-        updateButtons()
+        updateEmailAction()
         statusCall?.cancel()
         statusCall = RetrofitClient.accountSecurityService.emailStatus().also { request ->
             request.enqueue(object : Callback<EmailVerificationState> {
@@ -62,26 +71,26 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
                     if (response.code() == 200 && !data?.email.isNullOrBlank()) {
                         verified = data!!.verified
                         requestUncertain = false
+                        codeRequested = false
                         emailView.text = data.email
-                        statusView.text = getString(if (verified) R.string.settings_verification_status_verified
-                            else R.string.settings_verification_status_pending)
+                        showMessage(getString(if (verified) R.string.settings_verification_status_verified
+                            else R.string.settings_verification_status_pending))
                     } else {
-                        statusView.text = when {
+                        val message = when {
                             response.isSuccessful -> "Resposta inválida ao consultar o e-mail."
                             response.code() >= 500 -> "O serviço de verificação está indisponível. Tente novamente."
                             else -> ApiError.parse(response).userMessage("Não foi possível consultar o e-mail (${response.code()}).")
                         }
-                        showStatusRetry()
+                        showStatusRetry(message)
                     }
-                    updateButtons()
+                    updateEmailAction()
                 }
 
                 override fun onFailure(call: Call<EmailVerificationState>, error: Throwable) {
                     if (call.isCanceled || view == null) return
                     busy = false
-                    statusView.text = "Falha de conexão ao consultar o e-mail."
-                    updateButtons()
-                    showStatusRetry()
+                    updateEmailAction()
+                    showStatusRetry("Falha de conexão ao consultar o e-mail.")
                 }
             })
         }
@@ -90,7 +99,7 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
     private fun requestCode() {
         if (busy || verified || requestUncertain) return
         busy = true
-        updateButtons()
+        updateEmailAction()
         requestCall = RetrofitClient.accountSecurityService.requestEmailCode().also { request ->
             request.enqueue(object : Callback<Void> {
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
@@ -98,28 +107,28 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
                     busy = false
                     when {
                         response.code() == 204 -> {
-                            statusView.text = getString(R.string.settings_verification_code_sent)
-                            Snackbar.make(requireView(), R.string.settings_verification_code_sent, Snackbar.LENGTH_LONG).show()
+                            codeRequested = true
+                            updateEmailAction()
+                            Snackbar.make(requireView(), "Código enviado. Toque no e-mail para digitá-lo.", Snackbar.LENGTH_LONG)
+                                .setAction("Digitar código") { showCodeDialog() }.show()
                         }
                         response.code() >= 500 || response.isSuccessful -> {
                             requestUncertain = true
-                            statusView.text = "Não foi possível confirmar o envio. Verifique sua caixa de entrada e atualize o status."
-                            showStatusRetry()
+                            showStatusRetry("Não foi possível confirmar o envio. Verifique sua caixa de entrada e atualize o status.")
                         }
                         else -> {
-                            statusView.text = ApiError.parse(response).userMessage("Não foi possível solicitar o código (${response.code()}).")
+                            showMessage(ApiError.parse(response).userMessage("Não foi possível solicitar o código (${response.code()})."))
                         }
                     }
-                    updateButtons()
+                    updateEmailAction()
                 }
 
                 override fun onFailure(call: Call<Void>, error: Throwable) {
                     if (call.isCanceled || view == null) return
                     busy = false
                     requestUncertain = true
-                    statusView.text = "Resultado incerto ao solicitar o código. Verifique sua caixa de entrada e atualize o status."
-                    updateButtons()
-                    showStatusRetry()
+                    updateEmailAction()
+                    showStatusRetry("Resultado incerto ao solicitar o código. Verifique sua caixa de entrada e atualize o status.")
                 }
             })
         }
@@ -152,7 +161,7 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
         if (busy) return
         busy = true
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
-        updateButtons()
+        updateEmailAction()
         verifyCall = RetrofitClient.accountSecurityService.verifyEmail(EmailCodeBody(code)).also { request ->
             request.enqueue(object : Callback<EmailVerificationState> {
                 override fun onResponse(call: Call<EmailVerificationState>, response: Response<EmailVerificationState>) {
@@ -162,47 +171,52 @@ class VerificacaoEmailFragment : Fragment(R.layout.fragment_verificacao_email) {
                     if (response.code() == 200 && data?.verified == true) {
                         verified = true
                         requestUncertain = false
+                        codeRequested = false
                         emailView.text = data.email ?: emailView.text
-                        statusView.text = getString(R.string.settings_verification_status_verified)
+                        updateEmailAction()
                         dialog.dismiss()
-                        Snackbar.make(requireView(), R.string.settings_verification_status_verified, Snackbar.LENGTH_LONG).show()
+                        showMessage(getString(R.string.settings_verification_status_verified))
                     } else if (response.code() >= 500 || response.isSuccessful) {
                         dialog.dismiss()
-                        statusView.text = "Resultado incerto. Atualize o status para confirmar."
-                        showStatusRetry()
+                        showStatusRetry("Resultado incerto. Atualize o status para confirmar.")
                     } else {
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                        Snackbar.make(dialog.window!!.decorView,
-                            ApiError.parse(response).userMessage("Código inválido ou expirado (${response.code()})."),
-                            Snackbar.LENGTH_LONG).show()
+                        showMessage(ApiError.parse(response).userMessage("Código inválido ou expirado (${response.code()})."))
                     }
-                    updateButtons()
+                    updateEmailAction()
                 }
 
                 override fun onFailure(call: Call<EmailVerificationState>, error: Throwable) {
                     if (call.isCanceled || view == null) return
                     busy = false
                     dialog.dismiss()
-                    statusView.text = "Resultado incerto. Atualize o status para confirmar."
-                    updateButtons()
-                    showStatusRetry()
+                    updateEmailAction()
+                    showStatusRetry("Resultado incerto. Atualize o status para confirmar.")
                 }
             })
         }
     }
 
-    private fun updateButtons() {
-        if (!::requestButton.isInitialized) return
-        requestButton.visibility = if (verified) View.GONE else View.VISIBLE
-        verifyButton.visibility = if (verified) View.GONE else View.VISIBLE
-        requestButton.isEnabled = !busy && !requestUncertain && !verified
-        verifyButton.isEnabled = !busy && !verified
+    private fun updateEmailAction() {
+        if (!::emailView.isInitialized) return
+        emailView.isEnabled = !busy && !verified
+        emailView.contentDescription = when {
+            verified -> "${emailView.text}. E-mail verificado."
+            codeRequested -> "${emailView.text}. Toque para digitar o código de verificação."
+            requestUncertain -> "${emailView.text}. Resultado do envio incerto; atualize o status."
+            else -> "${emailView.text}. Toque para solicitar um código de verificação."
+        }
     }
 
-    private fun showStatusRetry() {
+    private fun showMessage(message: String) {
+        view?.let { Snackbar.make(it, message, Snackbar.LENGTH_LONG).show() }
+    }
+
+    private fun showStatusRetry(message: String) {
+        if (!::emailView.isInitialized) return
         view?.let {
             feedbackSnackbar?.dismiss()
-            feedbackSnackbar = Snackbar.make(it, statusView.text, Snackbar.LENGTH_INDEFINITE)
+            feedbackSnackbar = Snackbar.make(it, message, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Atualizar status") { loadStatus() }.also { snackbar -> snackbar.show() }
         }
     }

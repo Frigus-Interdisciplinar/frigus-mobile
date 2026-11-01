@@ -86,8 +86,8 @@ class MoneySavingViewModel(
             session.activeGroupId == currentGroup && requestId == id
         pending = viewModelScope.launch {
             try {
-                val group = if (append && sameSession) groupId ?: repository.groupId(currentGroup)
-                    else repository.groupId(currentGroup)
+                val group = if (append && sameSession) groupId ?: repository.groupId()
+                    else repository.groupId()
                 if (!active()) return@launch
                 groupId = group
                 val from = snapshot.month.atDay(1).toString()
@@ -129,7 +129,8 @@ class MoneySavingViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(MoneySavingViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
-            return MoneySavingViewModel(MoneySavingRepository(), SessionManager(context.applicationContext)) as T
+            val session = SessionManager(context.applicationContext)
+            return MoneySavingViewModel(MoneySavingRepository(session), session) as T
         }
     }
 
