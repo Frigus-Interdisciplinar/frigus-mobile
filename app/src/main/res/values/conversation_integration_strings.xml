@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_generic_title">Conversa</string>
+    <string name="conversation_generic_participant">Participante</string>
+    <string name="conversation_no_messages">Sem mensagens ainda</string>
+    <string name="conversation_other_message">Mensagem de outro tipo</string>
+    <string name="conversation_extra_members">+%1$d</string>
+    <string name="conversation_rename_title">Renomear grupo</string>
+    <string name="conversation_rename_unavailable">Renomear a conversa ainda não está disponível pelo aplicativo.</string>
+    <string name="conversation_search_empty">Nenhuma conversa encontrada</string>
+    <string name="conversation_subtitle_group">%1$d participantes</string>
+    <string name="conversation_refresh">Atualizar conversas</string>
+    <string name="conversation_actions">Opções da conversa</string>
+    <string name="conversation_load_previous">Carregar mensagens anteriores</string>
+    <string name="conversation_mark_latest_read">Marcar última mensagem recebida como lida</string>
+    <string name="conversation_read_confirmed">Leitura da mensagem confirmada.</string>
+    <string name="conversation_uncertain">Não foi possível confirmar a operação. Atualize o histórico e confira as mensagens antes de tentar novamente. Nada será reenviado automaticamente.</string>
+</resources>

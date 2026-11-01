@@ -55,7 +55,19 @@ class SessionManager(context: Context) {
                             .putString("profile", Gson().toJson(profile))
                             .commit()) { "Session persistence failed" }
                     },
-                    erase = { preferences.edit().clear().apply() },
+                    erase = {
+                        com.example.frigus_mobile.data.repository.FirebaseShoppingSession.signOut()
+                        preferences.edit()
+                            .remove("group")
+                            .remove("stock")
+                            .remove("google_photo_url")
+                            .remove("origin")
+                            .remove("access")
+                            .remove("iv")
+                            .remove("profile")
+                            .clear()
+                            .apply()
+                    },
                     changed = {
                         authenticated.postValue(it)
                         PushRegistration.onSessionChanged(context.applicationContext, it)
@@ -72,8 +84,23 @@ class SessionManager(context: Context) {
     val userEmail: String? get() = state.user?.email
     val userBirthDate: String? get() = state.user?.birthDate
     val userAccountType: String? get() = state.user?.accountType
+    val userId: String? get() = state.user?.id
+    /** Cached identity may open only local shopping data; it never authorizes a backend operation. */
+    val canReadCachedShopping: Boolean get() = !accessToken.isNullOrBlank() && userId?.let { id ->
+        runCatching { java.util.UUID.fromString(id).toString().equals(id, ignoreCase = true) }.getOrDefault(false)
+    } == true
+    /** Conta do tipo Doméstico (backend: "DOMESTIC"). Usado para liberar o MoneySaving. */
+    val isDomestic: Boolean get() = userAccountType.equals("DOMESTIC", ignoreCase = true)
     val activeGroupId: String? get() = preferences.getString("group", null)
     val activeStockId: Int? get() = preferences.getInt("stock", -1).takeIf { it > 0 }
+    val googlePhotoUrl: String? get() = preferences.getString("google_photo_url", null)
+        ?.takeIf { isLoggedIn && preferences.getString("google_photo_owner", null) == userId }
+
+    fun saveGooglePhotoUrl(url: String?) {
+        if (isLoggedIn && !userId.isNullOrBlank() && !url.isNullOrBlank()) {
+            preferences.edit().putString("google_photo_url", url).putString("google_photo_owner", userId).apply()
+        }
+    }
 
     fun saveUserProfile(user: UserResponse?) { if (user != null) state.updateUser(user) }
     fun clearSession() = state.clear()

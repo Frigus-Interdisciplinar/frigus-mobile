@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/pure_white"
     android:fillViewport="true">
 
     <LinearLayout
@@ -26,7 +26,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
+                android:contentDescription="@string/profile_back"
                 android:src="@drawable/ic_chevron_left"
                 app:tint="@color/darkBlue" />
 
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:fontFamily="@font/sarabun"
-                android:text="Meus Dados"
+                android:text="@string/profile_data_title"
                 android:textColor="@color/darkBlue"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -48,7 +48,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"
             android:fontFamily="@font/sarabun"
-            android:text="Informações da Conta"
+            android:text="@string/profile_data_information"
             android:textColor="@color/color_text_secondary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -64,7 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="Nome completo"
+                android:text="@string/profile_data_full_name"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
 
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:fontFamily="@font/sarabun"
-                android:text="-"
+                android:text="@string/account_not_informed"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="E-mail"
+                android:text="@string/account_email"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
 
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:fontFamily="@font/sarabun"
-                android:text="-"
+                android:text="@string/account_not_informed"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -114,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="Data de nascimento"
+                android:text="@string/account_birth_date"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
 
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:fontFamily="@font/sarabun"
-                android:text="-"
+                android:text="@string/account_not_informed"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -139,7 +139,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sarabun"
-                android:text="Tipo de conta"
+                android:text="@string/account_type"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
 
@@ -149,11 +149,31 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:fontFamily="@font/sarabun"
-                android:text="-"
+                android:text="@string/account_not_informed"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvMeusDadosStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/account_gap"
+            android:accessibilityLiveRegion="polite"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="@dimen/account_body_size"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAtualizarMeusDados"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/account_gap"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/account_refresh"
+            android:textAllCaps="false" />
 
         <!-- Seção Meus Dados -->
         <TextView
@@ -162,7 +182,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="8dp"
             android:fontFamily="@font/sarabun"
-            android:text="Opções"
+            android:text="@string/profile_data_options"
             android:textColor="@color/color_text_secondary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -200,7 +220,7 @@
                     android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Privacidade"
+                    android:text="@string/profile_privacy"
                     android:textColor="@color/color_text_primary"
                     android:textSize="15sp" />
 
@@ -242,7 +262,7 @@
                     android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/sarabun"
-                    android:text="Alterar senha"
+                    android:text="@string/profile_change_password"
                     android:textColor="@color/color_text_primary"
                     android:textSize="15sp" />
 

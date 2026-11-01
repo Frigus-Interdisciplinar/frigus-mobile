@@ -1,6 +1,7 @@
 package com.example.frigus_mobile.ui.stock.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
-import java.text.NumberFormat
-import com.example.frigus_mobile.ui.stock.stockCategoryIcon
-import com.example.frigus_mobile.ui.stock.lotUnitLabel
+import com.example.frigus_mobile.ui.stock.AlimentoDetalhesActivity
+import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductNameTracker
 
 class EstoqueProdutoAdapter(
     private val context: Context,
@@ -31,41 +32,59 @@ class EstoqueProdutoAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.itemView.isClickable = onClick != null && (item.id ?: 0) > 0
-        holder.itemView.isFocusable = holder.itemView.isClickable
-        holder.itemView.setOnClickListener(if (onClick != null && (item.id ?: 0) > 0)
-            View.OnClickListener { onClick.invoke(item) } else null)
-        holder.tvNome.text = item.product?.name?.takeIf(String::isNotBlank)
+        val productName = item.id?.let { ProductNameTracker.getName(context, it) }
+            ?: item.product?.name?.takeIf(String::isNotBlank)
             ?: context.getString(R.string.inventory_unnamed_product)
-        val quantity = item.quantity?.let { NumberFormat.getIntegerInstance().format(it) }
-            ?: context.getString(R.string.inventory_unknown)
-        val unit = context.lotUnitLabel(item.product?.unitOfMeasure)
-        val status = when (item.productStatus) {
-            "FRESH" -> R.string.inventory_fresh
-            "NEAR_EXPIRATION" -> R.string.inventory_near_expiration
-            "EXPIRED" -> R.string.inventory_expired
-            else -> R.string.inventory_unclassified
+        val qty = item.quantity?.toString() ?: "-"
+        val unit = when (item.product?.unitOfMeasure) {
+            "GRAM" -> "g"
+            "KILOGRAM" -> "kg"
+            "LITER" -> "L"
+            "MILLILITER" -> "ml"
+            else -> "un"
         }
-        holder.tvSubtitulo.text = listOf(
-            context.getString(R.string.inventory_quantity, quantity, unit),
-            context.getString(R.string.inventory_expiry, item.expireDate?.takeIf(String::isNotBlank)
-                ?: context.getString(R.string.inventory_unknown)),
-            context.getString(status),
-            context.getString(R.string.inventory_lot_identity, item.id, item.stockId)
-        ).joinToString("\n")
-        holder.imgProduto.setImageResource(stockCategoryIcon(item.category ?: item.product?.category))
-        val color = when (item.productStatus) {
-            "FRESH" -> R.color.color_green
-            "NEAR_EXPIRATION" -> R.color.color_gold
-            "EXPIRED" -> R.color.color_red
-            else -> null
+        val expireDate = item.expireDate ?: "Sem data"
+
+        holder.tvNome.text = productName
+        holder.tvSubtitulo.text = "$qty$unit • Vence $expireDate"
+
+        // Ícone unificado baseado na categoria
+        holder.imgProduto.clearColorFilter()
+        holder.imgProduto.setImageResource(
+            ProductCategoryHelper.getIconeCategoria(item.category ?: item.product?.category)
+        )
+
+        // Status badge
+        when (item.productStatus) {
+            "EXPIRED" -> {
+                holder.imgStatusBadge.setImageResource(R.drawable.ic_cancel)
+                holder.imgStatusBadge.setColorFilter(ContextCompat.getColor(context, R.color.color_red))
+                holder.imgStatusBadge.visibility = View.VISIBLE
+            }
+            "NEAR_EXPIRATION" -> {
+                holder.imgStatusBadge.setImageResource(R.drawable.ic_cancel)
+                holder.imgStatusBadge.setColorFilter(ContextCompat.getColor(context, R.color.color_gold))
+                holder.imgStatusBadge.visibility = View.VISIBLE
+            }
+            else -> {
+                holder.imgStatusBadge.setImageResource(R.drawable.ic_circle_check)
+                holder.imgStatusBadge.setColorFilter(ContextCompat.getColor(context, R.color.color_green))
+                holder.imgStatusBadge.visibility = View.VISIBLE
+            }
         }
-        holder.imgStatusBadge.visibility = if (color == null) View.GONE else View.VISIBLE
-        if (color != null) {
-            holder.imgStatusBadge.setImageResource(
-                if (item.productStatus == "FRESH") R.drawable.ic_circle_check else R.drawable.ic_cancel
-            )
-            holder.imgStatusBadge.setColorFilter(ContextCompat.getColor(context, color))
+
+        holder.itemView.isClickable = true
+        holder.itemView.isFocusable = true
+        holder.itemView.setOnClickListener {
+            if (onClick != null) {
+                onClick.invoke(item)
+            } else {
+                val intent = Intent(context, AlimentoDetalhesActivity::class.java).apply {
+                    putExtra("STOCK_PRODUCT", item)
+                    putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, item.id ?: 0)
+                }
+                context.startActivity(intent)
+            }
         }
     }
 

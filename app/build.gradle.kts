@@ -26,6 +26,11 @@ val frigusBffBaseUrl = providers.environmentVariable("FRIGUS_BFF_BASE_URL").orNu
 require(frigusBffBaseUrl.none { it == '"' || it == '\\' || it.isISOControl() }) {
     "FRIGUS_BFF_BASE_URL must be a plain BFF origin URL"
 }
+val googleClientId = providers.environmentVariable("GOOGLE_CLIENT_ID").orNull
+    ?: envProperties.getProperty("GOOGLE_CLIENT_ID") ?: ""
+require(googleClientId.none { it == '"' || it == '\\' || it.isISOControl() }) {
+    "GOOGLE_CLIENT_ID must be a plain Google OAuth client ID"
+}
 
 android {
     namespace = "com.example.frigus_mobile"
@@ -42,6 +47,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "BFF_BASE_URL", "\"$frigusBffBaseUrl\"")
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleClientId\"")
     }
 
     buildFeatures {
@@ -68,6 +74,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -78,6 +85,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
     implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    // Auth 25 uses Kotlin 2.4 metadata; retain compatibility with AGP's built-in Kotlin.
+    implementation("com.google.firebase:firebase-auth") {
+        version { strictly("24.0.1") }
+    }
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 }

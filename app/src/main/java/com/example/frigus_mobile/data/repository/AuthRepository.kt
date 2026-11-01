@@ -1,7 +1,6 @@
 package com.example.frigus_mobile.data.repository
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.AuthApiService
 import com.example.frigus_mobile.data.api.RetrofitClient
@@ -28,6 +27,35 @@ class AuthRepository(
         val generation = session.beginAuthentication()
         result(AuthResult.Loading)
         signIn(email, password, generation, result)
+    }
+
+    fun loginWithGoogle(idToken: String, result: (AuthResult) -> Unit) {
+        cancel()
+        val generation = session.beginAuthentication()
+        result(AuthResult.Loading)
+        val call = api.loginComGoogle(GoogleLoginRequest(idToken))
+        pending = call
+        call.enqueue(object : Callback<UserLoginResponse> {
+            override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                if (call.isCanceled || generation != session.generation) return
+                val body = response.body()
+                try {
+                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
+                        result(AuthResult.Authenticated)
+                    } else {
+                        result(AuthResult.Failure(if (response.isSuccessful)
+                            ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
+                    }
+                } catch (_: Exception) {
+                    session.clear()
+                    result(AuthResult.Failure(ApiError(displayMessage = text(R.string.auth_storage_error))))
+                }
+            }
+
+            override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(networkError()))
+            }
+        })
     }
 
     private fun signIn(email: String, password: String, generation: Long, result: (AuthResult) -> Unit,
@@ -99,7 +127,9 @@ class AuthRepository(
                     if (response.code() == 200 && user != null && validUser(user) && session.validate(generation, token, user)) {
                         result(AuthResult.Authenticated)
                     } else {
-                        if (response.code() == 401) session.invalidate(SessionCredential(token, generation))
+                        if (response.code() == 401) {
+                            session.invalidate(SessionCredential(token, generation))
+                        }
                         result(AuthResult.Failure(if (response.isSuccessful)
                             ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
                     }
@@ -122,7 +152,4 @@ class AuthRepository(
     private fun networkError() = ApiError(displayMessage = text(R.string.auth_network_error))
     fun cancel() { pending?.cancel(); pending = null }
 
-    fun sendPasswordReset(email: String, liveData: MutableLiveData<Resource<Void>>) {
-        liveData.value = Resource.error(text(R.string.auth_password_reset_unavailable))
-    }
 }

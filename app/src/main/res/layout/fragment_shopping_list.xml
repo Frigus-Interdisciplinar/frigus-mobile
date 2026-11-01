@@ -57,7 +57,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerListaCompras" />
 
-    <!-- Future adapter alternates item_shopping_list_category and item_shopping_list_product. -->
+    <LinearLayout
+        android:id="@+id/shoppingSyncStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etAdicionarProdutoLista">
+
+        <TextView
+            android:id="@+id/tvShoppingSyncStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/shopping_sync_pending"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/btnShoppingSync"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:text="@string/shopping_sync_retry"
+            android:textColor="@color/blue_primary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvListaCompras"
         android:layout_width="0dp"
@@ -69,7 +102,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etAdicionarProdutoLista" />
+        app:layout_constraintTop_toBottomOf="@id/estadoErroListaCompras" />
 
     <ProgressBar
         android:id="@+id/progressListaCompras"
@@ -99,15 +132,15 @@
 
     <LinearLayout
         android:id="@+id/estadoErroListaCompras"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/rvListaCompras"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/rvListaCompras">
+        app:layout_constraintTop_toBottomOf="@id/shoppingSyncStatus">
 
         <TextView
             android:id="@+id/tvErroListaCompras"
@@ -134,11 +167,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:contentDescription="@string/lista_adicionar_item"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/blue_primary"
-        app:fabSize="mini"
+        app:fabCustomSize="56dp"
+        app:maxImageSize="28dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@color/pure_white" />

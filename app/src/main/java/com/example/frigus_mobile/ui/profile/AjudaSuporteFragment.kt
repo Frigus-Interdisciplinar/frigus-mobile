@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.local.SessionManager
 
 class AjudaSuporteFragment : Fragment() {
 
@@ -21,10 +21,7 @@ class AjudaSuporteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        view.findViewById<View>(R.id.btnVoltar).setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+        configurarVoltar(view)
 
         view.findViewById<View>(R.id.btnFaqScanner).setOnClickListener {
             exibirRespostaFaq(
@@ -47,19 +44,19 @@ class AjudaSuporteFragment : Fragment() {
             )
         }
 
-        view.findViewById<View>(R.id.btnFaqMoneySaving).setOnClickListener {
-            exibirRespostaFaq(
-                "Como funciona o MoneySaving",
-                getString(R.string.money_saving_faq)
-            )
+        // MoneySaving só existe para contas do tipo Doméstico
+        if (SessionManager(requireContext()).isDomestic) {
+            view.findViewById<View>(R.id.groupFaqMoneySaving).visibility = View.VISIBLE
+            view.findViewById<View>(R.id.btnFaqMoneySaving).setOnClickListener {
+                exibirRespostaFaq(
+                    "Como funciona o MoneySaving",
+                    "O MoneySaving calcula a economia gerada ao consumir alimentos antes do vencimento e aponta o desperdício evitado mês a mês."
+                )
+            }
         }
 
         view.findViewById<View>(R.id.btnEntrarContato).setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Fale Conosco")
-                .setMessage("Envie sua mensagem para nosso suporte em suporte@frigus.com.br. Nosso time responderá em até 24h.")
-                .setPositiveButton("OK", null)
-                .show()
+            abrirTela(EnviarSolicitacaoFragment())
         }
     }
 

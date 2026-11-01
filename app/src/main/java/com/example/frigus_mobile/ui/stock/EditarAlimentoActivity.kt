@@ -1,205 +1,376 @@
 package com.example.frigus_mobile.ui.stock
 
+import android.app.DatePickerDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.model.StockProductUpdateRequest
-import com.example.frigus_mobile.ui.login.LoginActivity
+import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.repository.StockRepository
-import java.time.format.DateTimeParseException
+import com.example.frigus_mobile.ui.login.LoginActivity
+import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductImageTracker
+import com.example.frigus_mobile.utils.ProductNameTracker
+import com.example.frigus_mobile.utils.StockObservationsTracker
+import com.example.frigus_mobile.utils.StockQuantityTracker
+import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Locale
 
 class EditarAlimentoActivity : AppCompatActivity() {
+
     private lateinit var session: SessionManager
-    private lateinit var model: StockLotViewModel
-    private lateinit var inputs: Map<String, EditText>
-    private lateinit var category: Spinner
-    private lateinit var place: Spinner
-    private var leaving = false
-    private var rendering = false
-    private var lotId = 0
-    private val inputIds = mapOf(
-        "name" to R.id.etNomeAlimento, "quantity" to R.id.etQuantidadeTotal,
-        "initialQuantity" to R.id.lotInitialQuantity, "minimalQuantity" to R.id.lotMinimum,
-        "expireDate" to R.id.etValidade, "batch" to R.id.lotBatch
-    )
+    private lateinit var repository: StockRepository
+    private var item: StockProductResponse? = null
+
+    private lateinit var imgEditarAlimento: ImageView
+    private lateinit var etNome: EditText
+    private lateinit var etValidade: EditText
+    private lateinit var etQuantidade: EditText
+    private lateinit var etObservacoes: EditText
+    private lateinit var spinnerLocal: Spinner
+    private lateinit var spinnerCategoria: Spinner
+    private lateinit var spinnerUnidade: Spinner
+    private lateinit var btnSalvar: Button
+    private lateinit var progressSalvar: ProgressBar
+
+    private var customImageUri: Uri? = null
+
+    private val locais = listOf("Geladeira", "Freezer", "Despensa")
+    private val categoriasGeladeira = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
+    private val categoriasFreezer = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
+    private val categoriasDespensa = listOf("Grãos", "Hortifruti", "Laticínios", "Bebidas")
+    private val unidades = listOf("Gramas", "Quilos", "Litros", "Mililitros", "Unidades")
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            customImageUri = uri
+            imgEditarAlimento.setPadding(0, 0, 0, 0)
+            imgEditarAlimento.clearColorFilter()
+            imgEditarAlimento.scaleType = ImageView.ScaleType.CENTER_CROP
+            imgEditarAlimento.setImageURI(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         session = SessionManager(this)
-        if (!session.isLoggedIn) { openLogin(); return }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        setContentView(R.layout.activity_editar_alimento)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lotEditRoot)) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-        ViewCompat.requestApplyInsets(findViewById(R.id.lotEditRoot))
-        SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
-        lotId = intent.getIntExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, 0)
-        model = ViewModelProvider(this)[StockLotViewModel::class.java]
-        inputs = inputIds.mapValues { findViewById(it.value) }
-        inputs.forEach { (key, input) ->
-            input.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-                override fun afterTextChanged(s: Editable?) = Unit
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (!rendering) model.edit(key, s.toString())
-                }
-            })
-        }
-        category = findViewById(R.id.spinnerCategoria)
-        place = findViewById(R.id.spinnerLocal)
-        setupSpinner(category, R.array.inventory_category_labels, R.array.inventory_category_codes, "category")
-        setupSpinner(place, R.array.inventory_place_labels, R.array.inventory_place_codes, "storagePlace")
-        findViewById<View>(R.id.btnVoltar).setOnClickListener { finish() }
-        findViewById<View>(R.id.lotReload).setOnClickListener { model.load(lotId, reconcile = true) }
-        findViewById<View>(R.id.btnSalvarAlteracoes).setOnClickListener { save() }
-        model.state.observe(this) { state ->
-            if (model.changed) setResult(RESULT_OK)
-            if (state.saved) {
-                Toast.makeText(this, R.string.lot_saved, Toast.LENGTH_SHORT).show()
-                setResult(RESULT_OK); finish(); return@observe
-            }
-            if (state.error == null) inputs.values.forEach { it.error = null }
-            rendering = true
-            state.lot?.let { lot ->
-                findViewById<ImageView>(R.id.imgEditarAlimento).setImageResource(
-                    stockCategoryIcon(lot.category ?: lot.product?.category))
-                val values = mapOf("name" to lot.product?.name.orEmpty(), "quantity" to lot.quantity?.toString().orEmpty(),
-                    "initialQuantity" to lot.initialQuantity?.toString().orEmpty(), "minimalQuantity" to lot.minimalQuantity?.toString().orEmpty(),
-                    "expireDate" to stockDisplayDate(lot.expireDate), "batch" to lot.batch.orEmpty())
-                inputs.forEach { (key, input) ->
-                    val value = model.draft(key, values.getValue(key))
-                    if (input.text.toString() != value) input.setText(value)
-                }
-                select(category, R.array.inventory_category_codes, model.draft("category", lot.category ?: lot.product?.category.orEmpty()))
-                select(place, R.array.inventory_place_codes, model.draft("storagePlace", lot.product?.storagePlace.orEmpty()))
-                findViewById<TextView>(R.id.lotUnit).apply {
-                    text = lotUnitLabel(lot.product?.unitOfMeasure)
-                    contentDescription = getString(R.string.lot_unit_read_only, text)
-                }
-            }
-            rendering = false
-            findViewById<View>(R.id.lotProgress).visibility = if (state.loading || state.busy) View.VISIBLE else View.GONE
-            findViewById<View>(R.id.lotForm).visibility = if (state.lot != null) View.VISIBLE else View.GONE
-            val enabled = state.lot != null && !state.busy && !state.loading && !state.uncertain
-            inputs.values.forEach { it.isEnabled = enabled }
-            category.isEnabled = enabled
-            place.isEnabled = enabled
-            findViewById<View>(R.id.btnSalvarAlteracoes).isEnabled = enabled
-            findViewById<View>(R.id.lotReload).isEnabled = !state.loading && !state.busy
-            findViewById<TextView>(R.id.lotStatus).text = when {
-                state.uncertain -> getString(R.string.lot_uncertain)
-                state.busy -> getString(R.string.lot_sending)
-                state.loading -> getString(R.string.inventory_loading)
-                state.error != null -> state.error.userMessage(getString(when(state.error.status) {
-                    403 -> R.string.lot_forbidden
-                    404 -> R.string.lot_not_found
-                    else -> R.string.lot_error
-                }))
-                else -> ""
-            }
-            state.error?.fields.orEmpty().forEach { field ->
-                field.displayMessage?.let { message ->
-                    inputs[field.fieldName]?.error = message
-                }
-            }
-            if (!state.loading && !state.busy && !state.uncertain && state.error != null) {
-                val messages = state.error.fields.orEmpty().mapNotNull { it.displayMessage }
-                if (messages.isNotEmpty()) findViewById<TextView>(R.id.lotStatus).append("\n" + messages.joinToString("\n"))
-            }
-        }
-        model.loadIfNeeded(lotId)
-    }
-
-    private fun setupSpinner(spinner: Spinner, labelsId: Int, codesId: Int, key: String) {
-        val labels = resources.getStringArray(labelsId).toMutableList()
-        labels[0] = getString(R.string.lot_keep_value)
-        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
-        spinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!rendering && spinner.isEnabled) model.edit(key, resources.getStringArray(codesId)[position])
-            }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
-        }
-    }
-    private fun select(spinner: Spinner, codesId: Int, code: String) {
-        spinner.setSelection(resources.getStringArray(codesId).indexOf(code).coerceAtLeast(0))
-    }
-
-    private fun save() {
-        val original = model.state.value?.lot ?: return
-        inputs.values.forEach { it.error = null }
-        var invalid = false
-        fun error(key: String) { inputs.getValue(key).error = getString(R.string.lot_invalid_field); invalid = true }
-        fun number(key: String, previous: Int?): Int? {
-            val raw = inputs.getValue(key).text.toString()
-            if (raw.isBlank() && previous == null) return null
-            val value = raw.toIntOrNull()
-            if (value == null || value < 0) { error(key); return null }
-            return value.takeIf { it != previous }
-        }
-        val rawName = inputs.getValue("name").text.toString().trim()
-        val oldName = original.product?.name
-        val name = rawName.takeIf { it != oldName && !(it.isEmpty() && oldName == null) }
-        if (name != null && (name.isBlank() || name.length > 255)) error("name")
-        val quantity = number("quantity", original.quantity)
-        val initial = number("initialQuantity", original.initialQuantity)
-        val minimum = number("minimalQuantity", original.minimalQuantity)
-        val rawDate = inputs.getValue("expireDate").text.toString().trim()
-        val normalizedDate = if (rawDate.isEmpty()) null else try {
-            StockRepository.isoDate(rawDate)
-        } catch (_: DateTimeParseException) { error("expireDate"); null }
-        if (rawDate.isEmpty() && original.expireDate != null) error("expireDate")
-        val date = normalizedDate?.takeIf { it != original.expireDate }
-        val rawBatch = inputs.getValue("batch").text.toString()
-        val batch = rawBatch.takeIf { it != original.batch && !(it.isEmpty() && original.batch == null) }
-        if (batch != null && batch.length > 120) error("batch")
-        fun choice(spinner: Spinner, codesId: Int, originalValue: String?): String? {
-            val code = resources.getStringArray(codesId)[spinner.selectedItemPosition]
-            return code.takeIf { it.isNotEmpty() && it != originalValue }
-        }
-        val request = StockProductUpdateRequest(name = name, quantity = quantity, initialQuantity = initial,
-            minimalQuantity = minimum, expireDate = date, batch = batch,
-            category = choice(category, R.array.inventory_category_codes, original.category ?: original.product?.category),
-            storagePlace = choice(place, R.array.inventory_place_codes, original.product?.storagePlace))
-        if (invalid) return
-        if (listOf(request.name, request.quantity, request.initialQuantity, request.minimalQuantity,
-                request.expireDate, request.batch, request.category, request.storagePlace).all { it == null }) {
-            findViewById<TextView>(R.id.lotStatus).setText(R.string.lot_no_changes)
+        if (!session.isLoggedIn) {
+            openLogin()
             return
         }
-        model.save(lotId, request)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setContentView(R.layout.activity_editar_alimento)
+
+        repository = StockRepository(this)
+        @Suppress("DEPRECATION")
+        item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
+
+        imgEditarAlimento = findViewById(R.id.imgEditarAlimento)
+        etNome = findViewById(R.id.etNomeAlimento)
+        etValidade = findViewById(R.id.etValidade)
+        etQuantidade = findViewById(R.id.etQuantidadeTotal)
+        etObservacoes = findViewById(R.id.etObservacoesAlimento)
+        spinnerLocal = findViewById(R.id.spinnerLocal)
+        spinnerCategoria = findViewById(R.id.spinnerCategoria)
+        spinnerUnidade = findViewById(R.id.spinnerUnidade)
+        btnSalvar = findViewById(R.id.btnSalvarAlteracoes)
+        progressSalvar = findViewById(R.id.progressSalvarAlteracoes)
+
+        findViewById<View>(R.id.btnVoltar).setOnClickListener {
+            finish()
+        }
+
+        // Permitir editar imagem pelo botão de câmera ou tocando na foto
+        findViewById<View>(R.id.btnEditarFotoAlimento)?.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+        findViewById<View>(R.id.layoutFotoEditarAlimento)?.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
+        // DatePicker para o campo Validade (somente data de hoje para frente)
+        etValidade.setOnClickListener {
+            abrirDatePickerValidade()
+        }
+
+        configurarSpinners()
+        preencherDados()
+
+        btnSalvar.setOnClickListener {
+            salvarAlteracoes()
+        }
+    }
+
+    private fun abrirDatePickerValidade() {
+        val calendar = Calendar.getInstance()
+        val textoAtual = etValidade.text.toString().trim()
+
+        if (textoAtual.isNotEmpty()) {
+            try {
+                if (textoAtual.contains("/")) {
+                    val partes = textoAtual.split("/")
+                    if (partes.size == 3) {
+                        calendar.set(Calendar.DAY_OF_MONTH, partes[0].toInt())
+                        calendar.set(Calendar.MONTH, partes[1].toInt() - 1)
+                        calendar.set(Calendar.YEAR, partes[2].toInt())
+                    }
+                } else if (textoAtual.contains("-")) {
+                    val partes = textoAtual.split("-")
+                    if (partes.size == 3) {
+                        calendar.set(Calendar.YEAR, partes[0].toInt())
+                        calendar.set(Calendar.MONTH, partes[1].toInt() - 1)
+                        calendar.set(Calendar.DAY_OF_MONTH, partes[2].toInt())
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+
+        val datePicker = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val formatado = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year)
+                etValidade.setText(formatado)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        // Limita a seleção estritamente da data de hoje para a frente
+        val hoje = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        datePicker.datePicker.minDate = hoje.timeInMillis
+        datePicker.show()
+    }
+
+    private fun configurarSpinners() {
+        spinnerLocal.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, locais)
+        spinnerUnidade.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, unidades)
+
+        // O usuário seleciona primeiro o local, e a categoria é atualizada com base no local escolhido
+        spinnerLocal.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                atualizarCategoriasPorLocal(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun atualizarCategoriasPorLocal(localIndex: Int, categoriaSelecionada: String? = null) {
+        val cats = when (localIndex) {
+            2 -> categoriasDespensa
+            1 -> categoriasFreezer
+            else -> categoriasGeladeira
+        }
+        val currentCategory = categoriaSelecionada ?: spinnerCategoria.selectedItem?.toString()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, cats)
+        spinnerCategoria.adapter = adapter
+
+        val index = if (currentCategory != null && cats.contains(currentCategory)) {
+            cats.indexOf(currentCategory)
+        } else {
+            0
+        }
+        spinnerCategoria.setSelection(index)
+    }
+
+    private fun preencherDados() {
+        val prod = item ?: return
+
+        val prodId = prod.id ?: 0
+        val currentQty = prod.quantity ?: 0
+        if (prodId > 0 && currentQty > 0) {
+            StockQuantityTracker.getOrSetInitialQuantity(this, prodId, currentQty)
+        }
+
+        val trackedName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
+        etNome.setText(trackedName ?: prod.product?.name ?: "")
+        etValidade.setText(formatarDataBr(prod.expireDate))
+        etQuantidade.setText(currentQty.takeIf { it > 0 }?.toString() ?: "1")
+
+        // Recupera observação salva se houver
+        if (prodId > 0) {
+            val savedObs = StockObservationsTracker.getObservation(this, prodId)
+            etObservacoes.setText(savedObs ?: "")
+        }
+
+        // 1. Configura Local
+        val rawPlace = (prod.storagePlace ?: prod.product?.storagePlace ?: "").uppercase()
+        val localIndex = when (rawPlace) {
+            "FREEZER" -> 1
+            "PANTRY", "DESPENSA" -> 2
+            else -> 0
+        }
+        spinnerLocal.setSelection(localIndex)
+
+        // 2. Configura Categoria adaptada ao local
+        val catName = when (prod.category ?: prod.product?.category) {
+            "MEAT" -> "Carnes"
+            "DAIRY" -> "Laticínios"
+            "FRUIT", "VEGETABLE" -> "Hortifruti"
+            "BEVERAGE" -> "Bebidas"
+            "GRAIN" -> "Grãos"
+            else -> "Carnes"
+        }
+        atualizarCategoriasPorLocal(localIndex, catName)
+
+        val unitIndex = when (prod.product?.unitOfMeasure) {
+            "GRAM" -> 0
+            "KILOGRAM" -> 1
+            "LITER" -> 2
+            "MILLILITER" -> 3
+            else -> 4
+        }
+        spinnerUnidade.setSelection(unitIndex)
+
+        // Foto do alimento (customizada pelo usuário ou padrão da categoria)
+        carregarFotoAlimento(prod)
+    }
+
+    private fun carregarFotoAlimento(prod: StockProductResponse) {
+        val prodId = prod.id ?: 0
+        val customUriStr = ProductImageTracker.getImageUri(this, prodId)
+
+        if (!customUriStr.isNullOrBlank()) {
+            try {
+                imgEditarAlimento.setPadding(0, 0, 0, 0)
+                imgEditarAlimento.clearColorFilter()
+                imgEditarAlimento.scaleType = ImageView.ScaleType.CENTER_CROP
+                imgEditarAlimento.setImageURI(Uri.parse(customUriStr))
+                return
+            } catch (_: Exception) {}
+        }
+
+        val displayName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(
+            displayName ?: prod.product?.name,
+            prod.category ?: prod.product?.category
+        )
+        imgEditarAlimento.setPadding(0, 0, 0, 0)
+        imgEditarAlimento.clearColorFilter()
+        if (imgRes == R.drawable.img_frango) {
+            imgEditarAlimento.scaleType = ImageView.ScaleType.CENTER_CROP
+        } else {
+            imgEditarAlimento.scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        imgEditarAlimento.setImageResource(imgRes)
+    }
+
+    private fun formatarDataBr(dataStr: String?): String {
+        if (dataStr.isNullOrBlank()) return ""
+        val trimmed = dataStr.trim()
+        if (trimmed.matches(Regex("""^\d{4}-\d{2}-\d{2}$"""))) {
+            val p = trimmed.split("-")
+            return "${p[2]}/${p[1]}/${p[0]}"
+        }
+        return trimmed
+    }
+
+    private fun salvarAlteracoes() {
+        val prodId = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { salvarAlteracoes() }) return
+
+        val novoNome = etNome.text.toString().trim()
+        if (novoNome.isEmpty()) {
+            etNome.error = "Informe o nome do alimento"
+            etNome.requestFocus()
+            return
+        }
+
+        val novaQtd = etQuantidade.text.toString().toIntOrNull()
+        if (novaQtd == null || novaQtd <= 0) {
+            etQuantidade.error = "Informe uma quantidade válida"
+            etQuantidade.requestFocus()
+            return
+        }
+
+        val novaValidade = etValidade.text.toString().trim()
+        val localSelecionado = when (spinnerLocal.selectedItemPosition) {
+            1 -> "FREEZER"
+            2 -> "PANTRY"
+            else -> "FRIDGE"
+        }
+
+        val categoriaCodigo = when (spinnerCategoria.selectedItem?.toString()) {
+            "Carnes" -> "MEAT"
+            "Laticínios" -> "DAIRY"
+            "Hortifruti" -> "VEGETABLE"
+            "Bebidas" -> "BEVERAGE"
+            "Grãos" -> "GRAIN"
+            else -> null
+        }
+
+        val observacoes = etObservacoes.text.toString().trim()
+
+        // Ativa estado de carregamento no botão
+        btnSalvar.isEnabled = false
+        btnSalvar.text = ""
+        progressSalvar.visibility = View.VISIBLE
+
+        lifecycleScope.launch {
+            try {
+                repository.updateStockProduct(
+                    id = prodId,
+                    request = com.example.frigus_mobile.data.model.StockProductUpdateRequest(
+                        name = novoNome,
+                        category = categoriaCodigo,
+                        quantity = novaQtd,
+                        expireDate = novaValidade.takeIf(String::isNotBlank)?.let(StockRepository::isoDate),
+                        storagePlace = localSelecionado
+                    )
+                )
+
+                // Salva nome rastreado localmente para persistência imediata
+                ProductNameTracker.setName(this@EditarAlimentoActivity, prodId, novoNome)
+
+                // Salva observações localmente
+                StockObservationsTracker.setObservation(this@EditarAlimentoActivity, prodId, observacoes)
+
+                // Salva foto personalizada caso o usuário tenha escolhido uma nova
+                customImageUri?.let { uri ->
+                    ProductImageTracker.setImageUri(this@EditarAlimentoActivity, prodId, uri.toString())
+                }
+
+                Toast.makeText(this@EditarAlimentoActivity, "Alimento atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                btnSalvar.isEnabled = true
+                btnSalvar.text = getString(R.string.stock_save_changes)
+                progressSalvar.visibility = View.GONE
+
+                NetworkGuard.showBlockingError(this@EditarAlimentoActivity, e.message) {
+                    salvarAlteracoes()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         if (::session.isInitialized && !session.isLoggedIn) openLogin()
     }
-    override fun finish() {
-        if (::model.isInitialized && model.requiresRefreshOnExit) setResult(RESULT_OK)
-        super.finish()
-    }
 
     private fun openLogin() {
-        if (leaving) return
-        leaving = true
         startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
         finish()
     }

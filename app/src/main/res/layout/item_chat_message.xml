@@ -1,21 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layoutMessageRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:orientation="vertical">
+    android:layout_marginBottom="@dimen/ai_space_12"
+    android:gravity="top"
+    android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tvChatMessage"
-        android:layout_width="wrap_content"
+    <!-- Transparent mascot inherits the exact chat background. -->
+    <ImageView
+        android:id="@+id/aiMessageAvatar"
+        android:layout_width="@dimen/ai_chat_avatar_size"
+        android:layout_height="@dimen/ai_chat_avatar_size"
+        android:layout_marginEnd="@dimen/ai_space_8"
+        android:background="@drawable/bg_ai_chat_avatar"
+        android:padding="0dp"
+        android:contentDescription="@string/ai_chat_avatar"
+        android:src="@drawable/frigulino"
+        android:scaleType="fitCenter" />
+
+    <LinearLayout
+        android:id="@+id/chatBubbleColumn"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxWidth="280dp"
-        android:fontFamily="@font/sarabun"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        android:text="Mensagem"
-        android:textColor="@color/color_text_primary"
-        android:textSize="14sp" />
-
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tvChatMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/ai_chat_message_width"
+            android:fontFamily="@font/sarabun"
+            android:paddingHorizontal="@dimen/ai_space_16"
+            android:paddingVertical="@dimen/ai_space_12"
+            android:textIsSelectable="true"
+            android:textColor="@color/color_text_primary"
+            android:textSize="@dimen/ai_chat_text_14" />
+        <TextView
+            android:id="@+id/chatDeliveryStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ai_space_4"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/ai_subtitle"
+            android:textSize="@dimen/ai_text_12"
+            android:visibility="gone" />
+    </LinearLayout>
 </LinearLayout>

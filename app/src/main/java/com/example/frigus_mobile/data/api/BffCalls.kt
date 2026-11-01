@@ -19,10 +19,8 @@ fun <T> Call<T>.requireBody(): T {
 
 fun <T> Call<T>.requireCreatedBody(): T {
     val response = execute()
-    if (response.code() != 201) {
-        if (!response.isSuccessful) throw response.failure()
-        throw InvalidBffResponseException()
-    }
+    if (!response.isSuccessful) throw response.failure()
+    if (response.code() != 201) throw InvalidBffResponseException()
     return response.body() ?: throw InvalidBffResponseException()
 }
 

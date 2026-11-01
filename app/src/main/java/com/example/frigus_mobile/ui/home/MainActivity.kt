@@ -1,4 +1,4 @@
-package com.example.frigus_mobile.ui.home
+﻿package com.example.frigus_mobile.ui.home
 
 import android.Manifest
 import android.content.Intent
@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -31,16 +30,34 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private val subscriptionModel by lazy {
+        ViewModelProvider(this, com.example.frigus_mobile.ui.profile.SubscriptionViewModel.Factory(this))[
+            com.example.frigus_mobile.ui.profile.SubscriptionViewModel::class.java]
+    }
     private lateinit var session: SessionManager
     private lateinit var navigation: BottomNavigationView
     private var leaving = false
     private var signingOut = false
     private var unavailableTitle = 0
     private var pendingNavigation: Bundle? = null
+    private val tabHistory = mutableListOf<Int>()
+    private var isNavigatingBack = false
+    private var shoppingInventoryRevision = 0L
     private val backToHome = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             if (supportFragmentManager.backStackEntryCount > 0) supportFragmentManager.popBackStack()
-            else showHome()
+            else if (tabHistory.size > 1) {
+                tabHistory.removeAt(tabHistory.lastIndex)
+                isNavigatingBack = true
+                navigation.selectedItemId = tabHistory.last()
+                isNavigatingBack = false
+            } else {
+                tabHistory.clear()
+                tabHistory.add(R.id.nav_home)
+                isNavigatingBack = true
+                showHome()
+                isNavigatingBack = false
+            }
         }
     }
     private val stockLotResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -77,48 +94,78 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
         ViewCompat.requestApplyInsets(findViewById(R.id.main))
-        findViewById<TextView>(R.id.sessionIdentity).text = session.userName ?: session.userEmail.orEmpty()
-        findViewById<View>(R.id.btnSessionNotifications).setOnClickListener { openNotifications() }
         findViewById<View>(R.id.btnEnablePush).setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-        findViewById<View>(R.id.btnSessionLogout).setOnClickListener { signOut() }
         SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
         onBackPressedDispatcher.addCallback(this, backToHome)
 
         navigation = findViewById(R.id.bottom_navigation)
-        navigation.setOnItemSelectedListener { openTab(it.itemId); true }
+        supportFragmentManager.registerFragmentLifecycleCallbacks(object : androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+            override fun onFragmentResumed(manager: androidx.fragment.app.FragmentManager, fragment: androidx.fragment.app.Fragment) {
+                navigation.visibility = if (fragment is com.example.frigus_mobile.ui.profile.GerenciarPlanoFragment ||
+                    fragment is com.example.frigus_mobile.ui.profile.AlterarPlanoFragment) View.GONE else View.VISIBLE
+            }
+        }, false)
+        navigation.setOnItemSelectedListener {
+            if (!isNavigatingBack) {
+                tabHistory.remove(it.itemId)
+                tabHistory.add(it.itemId)
+            }
+            openTab(it.itemId)
+            true
+        }
         navigation.setOnItemReselectedListener { openTab(it.itemId) }
         ViewModelProvider(this)[InventoryViewModel::class.java].restoreNavigationState(navigationState?.getBundle(INVENTORY_NAVIGATION))
+        subscriptionModel.restoreNavigationState(navigationState?.getBundle(SUBSCRIPTION_NAVIGATION))
+        subscriptionModel.state.observe(this) {
+            if (session.isLoggedIn && subscriptionModel.consumeInventoryContextChange()) {
+                ViewModelProvider(this)[HomeViewModel::class.java].apply {
+                    invalidate()
+                    if (supportFragmentManager.findFragmentById(R.id.fragment_container) is HomeFragment)
+                        loadIfNeeded()
+                }
+                ViewModelProvider(this)[InventoryViewModel::class.java].refresh()
+                ViewModelProvider(this)[com.example.frigus_mobile.ui.recipes.RecipesViewModel::class.java].refreshSuggestions()
+            }
+        }
+        ViewModelProvider(this)[com.example.frigus_mobile.ui.shopping.ShoppingListViewModel::class.java].state.observe(this) { state ->
+            if (session.isLoggedIn && state.inventoryRevision > shoppingInventoryRevision) {
+                shoppingInventoryRevision = state.inventoryRevision
+                ViewModelProvider(this)[HomeViewModel::class.java].invalidate()
+                ViewModelProvider(this)[InventoryViewModel::class.java].refresh()
+                ViewModelProvider(this)[com.example.frigus_mobile.ui.recipes.RecipesViewModel::class.java].refreshSuggestions()
+            }
+        }
         val selected = navigationState?.getInt(SELECTED_TAB) ?: R.id.nav_home
-        val validSelected = if (navigation.menu.findItem(selected) != null) selected else R.id.nav_home
-        navigation.menu.findItem(validSelected).isChecked = true
-        val pendingTitle = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
-        if (pendingTitle != 0) showUnavailable(pendingTitle) else openTab(validSelected)
-        if (validSelected == R.id.nav_perfil) {
+        tabHistory.addAll(navigationState?.getIntArray(TAB_HISTORY)?.toList().orEmpty())
+        if (tabHistory.isEmpty()) tabHistory.add(R.id.nav_home)
+        if (tabHistory.last() != selected) { tabHistory.remove(selected); tabHistory.add(selected) }
+        val unavailable = navigationState?.getInt(UNAVAILABLE_TITLE) ?: 0
+        navigation.menu.findItem(selected)?.isChecked = true
+        if (unavailable != 0) showUnavailable(unavailable)
+        else openTab(selected)
+        if (unavailable == 0 && (selected == R.id.nav_perfil ||
+                navigationState?.getString(PROFILE_SECTION) == "money_saving")) {
             val section = when (navigationState?.getString(PROFILE_SECTION)) {
                 "subscription" -> com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment()
-                "money-saving" -> com.example.frigus_mobile.ui.profile.MoneySavingFragment()
+                "subscription_manage" -> com.example.frigus_mobile.ui.profile.GerenciarPlanoFragment()
+                "subscription_plans" -> com.example.frigus_mobile.ui.profile.AlterarPlanoFragment()
+                "subscription_group" -> com.example.frigus_mobile.ui.profile.MeuGrupoFragment()
+                "subscription_history" -> com.example.frigus_mobile.ui.profile.HistoricoCobrancasFragment()
+                "money_saving" -> com.example.frigus_mobile.ui.profile.MoneySavingFragment()
+                "profile_data" -> com.example.frigus_mobile.ui.profile.MeusDadosFragment()
                 else -> null
             }
-            section?.let {
-                supportFragmentManager.beginTransaction().replace(R.id.fragment_container, it)
-                    .addToBackStack(null).commit()
-            }
+            section?.let { supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, it).addToBackStack(null).commit() }
         }
         consumeReceiptImport(intent)
-
+        if (PushNotifications.shouldOpenCenter(intent)) openNotifications()
         updatePermissionAction()
-        if (PushNotifications.shouldOpenCenter(intent)) {
-            intent.removeExtra(PushNotifications.EXTRA_OPEN_NOTIFICATIONS)
-            openNotifications()
-        }
     }
-
-    fun selectTab(id: Int) { navigation.selectedItemId = id }
-    fun showHome() { selectTab(R.id.nav_home) }
 
     fun openInventory(storagePlace: String? = null, showAllStatusesNotice: Boolean = false) {
         if (!session.isLoggedIn) return
@@ -132,23 +179,42 @@ class MainActivity : AppCompatActivity() {
             .putExtra(AlimentoDetalhesActivity.EXTRA_LOT_ID, id))
     }
 
-    private fun openTab(id: Int) {
+    fun selectTab(tabId: Int) {
+        if (!::navigation.isInitialized) return
+        navigation.selectedItemId = tabId
+    }
+
+    fun showHome() {
+        unavailableTitle = 0
+        backToHome.isEnabled = false
+        if (::navigation.isInitialized && navigation.selectedItemId != R.id.nav_home) {
+            navigation.selectedItemId = R.id.nav_home
+        } else {
+            openTab(R.id.nav_home)
+        }
+    }
+
+    private fun openTab(tabId: Int) {
         if (supportFragmentManager.backStackEntryCount > 0)
             supportFragmentManager.popBackStackImmediate(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        val title = when (id) {
-
-            R.id.nav_lista -> R.string.home_shopping_list
-
-            else -> 0
+        unavailableTitle = 0
+        backToHome.isEnabled = tabId != R.id.nav_home || tabHistory.size > 1
+        val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        val shouldReplace = when (tabId) {
+            R.id.nav_home -> current !is HomeFragment
+            R.id.nav_estoque -> current !is EstoqueFragment
+            R.id.nav_receitas -> current !is ReceitasFragment
+            R.id.nav_perfil -> current !is PerfilFragment
+            R.id.nav_lista -> current !is com.example.frigus_mobile.ui.shopping.ShoppingListFragment
+            else -> true
         }
-        if (title != 0) showUnavailable(title)
-        else {
-            unavailableTitle = 0
-            backToHome.isEnabled = id == R.id.nav_estoque || id == R.id.nav_receitas || id == R.id.nav_perfil
-            val fragment = when (id) {
+        if (shouldReplace) {
+            val fragment = when (tabId) {
+                R.id.nav_home -> HomeFragment()
                 R.id.nav_estoque -> EstoqueFragment()
                 R.id.nav_receitas -> ReceitasFragment()
                 R.id.nav_perfil -> PerfilFragment()
+                R.id.nav_lista -> com.example.frigus_mobile.ui.shopping.ShoppingListFragment()
                 else -> HomeFragment()
             }
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
@@ -165,11 +231,18 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         if (::navigation.isInitialized) outState.putInt(SELECTED_TAB, navigation.selectedItemId)
         outState.putInt(UNAVAILABLE_TITLE, unavailableTitle)
+        outState.putIntArray(TAB_HISTORY, tabHistory.toIntArray())
         when (supportFragmentManager.findFragmentById(R.id.fragment_container)) {
             is com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment -> outState.putString(PROFILE_SECTION, "subscription")
-            is com.example.frigus_mobile.ui.profile.MoneySavingFragment -> outState.putString(PROFILE_SECTION, "money-saving")
+            is com.example.frigus_mobile.ui.profile.GerenciarPlanoFragment -> outState.putString(PROFILE_SECTION, "subscription_manage")
+            is com.example.frigus_mobile.ui.profile.AlterarPlanoFragment -> outState.putString(PROFILE_SECTION, "subscription_plans")
+            is com.example.frigus_mobile.ui.profile.MeuGrupoFragment -> outState.putString(PROFILE_SECTION, "subscription_group")
+            is com.example.frigus_mobile.ui.profile.HistoricoCobrancasFragment -> outState.putString(PROFILE_SECTION, "subscription_history")
+            is com.example.frigus_mobile.ui.profile.MoneySavingFragment -> outState.putString(PROFILE_SECTION, "money_saving")
+            is com.example.frigus_mobile.ui.profile.MeusDadosFragment -> outState.putString(PROFILE_SECTION, "profile_data")
         }
         if (::navigation.isInitialized) outState.putBundle(INVENTORY_NAVIGATION, ViewModelProvider(this)[InventoryViewModel::class.java].saveNavigationState())
+        if (::navigation.isInitialized) outState.putBundle(SUBSCRIPTION_NAVIGATION, subscriptionModel.saveNavigationState())
         outState.putBundle(ACTIVITY_RESULTS, Bundle().also(activityResultRegistry::onSaveInstanceState))
         super.onSaveInstanceState(outState)
     }
@@ -197,15 +270,9 @@ class MainActivity : AppCompatActivity() {
         navigation.selectedItemId = R.id.nav_estoque
     }
 
-    fun refreshSessionIdentity() {
-        if (!session.isLoggedIn || leaving) return
-        findViewById<TextView>(R.id.sessionIdentity).text = session.userName ?: session.userEmail.orEmpty()
-    }
-
     fun signOut() {
         if (signingOut || leaving || !session.isLoggedIn) return
         signingOut = true
-        findViewById<View>(R.id.btnSessionLogout).isEnabled = false
         lifecycleScope.launch {
             try {
                 PushRegistration.unregister(this@MainActivity)
@@ -235,12 +302,15 @@ class MainActivity : AppCompatActivity() {
             val tab = source.getInt(SELECTED_TAB, R.id.nav_home)
             val safeTabs = setOf(R.id.nav_home, R.id.nav_estoque, R.id.nav_receitas, R.id.nav_lista, R.id.nav_perfil)
             putInt(SELECTED_TAB, tab.takeIf { it in safeTabs } ?: R.id.nav_home)
+            putIntArray(TAB_HISTORY, source.getIntArray(TAB_HISTORY)?.filter { it in safeTabs }?.distinct()?.toIntArray())
             val title = source.getInt(UNAVAILABLE_TITLE)
             val safeTitles = setOf(R.string.home_recipes, R.string.home_shopping_list, R.string.home_profile,
                 R.string.home_conversations, R.string.home_qr, R.string.home_ai)
             putInt(UNAVAILABLE_TITLE, title.takeIf { it in safeTitles } ?: 0)
             putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
-            source.getString(PROFILE_SECTION)?.takeIf { it in setOf("subscription", "money-saving") }
+            putBundle(SUBSCRIPTION_NAVIGATION, source.getBundle(SUBSCRIPTION_NAVIGATION))
+            source.getString(PROFILE_SECTION)?.takeIf { it in setOf("subscription", "subscription_manage",
+                "subscription_plans", "subscription_group", "subscription_history", "money_saving", "profile_data") }
                 ?.let { putString(PROFILE_SECTION, it) }
         }
     }
@@ -268,5 +338,7 @@ class MainActivity : AppCompatActivity() {
         private const val SELECTED_TAB = "selected_tab"
         private const val UNAVAILABLE_TITLE = "unavailable_title"
         private const val PROFILE_SECTION = "profile_section"
+        private const val SUBSCRIPTION_NAVIGATION = "subscription_navigation"
+        private const val TAB_HISTORY = "tab_history"
     }
 }

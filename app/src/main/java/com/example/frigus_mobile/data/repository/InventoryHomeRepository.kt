@@ -13,15 +13,16 @@ import com.google.gson.JsonParseException
 import com.google.gson.stream.MalformedJsonException
 
 class InventoryHomeRepository(private val api: StockApiService = RetrofitClient.stockService) {
-    fun load(result: (InventoryHomeResponse?, ApiError?) -> Unit): Call<InventoryHomeResponse> {
-        val call = api.getInventoryHome()
+    fun load(groupId: String? = null, result: (InventoryHomeResponse?, ApiError?) -> Unit): Call<InventoryHomeResponse> {
+        val call = api.getInventoryHome(groupId)
         call.enqueue(object : Callback<InventoryHomeResponse> {
             override fun onResponse(call: Call<InventoryHomeResponse>, response: Response<InventoryHomeResponse>) {
                 if (call.isCanceled) return
                 val body = response.body()
                 when {
                     response.code() != 200 -> result(null, ApiError.parse(response))
-                    body == null || !valid(body) -> result(null, ApiError(code = "INVALID_RESPONSE"))
+                    body == null || !valid(body) || (groupId != null && body.groupId != groupId) ->
+                        result(null, ApiError(code = "INVALID_RESPONSE"))
                     else -> result(body, null)
                 }
             }

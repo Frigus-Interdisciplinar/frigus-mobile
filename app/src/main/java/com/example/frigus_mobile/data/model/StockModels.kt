@@ -80,6 +80,9 @@ data class StockProductResponse(
     @SerializedName("category")
     var category: String? = null,
 
+    @SerializedName("storagePlace")
+    var storagePlace: String? = null,
+
     @SerializedName("batch")
     val batch: String? = null
 ) : Serializable

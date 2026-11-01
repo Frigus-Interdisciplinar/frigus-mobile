@@ -1,6 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="money_saving_title">MoneySaving</string>
-    <string name="money_saving_faq">O MoneySaving mostra gastos, economia e perdas confirmados pelo servidor para grupos cujo plano ativo inclui o recurso. Valores sem confirmação aparecem separados no histórico.</string>
-    <string name="money_saving_access_denied">Verifique se seu plano inclui MoneySaving e se você tem acesso ao grupo selecionado.</string>
+    <string name="money_saving_back">Voltar</string>
+    <string name="money_saving_info">Informações</string>
+    <string name="money_saving_overview">Visão geral</string>
+    <string name="money_saving_month_summary">Resumo do mês</string>
+    <string name="money_saving_current_month">Mês atual</string>
+    <string name="money_saving_saving">Economia obtida</string>
+    <string name="money_saving_spending">Gasto com alimentação</string>
+    <string name="money_saving_loss">Desperdício (perdas)</string>
+    <string name="money_saving_comparison">Comparação com mês anterior</string>
+    <string name="money_saving_evolution">Evolução da economia</string>
+    <string name="money_saving_recent_months">Histórico mensal confirmado</string>
+    <string name="money_saving_shortcuts">Acesso rápido</string>
+    <string name="money_saving_purchases">Gastos com alimentação</string>
+    <string name="money_saving_waste">Economia e desperdício</string>
+    <string name="money_saving_history">Histórico financeiro</string>
+    <string name="money_saving_calculation">Como os valores são calculados</string>
+    <string name="money_saving_explanation">Gastos somam quantidade × preço unitário das compras financeiras confirmadas do grupo. Economia soma o custo confirmado dos alimentos consumidos até o dia da validade. Perdas somam o custo confirmado dos descartes com motivo Vencido feitos após a validade. Ter alimentos no estoque, ou apenas vencidos, não comprova economia ou perda. Saídas sem custo confirmado ficam fora dos valores; outras saídas podem aparecer no histórico sem compor as métricas. Os filtros de categoria e tipo afetam o histórico; o resumo mostra o mês completo.</string>
+    <string name="money_saving_close">Entendi</string>
+    <string name="money_saving_unknown">Valor não confirmado</string>
+    <string name="money_saving_not_informed">Não informado</string>
+    <string name="money_saving_loading">Carregando dados do grupo…</string>
+    <string name="money_saving_no_confirmed_values">Sem valores financeiros confirmados neste período.</string>
+    <string name="money_saving_access_denied">Seu plano ou sua permissão não permite acessar o MoneySaving deste grupo.</string>
+    <string name="money_saving_upgrade_plan">Ver planos com MoneySaving</string>
+    <string name="money_saving_network_error">Não foi possível conectar. Verifique sua conexão e atualize os dados.</string>
+    <string name="money_saving_invalid_response">Não foi possível confirmar os dados recebidos. Tente atualizar.</string>
+    <string name="money_saving_load_error">Não foi possível carregar o MoneySaving. Tente atualizar.</string>
+    <string name="money_saving_refresh">Atualizar dados</string>
+    <string name="money_saving_previous_month">Mês anterior</string>
+    <string name="money_saving_next_month">Próximo mês</string>
+    <string name="money_saving_category_filter">Categoria dos eventos</string>
+    <string name="money_saving_kind_filter">Tipo dos eventos</string>
+    <string name="money_saving_categories_title">Valores por categoria</string>
+    <string name="money_saving_events_title">Eventos do período</string>
+    <string name="money_saving_events_note">Os filtros abaixo afetam os eventos; os totais acima representam o mês completo.</string>
+    <string name="money_saving_more">Carregar mais eventos</string>
+    <string name="money_saving_empty_events">Nenhum evento para os filtros selecionados.</string>
+    <string name="money_saving_category">Categoria</string>
+    <string name="money_saving_event">Evento</string>
+    <string name="money_saving_product">Produto</string>
+    <string name="money_saving_spending_change">Variação dos gastos: %1$s%%</string>
+    <string name="money_saving_loss_actions">Ações de perda: %1$s</string>
+    <string name="money_saving_breakdown">%1$s\nGastos: %2$s · Economia: %3$s · Perdas: %4$s</string>
+    <string name="money_saving_event_row">%1$s · %2$s\n%3$s · %4$s %5$s · %6$s\n%7$s</string>
+    <string name="money_saving_included">Incluído nas métricas</string>
+    <string name="money_saving_excluded">Não incluído nas métricas</string>
+    <string-array name="money_saving_categories">
+        <item>Todas as categorias</item><item>Hortifruti</item><item>Carnes</item>
+        <item>Laticínios</item><item>Grãos</item><item>Bebidas</item>
+    </string-array>
+    <string-array name="money_saving_kinds">
+        <item>Todos os tipos</item><item>Compras</item><item>Consumo</item><item>Descarte</item>
+    </string-array>
+    <string-array name="money_saving_effects">
+        <item>Consumo e economia</item><item>Descarte e desperdício</item>
+    </string-array>
 </resources>

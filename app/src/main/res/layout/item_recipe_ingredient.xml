@@ -33,7 +33,7 @@
             android:layout_marginStart="10dp"
             android:fontFamily="@font/sarabun"
             android:textColor="@color/darkBlue"
-            android:textSize="@dimen/recipe_browser_body"
+            android:textSize="12sp"
             android:textStyle="bold"
             tools:text="500g" />
 
@@ -43,8 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:fontFamily="@font/sarabun"
-            android:textColor="@color/darkBlue"
-            android:textSize="@dimen/recipe_browser_body"
+            android:textColor="@color/gray"
+            android:textSize="12sp"
             tools:text="Peito de frango" />
     </LinearLayout>
 

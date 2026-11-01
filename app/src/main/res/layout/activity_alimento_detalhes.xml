@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_white"
-    android:id="@+id/lotDetailRoot"
+    android:fitsSystemWindows="true"
     android:fillViewport="true">
 
     <LinearLayout
@@ -24,8 +24,8 @@
 
             <ImageButton
                 android:id="@+id/btnVoltar"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -44,29 +44,6 @@
                 android:textStyle="bold" />
         </RelativeLayout>
 
-        <ProgressBar android:id="@+id/lotProgress"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" android:visibility="gone"
-            android:contentDescription="@string/inventory_loading" />
-        <TextView android:id="@+id/lotStatus"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue"
-            android:textSize="@dimen/inventory_body_size" android:accessibilityLiveRegion="polite" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/lotReload"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_gravity="end" android:text="@string/lot_reload" />
-        <TextView android:id="@+id/movementGlobalStatus"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun" android:accessibilityLiveRegion="polite"
-            android:textColor="@color/darkBlue" android:textSize="13sp"
-            android:visibility="gone" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/movementGlobalVerify"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:minHeight="48dp" android:text="@string/movement_verify"
-            android:visibility="gone" />
-        <LinearLayout android:id="@+id/lotContent"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:visibility="gone">
         <!-- Imagem do Alimento -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgDetalhesAlimento"
@@ -208,7 +185,40 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:fontFamily="@font/sarabun"
-                    tools:text="DD/MM/AAAA"
+                    tools:text="DD-MM-AAAA"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Preço unitário real: aquisição do lote ou catálogo identificado. -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:id="@+id/tvInfoPrecoRotulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/tvInfoPreco"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_detail_purchase_unit_price"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoPreco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
                     android:textColor="@color/darkBlue"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -275,150 +285,45 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </RelativeLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_minimum" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotMinimumValue" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_batch_label" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotBatchValue" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_unit_label" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotUnitValue" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_brand" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotBrandValue" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_status_label" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotProductStatus" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="@color/color_divider" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:paddingVertical="6dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:fontFamily="@font/sarabun"
-                    android:text="@string/lot_identity_label" android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp" />
-                <TextView android:id="@+id/lotIdentity" android:layout_width="0dp"
-                    android:layout_height="wrap_content" android:layout_weight="1"
-                    android:gravity="end" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/darkBlue" android:textSize="13sp" android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical">
+            <!-- Observações (se houver) -->
+            <LinearLayout
+                android:id="@+id/layoutInfoObservacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <TextView
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun" android:text="@string/movement_history"
-                android:textColor="@color/darkBlue" android:textSize="18sp" android:textStyle="bold" />
-            <TextView android:id="@+id/movementHistoryStatus"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
-                android:accessibilityLiveRegion="polite" android:textColor="@color/darkBlue"
-                android:textSize="13sp" />
-            <androidx.recyclerview.widget.RecyclerView android:id="@+id/movementHistoryList"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:nestedScrollingEnabled="false" />
-            <com.google.android.material.button.MaterialButton android:id="@+id/movementHistoryRetry"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:minHeight="48dp" android:text="@string/movement_retry" android:visibility="gone" />
-            <com.google.android.material.button.MaterialButton android:id="@+id/movementHistoryMore"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:minHeight="48dp" android:text="@string/movement_more" android:visibility="gone" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/color_divider" />
 
-            <TextView
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" android:fontFamily="@font/sarabun"
-                android:text="@string/movement_form_title" android:textColor="@color/darkBlue"
-                android:textSize="18sp" android:textStyle="bold" />
-            <TextView
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
-                android:text="@string/movement_type_label" android:textColor="@color/darkBlue"
-                android:textSize="13sp" />
-            <Spinner android:id="@+id/movementType"
-                android:layout_width="match_parent" android:layout_height="48dp"
-                android:entries="@array/movement_type_labels" />
-            <EditText android:id="@+id/movementQuantity"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:minHeight="48dp"
-                android:hint="@string/movement_quantity_hint" android:inputType="number"
-                android:singleLine="true" />
-            <EditText android:id="@+id/movementObservation"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:minHeight="48dp"
-                android:hint="@string/movement_observation_hint"
-                android:inputType="textCapSentences|textMultiLine" android:maxLength="2000" />
-            <com.google.android.material.button.MaterialButton android:id="@+id/movementSubmit"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" android:minHeight="48dp"
-                android:text="@string/movement_submit" />
-            <TextView android:id="@+id/movementMutationStatus"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun" android:accessibilityLiveRegion="polite"
-                android:textColor="@color/darkBlue" android:textSize="13sp" />
-            <com.google.android.material.button.MaterialButton android:id="@+id/movementVerify"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:minHeight="48dp" android:text="@string/movement_verify"
-                android:visibility="gone" />
-            <com.google.android.material.button.MaterialButton android:id="@+id/movementAcknowledge"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:minHeight="48dp" android:text="@string/movement_acknowledge"
-                android:visibility="gone" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="Observações"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvInfoObservacoes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:fontFamily="@font/sarabun"
+                        tools:text="Observação"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Spacer -->
@@ -461,6 +366,5 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>

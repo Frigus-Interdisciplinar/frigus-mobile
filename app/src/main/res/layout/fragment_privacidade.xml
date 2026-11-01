@@ -25,32 +25,6 @@
             android:paddingBottom="24dp">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp" android:fontFamily="@font/sarabun"
-            android:text="@string/settings_privacy_profile_section" android:textColor="@color/profile_primary"
-            android:textSize="15sp" android:textStyle="bold" />
-        <LinearLayout android:id="@+id/btnProfileVisibility"
-            android:layout_width="match_parent" android:layout_height="78dp"
-            android:layout_marginTop="16dp" android:orientation="horizontal"
-            android:gravity="center_vertical" android:paddingHorizontal="16dp"
-            android:background="@drawable/bg_settings_card"
-            android:clickable="true" android:focusable="true">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:orientation="vertical">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/settings_privacy_visibility"
-                    android:textColor="@color/darkBlue" android:textSize="15sp" />
-                <TextView android:id="@+id/tvProfileVisibility"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" android:fontFamily="@font/sarabun"
-                    android:textColor="@color/gray" android:textSize="12sp"
-                    tools:text="Apenas membros da família" />
-            </LinearLayout>
-            <ImageView android:layout_width="20dp" android:layout_height="20dp"
-                android:src="@drawable/ic_chevron_right" android:contentDescription="@null"
-                app:tint="@color/darkBlue" />
-        </LinearLayout>
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="40dp" android:fontFamily="@font/sarabun"
             android:text="@string/settings_privacy_data_section" android:textColor="@color/profile_primary"
             android:textSize="15sp" android:textStyle="bold" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

@@ -1,138 +1,141 @@
 package com.example.frigus_mobile.ui.profile
 
-import androidx.lifecycle.MutableLiveData
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.frigus_mobile.data.api.BffException
+import com.example.frigus_mobile.data.api.InvalidBffResponseException
+import com.example.frigus_mobile.data.local.SessionManager
+import com.example.frigus_mobile.data.model.ApiError
 import com.example.frigus_mobile.data.model.MoneySavingEvent
 import com.example.frigus_mobile.data.model.MoneySavingSummary
 import com.example.frigus_mobile.data.repository.MoneySavingRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.io.IOException
+import java.time.YearMonth
 
 data class MoneySavingState(
     val summary: MoneySavingSummary? = null,
     val events: List<MoneySavingEvent> = emptyList(),
-    val month: Calendar = Calendar.getInstance(),
+    val month: YearMonth = YearMonth.now(),
     val category: String? = null,
     val kind: String? = null,
     val page: Int = -1,
     val hasMore: Boolean = false,
     val loading: Boolean = false,
-    val error: String? = null
+    val error: ApiError? = null
 )
 
 class MoneySavingViewModel(
     private val repository: MoneySavingRepository,
-    private val accessDeniedMessage: String
+    private val session: SessionManager
 ) : ViewModel() {
-    val state = MutableLiveData(MoneySavingState())
+    private val mutableState = MutableLiveData(MoneySavingState())
+    val state: LiveData<MoneySavingState> = mutableState
     private var groupId: String? = null
-    private var busy = false
+    private var selectedGroupId: String? = null
+    private var generation: Long? = null
+    private var pending: Job? = null
+    private var requestId = 0L
 
-    fun load() {
-        if (busy) return
-        busy = true
-        state.value = state.value!!.copy(loading = true, error = null)
-        viewModelScope.launch {
-            try {
-                val group = repository.groupId().also { groupId = it }
-                val (from, to) = period()
-                val summary = repository.summary(group, from, to)
-                val page = repository.events(group, from, to, state.value?.category, state.value?.kind, 0)
-                require(page.content != null && page.number == 0)
-                state.value = state.value!!.copy(
-                    summary = summary, events = page.content, page = 0,
-                    hasMore = page.totalPages > 1
-                )
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (e: Exception) {
-                state.value = state.value!!.copy(error = userMessage(e, "Não foi possível carregar as métricas."))
-            } finally {
-                busy = false
-                state.value = state.value!!.copy(loading = false)
-            }
-        }
+    fun loadIfNeeded() {
+        if (generation != session.state.generation || selectedGroupId != session.activeGroupId ||
+            (state.value?.summary == null && state.value?.loading != true)) load()
     }
 
+    fun load() = request(false)
     fun nextPage() {
-        val current = state.value ?: return
-        val group = groupId ?: return
-        if (busy || !current.hasMore) return
-        busy = true
-        state.value = current.copy(loading = true, error = null)
-        viewModelScope.launch {
-            try {
-                val (from, to) = period()
-                val result = repository.events(group, from, to, current.category, current.kind, current.page + 1)
-                require(result.content != null && result.number == current.page + 1)
-                state.value = state.value!!.copy(
-                    events = current.events + result.content, page = result.number,
-                    hasMore = result.number + 1 < result.totalPages
-                )
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (e: Exception) {
-                state.value = state.value!!.copy(error = userMessage(e, "Não foi possível carregar mais eventos."))
-            } finally {
-                busy = false
-                state.value = state.value!!.copy(loading = false)
-            }
-        }
+        if (state.value?.hasMore == true && state.value?.error == null) request(true)
     }
 
     fun changeMonth(delta: Int) {
-        if (busy) return
-        val month = (state.value?.month?.clone() as? Calendar) ?: Calendar.getInstance()
-        month.add(Calendar.MONTH, delta)
-        state.value = state.value!!.copy(month = month, summary = null, events = emptyList(), page = -1, hasMore = false)
+        val current = state.value ?: return
+        if (current.loading) return
+        mutableState.value = current.copy(month = current.month.plusMonths(delta.toLong()), summary = null,
+            events = emptyList(), page = -1, hasMore = false)
         load()
     }
 
     fun filter(category: String?, kind: String?) {
-        if (busy) return
-        state.value = state.value!!.copy(category = category, kind = kind, events = emptyList(), page = -1, hasMore = false)
+        val current = state.value ?: return
+        if (current.loading || (category == current.category && kind == current.kind)) return
+        if (category !in CATEGORIES || kind !in KINDS) return
+        mutableState.value = current.copy(category = category, kind = kind, events = emptyList(), page = -1, hasMore = false)
         load()
     }
 
-    private fun period(): Pair<String, String> {
-        val start = (state.value!!.month.clone() as Calendar).apply {
-            set(Calendar.DAY_OF_MONTH, 1)
-        }
-        val end = (start.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
-        val format = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        return format.format(start.time) to format.format(end.time)
-    }
-
-    private fun userMessage(error: Exception, fallback: String): String {
-        if (error is BffException) {
-            val apiError = error.error
-            if (apiError.code == "MONEY_SAVING_PLAN_REQUIRED") return accessDeniedMessage
-            val status = apiError.status?.let { "HTTP $it" } ?: "HTTP desconhecido"
-            apiError.displayMessage?.takeIf { it.isNotBlank() }?.let { return "$it ($status)" }
-            apiError.message?.takeIf { it.isNotBlank() }?.let { message ->
-                val code = apiError.code?.takeIf { it.isNotBlank() }?.let { " · $it" }.orEmpty()
-                return "$message$code ($status)"
+    private fun request(append: Boolean) {
+        if (!session.isLoggedIn) return
+        val currentGeneration = session.state.generation
+        val currentGroup = session.activeGroupId
+        val sameSession = generation == currentGeneration && selectedGroupId == currentGroup
+        if (append && !sameSession) { load(); return }
+        if (sameSession && state.value?.loading == true) return
+        pending?.cancel()
+        generation = currentGeneration
+        selectedGroupId = currentGroup
+        val snapshot = if (sameSession) state.value!! else MoneySavingState()
+        val id = ++requestId
+        mutableState.value = snapshot.copy(loading = true, error = null)
+        fun active() = session.isLoggedIn && session.state.generation == currentGeneration &&
+            session.activeGroupId == currentGroup && requestId == id
+        pending = viewModelScope.launch {
+            try {
+                val group = if (append && sameSession) groupId ?: repository.groupId()
+                    else repository.groupId()
+                if (!active()) return@launch
+                groupId = group
+                val from = snapshot.month.atDay(1).toString()
+                val to = snapshot.month.plusMonths(1).atDay(1).toString()
+                if (!append) {
+                    val summary = repository.summary(group, from, to)
+                    if (!active()) return@launch
+                    mutableState.value = mutableState.value!!.copy(summary = summary)
+                }
+                val page = repository.events(group, from, to, snapshot.category, snapshot.kind,
+                    if (append) snapshot.page + 1 else 0)
+                if (!active()) return@launch
+                mutableState.value = mutableState.value!!.copy(
+                    events = (if (append) snapshot.events else emptyList()) + page.content.orEmpty(),
+                    page = page.number, hasMore = page.number + 1 < page.totalPages
+                )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (active()) {
+                    val failure = when (error) {
+                    is BffException -> error.error
+                    is InvalidBffResponseException -> ApiError(code = "INVALID_RESPONSE")
+                    is IOException -> ApiError(code = "NETWORK_ERROR")
+                    else -> ApiError(code = "INVALID_RESPONSE")
+                    }
+                    val current = mutableState.value!!
+                    mutableState.value = if (failure.status == 403) current.copy(error = failure,
+                        summary = null, events = emptyList(), page = -1, hasMore = false)
+                        else current.copy(error = failure)
+                }
+            } finally {
+                if (active()) mutableState.value = mutableState.value!!.copy(loading = false)
             }
-            apiError.code?.takeIf { it.isNotBlank() }?.let { return "$it ($status)" }
         }
-        return error.message?.takeIf { it.isNotBlank() } ?: fallback
     }
 
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(MoneySavingViewModel::class.java))
             @Suppress("UNCHECKED_CAST")
-            return MoneySavingViewModel(
-                MoneySavingRepository(com.example.frigus_mobile.data.local.SessionManager(context)),
-                context.getString(com.example.frigus_mobile.R.string.money_saving_access_denied)
-            ) as T
+            val session = SessionManager(context.applicationContext)
+            return MoneySavingViewModel(MoneySavingRepository(session), session) as T
         }
+    }
+
+    companion object {
+        val CATEGORIES = listOf(null, "HORTIFRUTI", "MEAT", "DAIRY", "GRAIN", "BEVERAGE")
+        val KINDS = listOf(null, "PURCHASE", "CONSUMED", "DISCARDED")
     }
 }

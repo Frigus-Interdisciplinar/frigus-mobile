@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shopping_unit_price_label">Preço unitário (R$) *</string>
+    <string name="shopping_unit_price_hint">Informe o preço pago por unidade</string>
+    <string name="shopping_transfer_question">Deseja adicionar “%1$s” ao estoque? Você também pode apenas marcar o item na lista.</string>
+    <string name="shopping_transfer_yes">Sim, adicionar ao estoque</string>
+    <string name="shopping_transfer_no">Não, apenas marcar</string>
+    <string name="shopping_grain_pantry">Grãos são armazenados somente na despensa.</string>
+    <string name="shopping_sync_pending">Salva no aparelho · sincronização pendente</string>
+    <string name="shopping_sync_pending_count">Salva no aparelho · %1$d alterações pendentes</string>
+    <string name="shopping_sync_sending">Salva no aparelho · sincronizando…</string>
+    <string name="shopping_sync_done">Lista sincronizada</string>
+    <string name="shopping_sync_auth">Salva no aparelho · autenticação da sincronização indisponível</string>
+    <string name="shopping_sync_error">Salva no aparelho · não foi possível sincronizar</string>
+    <string name="shopping_sync_retry">Sincronizar</string>
+    <string name="shopping_stock_sending">Há um envio ao estoque em andamento. Aguarde a confirmação antes de enviar outro alimento.</string>
+    <string name="shopping_unit_mismatch">Já existe um alimento com esse nome e outra unidade no catálogo. Edite a unidade do item para corresponder à cadastrada antes de enviar ao estoque.</string>
+    <string name="shopping_stock_selected">Estoque selecionado. Confirme novamente o envio do alimento.</string>
+    <string name="shopping_auth_required">A lista está disponível neste aparelho. Para enviar alimentos ao estoque, conecte-se à internet e valide sua sessão.</string>
+</resources>

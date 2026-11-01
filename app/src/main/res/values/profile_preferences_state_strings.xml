@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_food_local_intro">Suas escolhas ficam salvas para esta conta neste dispositivo e são usadas pelo assistente. O catálogo de receitas não é filtrado automaticamente.</string>
+    <string name="profile_food_save_failed">Não foi possível salvar a preferência neste dispositivo. Tente novamente.</string>
+    <string name="profile_food_assistant_context">Preferências alimentares informadas pela pessoa: %1$s. Considere essas escolhas ao sugerir receitas. Confira os ingredientes e não afirme que restrições foram garantidas sem informação suficiente.</string>
+</resources>

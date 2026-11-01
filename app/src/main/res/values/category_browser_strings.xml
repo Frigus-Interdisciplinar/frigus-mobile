@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="category_browser_back">Voltar</string>
+    <string name="category_browser_title">Todas as categorias</string>
+    <string name="category_browser_meat">Carnes</string>
+    <string name="category_browser_grains">Grãos</string>
+    <string name="category_browser_dairy">Laticínios</string>
+    <string name="category_browser_produce">Hortifruti</string>
+    <string name="category_browser_beverages">Bebidas</string>
+    <string name="category_browser_unknown">Não informado</string>
+    <string name="category_browser_empty">Nenhum alimento encontrado nesta categoria.</string>
+    <string name="category_browser_error">Não foi possível consultar as categorias. Toque para tentar novamente.</string>
+    <plurals name="category_browser_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d itens</item>
+    </plurals>
+</resources>

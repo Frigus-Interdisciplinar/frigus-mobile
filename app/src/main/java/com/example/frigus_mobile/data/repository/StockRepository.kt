@@ -32,13 +32,37 @@ class StockRepository(context: Context? = null) {
 
     /** M04 resolves the active group and its stocks on the BFF. */
     suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
-        val home = api.getInventoryHome().requireBody()
-        val stockId = home.stocks?.filterNotNull()?.firstOrNull()?.id
-        sessionManager?.saveActiveGroupAndStock(home.groupId, stockId)
-        stockId
+        val credential = sessionManager?.state?.credential()
+        val cachedStock = sessionManager?.activeStockId
+        val cachedGroup = sessionManager?.activeGroupId
+        if (cachedStock != null && cachedStock > 0 && !cachedGroup.isNullOrBlank()) {
+            return@withContext cachedStock
+        }
+        try {
+            val home = api.getInventoryHome(cachedGroup).requireBody()
+            if (sessionManager != null && (!sessionManager.isLoggedIn || sessionManager.state.credential() != credential ||
+                    sessionManager.activeGroupId != cachedGroup))
+                throw kotlinx.coroutines.CancellationException()
+            if (cachedGroup != null && home.groupId != cachedGroup)
+                throw com.example.frigus_mobile.data.api.InvalidBffResponseException()
+            val stockId = home.stocks?.filterNotNull()?.firstOrNull()?.id
+            sessionManager?.saveActiveGroupAndStock(home.groupId, stockId)
+            stockId
+        } catch (e: Exception) {
+            if (sessionManager?.state?.credential() == credential && sessionManager?.activeGroupId == cachedGroup)
+                sessionManager?.saveActiveGroupAndStock(null, null)
+            throw e
+        }
     }
 
-    /** Existing screens expect all products; M05 is paged across the active group. */
+    suspend fun getInventoryContext(): InventoryHomeResponse = withContext(Dispatchers.IO) {
+        val groupId = sessionManager?.activeGroupId
+        api.getInventoryHome(groupId).requireBody().also {
+            if (groupId != null && it.groupId != groupId)
+                throw com.example.frigus_mobile.data.api.InvalidBffResponseException()
+        }
+    }
+
     suspend fun getStockProducts(): List<StockProductResponse> = withContext(Dispatchers.IO) {
         val items = mutableListOf<StockProductResponse>()
         var page = 0
@@ -50,19 +74,6 @@ class StockRepository(context: Context? = null) {
             page++
         } while (page < totalPages)
         items
-    }
-
-    /** Reuse the M04 validation used by Home, without choosing or creating a stock. */
-    suspend fun getInventoryContext(): InventoryHomeResponse = suspendCancellableCoroutine { continuation ->
-        val call = InventoryHomeRepository().load { home, error ->
-            if (continuation.isActive) {
-                if (home != null) continuation.resume(home)
-                else continuation.resumeWithException(BffException(
-                    error ?: ApiError(code = "INVALID_RESPONSE"), ""
-                ))
-            }
-        }
-        continuation.invokeOnCancellation { call.cancel() }
     }
 
     suspend fun getProductsPage(

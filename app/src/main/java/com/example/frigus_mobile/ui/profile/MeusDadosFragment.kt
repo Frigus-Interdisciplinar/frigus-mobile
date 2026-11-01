@@ -1,95 +1,63 @@
 package com.example.frigus_mobile.ui.profile
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.utils.NetworkGuard
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-class MeusDadosFragment : Fragment() {
-
-    private lateinit var sessionManager: SessionManager
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_meus_dados, container, false)
-    }
-
+/** Read-only account screen recovered from a8ed829, using the shared M03 profile state. */
+class MeusDadosFragment : Fragment(R.layout.fragment_meus_dados) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        sessionManager = SessionManager(requireContext())
-        preencherCampos(view)
-
-        view.findViewById<View>(R.id.btnVoltar).setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
-        view.findViewById<View>(R.id.btnPrivacidade).setOnClickListener {
-            Toast.makeText(requireContext(), "Políticas de privacidade", Toast.LENGTH_SHORT).show()
-        }
-
+        val session = SessionManager(requireContext())
+        val model = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
+        configurarVoltar(view)
+        view.findViewById<View>(R.id.btnAtualizarMeusDados).setOnClickListener { model.reload() }
+        view.findViewById<View>(R.id.btnPrivacidade).setOnClickListener { abrirTela(PrivacidadeFragment()) }
         view.findViewById<View>(R.id.btnAlterarSenha).setOnClickListener {
-            Toast.makeText(requireContext(), "Alterar senha da conta", Toast.LENGTH_SHORT).show()
+            AlertDialog.Builder(requireContext()).setTitle(R.string.profile_change_password)
+                .setMessage(R.string.profile_password_not_integrated)
+                .setPositiveButton(android.R.string.ok, null).show()
         }
 
-        carregarDadosDaApi()
-    }
-
-    private fun preencherCampos(rootView: View) {
-        rootView.findViewById<TextView>(R.id.tvDadosNome)?.text = sessionManager.userName ?: "-"
-        rootView.findViewById<TextView>(R.id.tvDadosEmail)?.text = sessionManager.userEmail ?: "-"
-        rootView.findViewById<TextView>(R.id.tvDadosNascimento)?.text =
-            formatarDataIso(sessionManager.userBirthDate) ?: "-"
-        val tipo = when (sessionManager.userAccountType?.uppercase()) {
-            "DOMESTIC" -> "Doméstica"
-            "COMMERCIAL" -> "Comercial"
-            else -> sessionManager.userAccountType ?: "-"
-        }
-        rootView.findViewById<TextView>(R.id.tvDadosTipoConta)?.text = tipo
-    }
-
-    private fun carregarDadosDaApi() {
-        if (!NetworkGuard.ensureConnected(activity) { carregarDadosDaApi() }) return
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val profile = withContext(Dispatchers.IO) {
-                    val resp = RetrofitClient.authService.getProfile().execute()
-                    if (!resp.isSuccessful) {
-                        throw IOException("Não foi possível carregar seus dados na API (Código ${resp.code()}).")
-                    }
-                    resp.body()
+        fun render(state: ProfileUiState?) {
+            if (!session.isLoggedIn) return
+            val user = state?.user?.takeIf { it.id == session.userId } ?: session.state.user
+            fun value(text: String?) = text?.takeIf(String::isNotBlank) ?: getString(R.string.account_not_informed)
+            view.findViewById<TextView>(R.id.tvDadosNome).text = value(user?.name)
+            view.findViewById<TextView>(R.id.tvDadosEmail).text = value(user?.email)
+            view.findViewById<TextView>(R.id.tvDadosNascimento).text = user?.birthDate?.let { birthDate ->
+                runCatching { LocalDate.parse(birthDate).format(DateTimeFormatter.ofPattern("dd/MM/uuuu", Locale.ROOT)) }.getOrNull()
+            } ?: getString(R.string.account_not_informed)
+            view.findViewById<TextView>(R.id.tvDadosTipoConta).setText(when (user?.accountType?.uppercase(Locale.ROOT)) {
+                "DOMESTIC" -> R.string.account_domestic
+                "COMMERCIAL" -> R.string.account_commercial
+                else -> R.string.account_not_informed
+            })
+            view.findViewById<View>(R.id.btnAtualizarMeusDados).isEnabled = state?.loading != true
+            view.findViewById<TextView>(R.id.tvMeusDadosStatus).apply {
+                text = when {
+                    state?.loading == true -> getString(R.string.account_loading)
+                    state?.error != null -> state.error.userMessage(getString(when {
+                        state.error.status == 403 -> R.string.account_forbidden
+                        state.error.code == "NETWORK_ERROR" -> R.string.account_network_error
+                        state.error.code == "INVALID_RESPONSE" -> R.string.account_invalid_response
+                        else -> R.string.account_load_error
+                    }))
+                    else -> getString(R.string.account_read_only)
                 }
-                if (profile != null) {
-                    sessionManager.saveUserProfile(profile)
-                    view?.let { preencherCampos(it) }
-                }
-            } catch (e: Exception) {
-                NetworkGuard.showBlockingError(activity, e.message) {
-                    carregarDadosDaApi()
-                }
+                visibility = View.VISIBLE
             }
         }
-    }
-
-    private fun formatarDataIso(iso: String?): String? {
-        if (iso.isNullOrBlank() || iso.length < 10) return null
-        val parts = iso.substring(0, 10).split("-")
-        return if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else iso
+        render(model.state.value)
+        model.state.observe(viewLifecycleOwner, ::render)
+        model.loadIfNeeded()
     }
 }

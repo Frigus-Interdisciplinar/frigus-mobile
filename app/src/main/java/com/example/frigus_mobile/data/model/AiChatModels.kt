@@ -10,10 +10,16 @@ data class AiRecipeChatRequest(
     val stockId: Int,
 
     @SerializedName("sessionId")
-    val sessionId: String? = null
+    val sessionId: String? = null,
+
+    @SerializedName("foodPreferences")
+    val foodPreferences: List<String> = emptyList()
 )
 
 data class AiRecipeChatResponse(
+    @SerializedName("recipeIds")
+    val recipeIds: List<Int>? = null,
+
     @SerializedName("sessionId")
     val sessionId: String? = null,
 
@@ -55,5 +61,10 @@ data class ChatUiMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
     val text: String,
     val isUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val isLoading: Boolean = false,
+    val delivery: AiMessageDelivery? = null,
+    val reply: AiRecipeChatResponse? = null
 )
+
+enum class AiMessageDelivery { SENDING, CONFIRMED, UNCERTAIN, REJECTED }

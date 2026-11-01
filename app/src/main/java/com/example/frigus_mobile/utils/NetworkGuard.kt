@@ -5,6 +5,13 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 object NetworkGuard {
 
@@ -78,6 +85,39 @@ object NetworkGuard {
             false
         } else {
             true
+        }
+    }
+}
+
+fun AppCompatActivity.launchSafeNetwork(
+    onRetry: () -> Unit,
+    block: suspend CoroutineScope.() -> Unit
+): Job? {
+    if (!NetworkGuard.ensureConnected(this, onRetry)) return null
+    return lifecycleScope.launch {
+        try {
+            block()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            NetworkGuard.showBlockingError(this@launchSafeNetwork, error.message, onRetry)
+        }
+    }
+}
+
+fun Fragment.launchSafeNetwork(
+    onRetry: () -> Unit,
+    block: suspend CoroutineScope.() -> Unit
+): Job? {
+    val host = activity ?: return null
+    if (!NetworkGuard.ensureConnected(host, onRetry)) return null
+    return viewLifecycleOwner.lifecycleScope.launch {
+        try {
+            block()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            NetworkGuard.showBlockingError(activity, error.message, onRetry)
         }
     }
 }

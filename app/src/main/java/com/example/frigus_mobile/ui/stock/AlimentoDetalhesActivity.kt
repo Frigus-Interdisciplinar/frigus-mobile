@@ -3,271 +3,233 @@ package com.example.frigus_mobile.ui.stock
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.lifecycleScope
 import com.example.frigus_mobile.R
-import com.example.frigus_mobile.data.local.SessionManager
-import com.example.frigus_mobile.data.model.StockMovementRequest
-import com.example.frigus_mobile.ui.login.LoginActivity
-import com.example.frigus_mobile.ui.stock.adapter.StockMovementAdapter
-import java.text.NumberFormat
+import com.example.frigus_mobile.data.model.StockProductResponse
+import com.example.frigus_mobile.data.repository.StockRepository
+import com.example.frigus_mobile.utils.NetworkGuard
+import com.example.frigus_mobile.utils.ProductCategoryHelper
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
+import com.example.frigus_mobile.utils.StockQuantityTracker
+import com.example.frigus_mobile.utils.ProductImageTracker
+import com.example.frigus_mobile.utils.StockObservationsTracker
+import com.example.frigus_mobile.utils.ProductNameTracker
+import android.net.Uri
+import kotlinx.coroutines.launch
 
 class AlimentoDetalhesActivity : AppCompatActivity() {
-    private lateinit var session: SessionManager
-    private lateinit var model: StockLotViewModel
-    private lateinit var movements: StockMovementsViewModel
-    private var leaving = false
-    private var lotId = 0
-    private val editResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            setResult(RESULT_OK)
-            model.load(lotId, reconcile = true)
-            movements.loadFirst(lotId)
-        }
+
+    companion object {
+        const val EXTRA_LOT_ID = "extra_lot_id"
     }
+
+    private lateinit var repository: StockRepository
+    private var item: StockProductResponse? = null
+    private var lotId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        session = SessionManager(this)
-        if (!session.isLoggedIn) { openLogin(); return }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_alimento_detalhes)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.lotDetailRoot)) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-        ViewCompat.requestApplyInsets(findViewById(R.id.lotDetailRoot))
-        SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
-        lotId = intent.getIntExtra(EXTRA_LOT_ID, 0)
-        model = ViewModelProvider(this)[StockLotViewModel::class.java]
-        movements = ViewModelProvider(this)[StockMovementsViewModel::class.java]
-        val movementAdapter = StockMovementAdapter()
-        findViewById<RecyclerView>(R.id.movementHistoryList).apply {
-            layoutManager = LinearLayoutManager(this@AlimentoDetalhesActivity)
-            adapter = movementAdapter
-        }
-        findViewById<View>(R.id.btnVoltar).setOnClickListener { finish() }
-        findViewById<View>(R.id.lotReload).setOnClickListener {
-            model.load(lotId, reconcile = true)
-            movements.loadFirst(lotId)
-        }
-        findViewById<View>(R.id.btnEditarAlimento).setOnClickListener {
-            editResult.launch(Intent(this, EditarAlimentoActivity::class.java).putExtra(EXTRA_LOT_ID, lotId))
+
+        repository = StockRepository(this)
+        item = intent.getSerializableExtra("STOCK_PRODUCT") as? StockProductResponse
+        lotId = intent.getIntExtra(EXTRA_LOT_ID, item?.id ?: -1)
+
+        findViewById<View>(R.id.btnVoltar).setOnClickListener {
+            finish()
         }
         findViewById<View>(R.id.btnRemoverEstoque).setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.stock_remove_from_stock).setMessage(R.string.lot_remove_confirmation)
-                .setPositiveButton(R.string.stock_remove) { _, _ -> model.delete(lotId) }
-                .setNegativeButton(R.string.stock_cancel, null).show()
+            confirmarRemocao()
         }
-        findViewById<View>(R.id.movementHistoryRetry).setOnClickListener { movements.loadFirst(lotId) }
-        findViewById<View>(R.id.movementHistoryMore).setOnClickListener { movements.loadMore(lotId) }
-        findViewById<View>(R.id.movementVerify).setOnClickListener { movements.verify(lotId) }
-        findViewById<View>(R.id.movementGlobalVerify).setOnClickListener { movements.verify(lotId) }
-        findViewById<View>(R.id.movementAcknowledge).setOnClickListener { movements.acknowledgeVerification() }
-        findViewById<View>(R.id.movementSubmit).setOnClickListener { confirmMovement() }
-        model.state.observe(this) { state ->
-            if (model.changed) setResult(RESULT_OK)
-            if (state.deleted) {
-                Toast.makeText(this, R.string.lot_removed, Toast.LENGTH_SHORT).show()
-                setResult(RESULT_OK); finish(); return@observe
+        findViewById<View>(R.id.btnEditarAlimento).setOnClickListener {
+            val intent = Intent(this, EditarAlimentoActivity::class.java).apply {
+                putExtra("STOCK_PRODUCT", item)
             }
-            findViewById<View>(R.id.lotProgress).visibility = if (state.loading || state.busy) View.VISIBLE else View.GONE
-            findViewById<View>(R.id.lotContent).visibility = if (state.lot != null) View.VISIBLE else View.GONE
-            findViewById<View>(R.id.lotReload).isEnabled = !state.loading && !state.busy
-            updateActionAvailability()
-            findViewById<TextView>(R.id.lotStatus).text = lotStatus(state)
-            state.lot?.let { lot ->
-                val unknown = getString(R.string.account_not_informed)
-                fun text(value: String?) = value?.takeIf(String::isNotBlank) ?: unknown
-                fun number(value: Int?) = value?.let { NumberFormat.getIntegerInstance().format(it) } ?: unknown
-                fun label(code: String?, codes: Int, labels: Int): String {
-                    val index = resources.getStringArray(codes).indexOf(code)
-                    return if (index > 0) resources.getStringArray(labels)[index] else text(code)
-                }
-                val category = label(lot.category ?: lot.product?.category, R.array.inventory_category_codes, R.array.inventory_category_labels)
-                val place = label(lot.product?.storagePlace, R.array.inventory_place_codes, R.array.inventory_place_labels)
-                findViewById<TextView>(R.id.tvDetalhesNome).text = text(lot.product?.name)
-                findViewById<ImageView>(R.id.imgDetalhesAlimento).setImageResource(
-                    stockCategoryIcon(lot.category ?: lot.product?.category))
-                findViewById<TextView>(R.id.chipCategoria).text = category
-                findViewById<TextView>(R.id.chipLocal).text = place
-                findViewById<TextView>(R.id.tvInfoCategoria).text = category
-                findViewById<TextView>(R.id.tvInfoValidade).text = stockDisplayDate(lot.expireDate).ifBlank { unknown }
-                val unit = lotUnitLabel(lot.product?.unitOfMeasure)
-                findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = getString(
-                    R.string.inventory_quantity, number(lot.initialQuantity), unit)
-                findViewById<TextView>(R.id.tvFracaoQuantidade).text = getString(
-                    R.string.lot_quantity_fraction, number(lot.quantity), number(lot.initialQuantity), unit)
-                val currentQuantity = lot.quantity
-                val initialQuantity = lot.initialQuantity
-                val percent = if (currentQuantity != null && currentQuantity >= 0 && initialQuantity != null && initialQuantity > 0)
-                    currentQuantity.toLong() * 100 / initialQuantity else null
-                findViewById<TextView>(R.id.tvPercentualRestante).apply {
-                    visibility = if (percent != null) View.VISIBLE else View.GONE
-                    text = percent?.let { NumberFormat.getPercentInstance().format(it / 100.0) }.orEmpty()
-                }
-                findViewById<ProgressBar>(R.id.pbQuantidadeRestante).apply {
-                    visibility = if (percent != null) View.VISIBLE else View.GONE
-                    progress = percent?.coerceIn(0, 100)?.toInt() ?: 0
-                }
-                findViewById<TextView>(R.id.lotMinimumValue).text = number(lot.minimalQuantity)
-                findViewById<TextView>(R.id.lotBatchValue).text = text(lot.batch)
-                findViewById<TextView>(R.id.lotUnitValue).text = unit
-                findViewById<TextView>(R.id.lotBrandValue).text = text(lot.product?.brand)
-                findViewById<TextView>(R.id.lotIdentity).text = getString(R.string.inventory_lot_identity, lot.id, lot.stockId)
-                findViewById<TextView>(R.id.lotProductStatus).setText(when (lot.productStatus) {
-                    "FRESH" -> R.string.inventory_fresh
-                    "NEAR_EXPIRATION" -> R.string.inventory_near_expiration
-                    "EXPIRED" -> R.string.inventory_expired
-                    else -> R.string.inventory_unclassified
-                })
-            }
+            startActivity(intent)
         }
-        movements.state.observe(this) { state ->
-            movementAdapter.updateList(state.items)
-            findViewById<TextView>(R.id.movementHistoryStatus).text = when {
-                state.loading || state.loadingMore -> getString(R.string.movement_loading)
-                state.readError != null -> state.readError.userMessage(getString(R.string.movement_read_error))
-                !state.loaded -> getString(R.string.movement_loading)
-                state.items.isEmpty() -> getString(R.string.movement_empty)
-                else -> getString(R.string.movement_loaded,
-                    NumberFormat.getIntegerInstance().format(state.items.size),
-                    NumberFormat.getIntegerInstance().format(state.totalElements))
-            }
-            findViewById<View>(R.id.movementHistoryRetry).visibility =
-                if (state.readError != null && !state.uncertain) View.VISIBLE else View.GONE
-            findViewById<View>(R.id.movementHistoryMore).apply {
-                visibility = if (state.loaded && state.nextPage < state.totalPages &&
-                    state.readError == null && !state.uncertain) View.VISIBLE else View.GONE
-                isEnabled = !state.loading && !state.loadingMore
-            }
-            findViewById<TextView>(R.id.movementMutationStatus).text = when {
-                state.verifying -> getString(R.string.movement_verifying)
-                state.verificationReady -> getString(R.string.movement_verification_ready)
-                state.uncertain -> getString(R.string.movement_uncertain)
-                state.busy -> getString(R.string.movement_sending)
-                state.mutationError != null -> state.mutationError.userMessage(getString(when (state.mutationError.status) {
-                    403 -> R.string.lot_forbidden
-                    404 -> R.string.lot_not_found
-                    else -> R.string.movement_error
-                }))
-                else -> ""
-            }
-            findViewById<View>(R.id.movementVerify).visibility =
-                if (state.uncertain && !state.verifying && !state.verificationReady) View.VISIBLE else View.GONE
-            findViewById<View>(R.id.movementAcknowledge).visibility =
-                if (state.uncertain && state.verificationReady) View.VISIBLE else View.GONE
-            state.verifiedLot?.let { movements.consumeVerifiedLot()?.let(model::showVerifiedLot) }
-            if (movements.consumeConfirmation()) {
-                Toast.makeText(this, R.string.movement_saved, Toast.LENGTH_SHORT).show()
-                findViewById<EditText>(R.id.movementQuantity).text.clear()
-                findViewById<EditText>(R.id.movementObservation).text.clear()
-                setResult(RESULT_OK)
-                model.load(lotId, reconcile = true)
-            }
-            updateActionAvailability()
-        }
-        model.loadIfNeeded(lotId)
-        movements.loadIfNeeded(lotId)
-    }
 
-    private fun updateActionAvailability() {
-        if (!::model.isInitialized || !::movements.isInitialized) return
-        val lot = model.state.value
-        val movement = movements.state.value
-        val enabled = lot?.lot != null && !lot.loading && !lot.busy && !lot.uncertain &&
-            movement?.busy != true && movement?.loading != true && movement?.loadingMore != true &&
-            movement?.uncertain != true && movement?.verifying != true
-        findViewById<View>(R.id.btnEditarAlimento).isEnabled = enabled
-        findViewById<View>(R.id.btnRemoverEstoque).isEnabled = enabled
-        findViewById<View>(R.id.movementSubmit).isEnabled = enabled
-        findViewById<View>(R.id.movementType).isEnabled = enabled
-        findViewById<View>(R.id.movementQuantity).isEnabled = enabled
-        findViewById<View>(R.id.movementObservation).isEnabled = enabled
-        val showGlobal = lot?.lot == null && movement?.uncertain == true
-        findViewById<TextView>(R.id.movementGlobalStatus).apply {
-            visibility = if (showGlobal) View.VISIBLE else View.GONE
-            text = when {
-                movement?.verifying == true -> getString(R.string.movement_verifying)
-                movement?.verificationReady == true -> getString(R.string.movement_verification_ready)
-                else -> getString(R.string.movement_uncertain)
-            }
-        }
-        findViewById<View>(R.id.movementGlobalVerify).visibility =
-            if (showGlobal && movement?.verifying != true && movement?.verificationReady != true)
-                View.VISIBLE else View.GONE
-    }
-
-    private fun confirmMovement() {
-        val labels = intArrayOf(R.string.movement_type_in, R.string.movement_type_out,
-            R.string.movement_type_adjustment)
-        val codes = arrayOf("IN", "OUT", "ADJUSTMENT")
-        val index = findViewById<Spinner>(R.id.movementType).selectedItemPosition
-        val quantityInput = findViewById<EditText>(R.id.movementQuantity)
-        val quantity = quantityInput.text.toString().trim().toIntOrNull()
-        if (index !in codes.indices || quantity == null || quantity < 0 ||
-            (index != 2 && quantity == 0)) {
-            quantityInput.error = getString(R.string.movement_invalid_quantity)
-            return
-        }
-        val observationInput = findViewById<EditText>(R.id.movementObservation)
-        val observation = observationInput.text.toString().trim().takeIf(String::isNotEmpty)
-        if ((observation?.length ?: 0) > 2000) {
-            observationInput.error = getString(R.string.movement_invalid_observation)
-            return
-        }
-        val request = StockMovementRequest(codes[index], quantity, observation)
-        AlertDialog.Builder(this)
-            .setTitle(R.string.movement_confirm_title)
-            .setMessage(getString(R.string.movement_confirm_message, getString(labels[index]),
-                NumberFormat.getIntegerInstance().format(quantity)))
-            .setNegativeButton(R.string.stock_cancel, null)
-            .setPositiveButton(R.string.movement_confirm_action) { _, _ -> movements.submit(lotId, request) }
-            .show()
-    }
-
-    private fun lotStatus(state: StockLotState): String = when {
-        state.uncertain -> getString(R.string.lot_uncertain)
-        state.busy -> getString(R.string.lot_sending)
-        state.loading -> getString(R.string.inventory_loading)
-        state.error != null -> state.error.userMessage(getString(when (state.error.status) {
-            403 -> R.string.lot_forbidden
-            404 -> R.string.lot_not_found
-            else -> R.string.lot_error
-        }))
-        else -> ""
+        preencherDados()
     }
 
     override fun onResume() {
         super.onResume()
-        if (::session.isInitialized && !session.isLoggedIn) openLogin()
-    }
-    override fun finish() {
-        if ((::model.isInitialized && model.requiresRefreshOnExit) ||
-            (::movements.isInitialized && movements.requiresRefreshOnExit)) setResult(RESULT_OK)
-        super.finish()
+        atualizarDetalhesDaApi()
     }
 
-    private fun openLogin() {
-        if (leaving) return
-        leaving = true
-        startActivity(Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
-        finish()
+    private fun atualizarDetalhesDaApi() {
+        val id = item?.id ?: if (lotId > 0) lotId else return
+        if (!NetworkGuard.ensureConnected(this) { atualizarDetalhesDaApi() }) return
+
+        lifecycleScope.launch {
+            try {
+                val updated = repository.getStockProductById(id)
+                if (updated != null) {
+                    item = updated
+                    lotId = updated.id ?: id
+                    preencherDados()
+                }
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
+                    atualizarDetalhesDaApi()
+                }
+            }
+        }
     }
-    companion object { const val EXTRA_LOT_ID = "stock_lot_id" }
+
+    private fun preencherDados() {
+        val prod = item ?: return
+        val productName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
+        val categoryName = when (prod.category ?: prod.product?.category) {
+            "MEAT" -> "Carnes"
+            "DAIRY" -> "Laticínios"
+            "FRUIT", "VEGETABLE" -> "Hortifruti"
+            "BEVERAGE" -> "Bebidas"
+            "GRAIN" -> "Grãos"
+            else -> "Outros"
+        }
+        val storagePlaceName = when (prod.storagePlace ?: prod.product?.storagePlace) {
+            "FREEZER" -> "Freezer"
+            "PANTRY", "DESPENSA" -> "Despensa"
+            else -> "Geladeira"
+        }
+        val unit = when (prod.product?.unitOfMeasure) {
+            "GRAM" -> "g"
+            "KILOGRAM" -> "kg"
+            "LITER" -> "L"
+            "MILLILITER" -> "ml"
+            else -> "un"
+        }
+        val currentQty = prod.quantity ?: 0
+        val originalQty = StockQuantityTracker.getOrSetInitialQuantity(this, prod.id ?: 0, currentQty)
+        val minQty = prod.minimalQuantity ?: 0
+        val percent = if (originalQty > 0) ((currentQty.toFloat() / originalQty) * 100).toInt().coerceIn(0, 100) else 100
+
+        findViewById<TextView>(R.id.tvDetalhesNome).text = productName
+        findViewById<TextView>(R.id.chipCategoria).text = categoryName
+        findViewById<TextView>(R.id.chipLocal).text = storagePlaceName
+        findViewById<TextView>(R.id.tvPercentualRestante).text = "$percent%"
+
+        val pbRestante = findViewById<ProgressBar>(R.id.pbQuantidadeRestante)
+        pbRestante.progress = percent
+        if (minQty > 0 && currentQty <= minQty) {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_red))
+        } else if (percent <= 25) {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_gold))
+        } else {
+            pbRestante.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_green))
+        }
+
+        findViewById<TextView>(R.id.tvFracaoQuantidade).text = "$currentQty$unit de $originalQty$unit"
+
+        findViewById<TextView>(R.id.tvInfoValidade).text = stockDetailExpiration(prod.expireDate)
+            ?: getString(R.string.lot_detail_not_informed)
+        val price = stockDetailUnitPrice(prod.purchaseUnitPrice, prod.product?.unitPrice)
+        findViewById<TextView>(R.id.tvInfoPrecoRotulo).setText(
+            if (price?.source == StockDetailPriceSource.CATALOG) R.string.lot_detail_catalog_unit_price
+            else R.string.lot_detail_purchase_unit_price)
+        findViewById<TextView>(R.id.tvInfoPreco).text = price?.let(::stockDetailCurrency)
+            ?: getString(R.string.lot_detail_not_informed)
+        findViewById<TextView>(R.id.tvInfoCategoria).text = categoryName
+        findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = "$originalQty$unit"
+
+        val obs = prod.id?.let { StockObservationsTracker.getObservation(this, it) }
+        val layoutObs = findViewById<View>(R.id.layoutInfoObservacoes)
+        val tvObs = findViewById<TextView>(R.id.tvInfoObservacoes)
+        if (!obs.isNullOrBlank()) {
+            layoutObs?.visibility = View.VISIBLE
+            tvObs?.text = obs
+        } else {
+            layoutObs?.visibility = View.GONE
+        }
+
+        val img = findViewById<ImageView>(R.id.imgDetalhesAlimento)
+        val customUriStr = prod.id?.let { ProductImageTracker.getImageUri(this, it) }
+        if (!customUriStr.isNullOrBlank()) {
+            try {
+                img.clearColorFilter()
+                img.setImageURI(Uri.parse(customUriStr))
+            } catch (_: Exception) {
+                carregarImagemPadrao(img, prod)
+            }
+        } else {
+            carregarImagemPadrao(img, prod)
+        }
+    }
+
+
+    private fun carregarImagemPadrao(img: ImageView, prod: StockProductResponse) {
+        val displayName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(displayName, prod.category ?: prod.product?.category)
+        img.clearColorFilter()
+        img.setImageResource(imgRes)
+    }
+
+    private fun confirmarRemocao() {
+        val prod = item ?: return
+        val dialogView = layoutInflater.inflate(R.layout.activity_stock_removal_confirmation, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val unit = when (prod.product?.unitOfMeasure) {
+            "GRAM" -> "g"
+            "KILOGRAM" -> "kg"
+            "LITER" -> "L"
+            "MILLILITER" -> "ml"
+            else -> "un"
+        }
+
+        val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
+        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName
+        dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
+        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = getString(
+            R.string.lot_detail_expiration_value,
+            stockDetailExpiration(prod.expireDate) ?: getString(R.string.lot_detail_not_informed))
+
+        val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(dialogProdName, prod.category ?: prod.product?.category)
+        imgRem?.clearColorFilter()
+        imgRem?.setImageResource(imgRes)
+
+        dialogView.findViewById<View>(R.id.btnCancelarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<View>(R.id.btnConfirmarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+            removerAlimento()
+        }
+
+        dialog.show()
+    }
+
+    private fun removerAlimento() {
+        val id = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { removerAlimento() }) return
+
+        lifecycleScope.launch {
+            try {
+                item?.id?.let {
+                    StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
+                    StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductNameTracker.remove(this@AlimentoDetalhesActivity, it)
+                }
+                repository.deleteStockProduct(id)
+                Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
+                    removerAlimento()
+                }
+            }
+        }
+    }
 }

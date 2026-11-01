@@ -23,7 +23,7 @@
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Voltar"
+            android:contentDescription="@string/category_browser_back"
             android:src="@drawable/ic_chevron_left"
             app:tint="@color/darkBlue" />
 
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="@font/sarabun"
-            android:text="Todas as categorias"
+            android:text="@string/category_browser_title"
             android:textColor="@color/darkBlue"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -82,6 +82,14 @@
                 app:tint="@color/color_text_secondary" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/categoryBrowserStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/color_text_secondary"
+            android:visibility="gone" />
+
         <!-- Category Item: Carnes -->
         <LinearLayout
             android:id="@+id/itemCarnes"
@@ -105,8 +113,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_meat"
-                    app:tint="#EF4444" />
+                    android:id="@+id/imgCategoryBrowserPrimary"
+                    android:src="@drawable/ic_cat_meat" />
             </FrameLayout>
 
             <LinearLayout
@@ -120,7 +128,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="Carnes"
+                    android:id="@+id/tvCategoryBrowserPrimary"
+                    android:text="@string/category_browser_meat"
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -166,8 +175,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_dairy"
-                    app:tint="@color/blue_primary" />
+                    android:src="@drawable/ic_cat_dairy" />
             </FrameLayout>
 
             <LinearLayout
@@ -181,7 +189,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="Laticínios"
+                    android:text="@string/category_browser_dairy"
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -227,8 +235,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_hortifruti"
-                    app:tint="@color/color_green" />
+                    android:src="@drawable/ic_cat_hortifruti" />
             </FrameLayout>
 
             <LinearLayout
@@ -242,7 +249,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="Hortifruti"
+                    android:text="@string/category_browser_produce"
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -288,8 +295,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_cat_beverages"
-                    app:tint="#EC4899" />
+                    android:src="@drawable/ic_cat_beverages" />
             </FrameLayout>
 
             <LinearLayout
@@ -303,7 +309,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="Bebidas"
+                    android:text="@string/category_browser_beverages"
                     android:textColor="@color/darkBlue"
                     android:textSize="15sp"
                     android:textStyle="bold" />

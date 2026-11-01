@@ -14,8 +14,9 @@ import retrofit2.Response
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
+class RecipeRepository(context: Context) {
     private val api = RetrofitClient.recipeService
+    private val session = com.example.frigus_mobile.data.local.SessionManager(context.applicationContext)
 
     suspend fun list(page: Int = 0, size: Int = 20, query: String? = null):
         PageResponse<RecipeResponse> {
@@ -34,11 +35,18 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
             content.all { it != null && (it.recipeId ?: 0) > 0 })
     }
 
-    /** M14 computes suggestions for the current group; no AI call or catalog fallback. */
-    suspend fun suggestions(): List<RecipeResponse> {
-        val result: List<RecipeSuggestionResponse?> = api.getSuggestions(limit = 10).awaitGet()
+    /** M18 supplies saved assistant recommendations; M14 adds current stock matches. Both are reads. */
+    suspend fun suggestions(stockId: Int? = null): List<RecipeResponse> {
+        val resolvedStock = stockId ?: run {
+            val home = RetrofitClient.stockService.getInventoryHome(session.activeGroupId).awaitGet()
+            requireResponse(home.groupId != null && (session.activeGroupId == null || home.groupId == session.activeGroupId))
+            home.stocks?.singleOrNull()?.id
+        }
+        val saved = resolvedStock?.let { api.getSuggestionsByStock(it).awaitGet() }.orEmpty()
+        requireResponse(saved.all { (it.recipeId ?: 0) > 0 })
+        val result: List<RecipeSuggestionResponse?> = api.getSuggestions(stockId = resolvedStock, limit = 10).awaitGet()
         requireResponse(result.all { it != null && (it.recipe?.recipeId ?: 0) > 0 })
-        return result.map { suggestion ->
+        val computed = result.map { suggestion ->
             suggestion!!.recipe!!.copy(
                 matchedIngredients = suggestion.matchedIngredients,
                 missingIngredients = suggestion.missingIngredients,
@@ -46,6 +54,13 @@ class RecipeRepository(@Suppress("UNUSED_PARAMETER") context: Context) {
                 availability = suggestion.availability
             )
         }
+        val computedById = computed.associateBy { it.recipeId }
+        val enrichedSaved = saved.map { recipe ->
+            val current = computedById[recipe.recipeId]
+            recipe.copy(favorite = current?.favorite ?: recipe.favorite,
+                availability = current?.availability ?: recipe.availability)
+        }
+        return (enrichedSaved + computed).distinctBy { it.recipeId }
     }
 
     suspend fun detail(id: Int, stockId: Int? = null): RecipeResponse {

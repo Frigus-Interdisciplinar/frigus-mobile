@@ -9,15 +9,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintWidth_max="@dimen/auth_content_max_width"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:paddingBottom="28dp">
 
         <TextView
@@ -145,7 +137,6 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/senha"
-                android:saveEnabled="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
@@ -283,7 +274,6 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- Não tem uma conta? Criar conta -->
         <TextView
             android:id="@+id/tvCriarConta"
             android:layout_width="wrap_content"
@@ -293,47 +283,12 @@
             android:focusable="true"
             android:fontFamily="@font/sarabun"
             android:padding="8dp"
-            android:text="Não tem uma conta? Criar conta"
-            android:textColor="@color/color_text_primary"
+            android:text="@string/auth_create_account_link"
+            android:textColor="@color/blue_primary"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutBtnGoogle" />
+            app:layout_constraintTop_toBottomOf="@id/layoutBtnGoogle" />
 
-        <TextView
-            android:id="@+id/authStatus"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            android:accessibilityLiveRegion="polite"
-            android:textColor="@color/color_text_primary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCriarConta" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRetrySession"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:text="@string/auth_retry_session"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/authStatus" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnChangeAccount"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:text="@string/auth_change_account"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnRetrySession" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

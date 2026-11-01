@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_recovered_plan_name">Plano %1$s</string>
+    <string name="profile_recovered_plan_pending">Seu plano</string>
+    <string name="profile_recovered_plan_hint">Toque para consultar sua assinatura</string>
+    <string name="profile_recovered_plan_reconcile">Atualize a assinatura para conferir o resultado</string>
+</resources>

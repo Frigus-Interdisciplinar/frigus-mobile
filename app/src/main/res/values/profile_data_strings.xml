@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_data_title">Meus Dados</string>
+    <string name="profile_data_information">Informações da Conta</string>
+    <string name="profile_data_full_name">Nome completo</string>
+    <string name="profile_data_options">Opções</string>
+</resources>
