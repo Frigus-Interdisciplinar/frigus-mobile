@@ -92,7 +92,8 @@ class EstoqueFragment : Fragment() {
 
         // Botão "Ver mais >"
         view.findViewById<View>(R.id.btnVerTodasCategorias).setOnClickListener {
-            abrirLocalArmazenamento()
+            startActivity(Intent(requireContext(), TodasCategoriasActivity::class.java)
+                .putExtra(CategoryBrowserActivity.EXTRA_STORAGE_PLACE, currentStoragePlace))
         }
 
         // RecyclerView

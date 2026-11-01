@@ -44,7 +44,7 @@ data class InventoryUiState(
 
 class InventoryViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager(application)
-    private val repository = StockRepository()
+    private val repository = StockRepository(application)
     private val mutableState = MutableLiveData(InventoryUiState())
     val state: LiveData<InventoryUiState> = mutableState
     private var request: Job? = null
@@ -138,6 +138,7 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
         if (!session.isLoggedIn) return
         request?.cancel()
         val generation = session.state.generation
+        val groupId = session.activeGroupId
         var snapshot = mutableState.value ?: return
         snapshot = snapshot.copy(
             home = if (refreshContext) null else snapshot.home,
@@ -173,7 +174,7 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
                         )
                     }
                 }
-                if (session.isLoggedIn && session.state.generation == generation) {
+                if (session.isLoggedIn && session.state.generation == generation && session.activeGroupId == groupId) {
                     mutableState.value = snapshot.copy(
                         items = (snapshot.items + result?.content.orEmpty()).distinctBy { it.id },
                         loading = false,
@@ -185,7 +186,7 @@ class InventoryViewModel(application: Application) : AndroidViewModel(applicatio
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                if (session.isLoggedIn && session.state.generation == generation) {
+                if (session.isLoggedIn && session.state.generation == generation && session.activeGroupId == groupId) {
                     val error = when (failure) {
                         is BffException -> failure.error
                         is JsonParseException, is MalformedJsonException -> ApiError(code = "INVALID_RESPONSE")

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="lot_detail_purchase_unit_price">Preço unitário de aquisição</string>
+    <string name="lot_detail_catalog_unit_price">Preço unitário do catálogo</string>
+    <string name="lot_detail_not_informed">Não informado</string>
+    <string name="lot_detail_expiration_value">Validade: %1$s</string>
     <string name="lot_reload">Recarregar dados</string>
     <string name="lot_remove_confirmation">Deseja remover este lote do estoque? O produto do catálogo será preservado. Não há restauração pelo app.</string>
     <string name="lot_uncertain">Não foi possível confirmar o resultado da operação. Ela pode ter sido aplicada. Recarregue os dados e confira o estado real antes de tentar novamente. Nenhuma alteração será reenviada automaticamente.</string>

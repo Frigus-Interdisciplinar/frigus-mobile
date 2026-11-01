@@ -128,7 +128,14 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.tvFracaoQuantidade).text = "$currentQty$unit de $originalQty$unit"
 
-        findViewById<TextView>(R.id.tvInfoValidade).text = prod.expireDate ?: "-"
+        findViewById<TextView>(R.id.tvInfoValidade).text = stockDetailExpiration(prod.expireDate)
+            ?: getString(R.string.lot_detail_not_informed)
+        val price = stockDetailUnitPrice(prod.purchaseUnitPrice, prod.product?.unitPrice)
+        findViewById<TextView>(R.id.tvInfoPrecoRotulo).setText(
+            if (price?.source == StockDetailPriceSource.CATALOG) R.string.lot_detail_catalog_unit_price
+            else R.string.lot_detail_purchase_unit_price)
+        findViewById<TextView>(R.id.tvInfoPreco).text = price?.let(::stockDetailCurrency)
+            ?: getString(R.string.lot_detail_not_informed)
         findViewById<TextView>(R.id.tvInfoCategoria).text = categoryName
         findViewById<TextView>(R.id.tvInfoQuantidadeOriginal).text = "$originalQty$unit"
 
@@ -182,7 +189,9 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
         dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName
         dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
-        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = "Validade: ${prod.expireDate ?: "-"}"
+        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = getString(
+            R.string.lot_detail_expiration_value,
+            stockDetailExpiration(prod.expireDate) ?: getString(R.string.lot_detail_not_informed))
 
         val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
         val imgRes = ProductCategoryHelper.getImagemParaProduto(dialogProdName, prod.category ?: prod.product?.category)
