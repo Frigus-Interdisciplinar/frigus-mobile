@@ -15,8 +15,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(email: String, password: String) {
         if (result.value != AuthResult.Loading) repository.login(email, password) { result.value = it }
     }
-    fun loginWithGoogle(idToken: String) {
-        if (result.value != AuthResult.Loading) repository.loginWithGoogle(idToken) { result.value = it }
+    fun loginWithGoogle(idToken: String, photoUrl: String? = null, googleEmail: String? = null) {
+        if (result.value != AuthResult.Loading) repository.loginWithGoogle(idToken) { response ->
+            if (response == AuthResult.Authenticated) {
+                val session = com.example.frigus_mobile.data.local.SessionManager(getApplication())
+                if (!googleEmail.isNullOrBlank() && session.userEmail.equals(googleEmail, ignoreCase = true))
+                    session.saveGooglePhotoUrl(photoUrl)
+            }
+            result.value = response
+        }
     }
     fun restore() {
         if (result.value != AuthResult.Loading) repository.restore { result.value = it }
@@ -24,6 +31,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun signOut() {
         repository.cancel()
         repository.session.clear()
+        result.value = null
+    }
+    fun pauseForOfflineShopping() {
+        repository.cancel()
         result.value = null
     }
     override fun onCleared() { repository.cancel() }

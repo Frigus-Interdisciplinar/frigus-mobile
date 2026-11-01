@@ -1,7 +1,6 @@
 package com.example.frigus_mobile.data.repository
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.api.AuthApiService
 import com.example.frigus_mobile.data.api.RetrofitClient
@@ -118,8 +117,8 @@ class AuthRepository(
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 if (call.isCanceled) return
                 if (generation != session.generation) {
-                    // The interceptor may already have cleared this very session for a 401 or 403.
-                    if ((response.code() == 401 || response.code() == 403) && session.generation == generation + 1 && session.accessToken == null)
+                    // The interceptor may already have cleared this very session for a 401.
+                    if (response.code() == 401 && session.generation == generation + 1 && session.accessToken == null)
                         result(AuthResult.Failure(ApiError.parse(response)))
                     return
                 }
@@ -128,9 +127,8 @@ class AuthRepository(
                     if (response.code() == 200 && user != null && validUser(user) && session.validate(generation, token, user)) {
                         result(AuthResult.Authenticated)
                     } else {
-                        if (response.code() == 401 || response.code() == 403) {
+                        if (response.code() == 401) {
                             session.invalidate(SessionCredential(token, generation))
-                            session.clear()
                         }
                         result(AuthResult.Failure(if (response.isSuccessful)
                             ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
@@ -146,13 +144,12 @@ class AuthRepository(
         })
     }
 
-    private fun validUser(user: UserResponse?): Boolean =
-        user != null && !user.id.isNullOrBlank()
+    private fun validUser(user: UserResponse?): Boolean = try {
+        val id = user?.id
+        id != null && java.util.UUID.fromString(id).toString().equals(id, ignoreCase = true)
+    } catch (_: IllegalArgumentException) { false }
 
     private fun networkError() = ApiError(displayMessage = text(R.string.auth_network_error))
     fun cancel() { pending?.cancel(); pending = null }
 
-    fun sendPasswordReset(email: String, liveData: MutableLiveData<Resource<Void>>) {
-        liveData.value = Resource.error(text(R.string.auth_password_reset_unavailable))
-    }
 }

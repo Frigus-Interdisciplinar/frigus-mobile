@@ -274,6 +274,23 @@
                 android:visibility="gone" />
         </FrameLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAbrirListaOffline"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="12dp"
+            android:minHeight="48dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/auth_open_cached_shopping"
+            android:textAllCaps="false"
+            android:textColor="@color/blue_primary"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutBtnGoogle" />
+
         <!-- Não tem uma conta? Criar conta -->
         <TextView
             android:id="@+id/tvCriarConta"
@@ -289,7 +306,7 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutBtnGoogle" />
+            app:layout_constraintTop_toBottomOf="@+id/btnAbrirListaOffline" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

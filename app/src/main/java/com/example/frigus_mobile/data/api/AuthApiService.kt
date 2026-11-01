@@ -12,13 +12,22 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthApiService {
+    @POST("mobile/core/auth/forgot-password")
+    fun requestPasswordRecovery(@Body request: com.example.frigus_mobile.data.model.PasswordRecoveryRequest): Call<Void>
+
+    @POST("mobile/core/auth/verify-reset-code")
+    fun verifyPasswordCode(@Body request: com.example.frigus_mobile.data.model.PasswordCodeRequest): Call<Void>
+
+    @POST("mobile/core/auth/reset-password")
+    fun resetPassword(@Body request: com.example.frigus_mobile.data.model.PasswordResetRequest): Call<Void>
+
     @POST("mobile/user/register")
     fun cadastrar(@Body request: UserRegisterRequest): Call<UserResponse>
 
     @POST("mobile/user/login")
     fun login(@Body request: UserLoginRequest): Call<UserLoginResponse>
 
-    @POST("auth/google")
+    @POST("mobile/core/auth/google")
     fun loginComGoogle(@Body request: GoogleLoginRequest): Call<UserLoginResponse>
 
     @GET("mobile/user/profile")

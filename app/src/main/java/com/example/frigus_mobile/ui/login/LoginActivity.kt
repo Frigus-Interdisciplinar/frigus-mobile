@@ -8,7 +8,6 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
-import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -25,6 +24,7 @@ import com.example.frigus_mobile.data.model.AuthResult
 import com.example.frigus_mobile.ui.createaccount.CreateAccountActivity
 import com.example.frigus_mobile.ui.forgotpassword.ForgotPasswordActivity
 import com.example.frigus_mobile.ui.home.MainActivity
+import com.example.frigus_mobile.ui.shopping.OfflineShoppingActivity
 import com.example.frigus_mobile.push.PushNotifications
 import com.example.frigus_mobile.utils.CustomTypefaceSpan
 import com.example.frigus_mobile.utils.ValidationUtils
@@ -56,11 +56,8 @@ class LoginActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
                 val idToken = account?.idToken
                 val photoUrl = account?.photoUrl?.toString()
-                if (!photoUrl.isNullOrBlank()) {
-                    SessionManager(this).saveGooglePhotoUrl(photoUrl)
-                }
                 if (!idToken.isNullOrBlank()) {
-                    viewModel.loginWithGoogle(idToken)
+                    viewModel.loginWithGoogle(idToken, photoUrl, account?.email)
                 } else {
                     Toast.makeText(this, "NÃ£o foi possÃ­vel obter o token do Google", Toast.LENGTH_SHORT).show()
                 }
@@ -95,6 +92,15 @@ class LoginActivity : AppCompatActivity() {
             iniciarLoginGoogle()
         }
         findViewById<View>(R.id.btnEntrar).setOnClickListener { fazerLogin() }
+        findViewById<View>(R.id.btnAbrirListaOffline).setOnClickListener {
+            if (session.canReadCachedShopping) {
+                isAutoRevalidating = false
+                viewModel.pauseForOfflineShopping()
+                startActivity(Intent(this, OfflineShoppingActivity::class.java))
+            }
+        }
+        SessionManager.authenticated.observe(this) { updateOfflineShoppingButton() }
+        updateOfflineShoppingButton()
         findViewById<View>(R.id.tvCriarConta).setOnClickListener {
             discardPendingNavigation()
             startActivity(Intent(this, CreateAccountActivity::class.java))
@@ -126,10 +132,8 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 }
             } else if (result is AuthResult.Failure && isAutoRevalidating) {
-                Log.d("LoginActivity", "Auto-login com token expirado/invÃ¡lido. Limpando sessÃ£o silenciosamente...")
                 isAutoRevalidating = false
-                SessionManager(this).clearSession()
-                render(null)
+                render(result)
             } else {
                 render(result)
             }
@@ -143,42 +147,20 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (::session.isInitialized) updateOfflineShoppingButton()
+    }
+
+    private fun updateOfflineShoppingButton() {
+        findViewById<View>(R.id.btnAbrirListaOffline).visibility =
+            if (session.canReadCachedShopping) View.VISIBLE else View.GONE
+    }
+
     private fun tentarAutoLogin(sessionManager: SessionManager) {
         isAutoRevalidating = true
         render(AuthResult.Loading)
-
-        val lastAccount = GoogleSignIn.getLastSignedInAccount(this)
-        val hasGooglePhoto = !sessionManager.googlePhotoUrl.isNullOrBlank()
-
-        if (lastAccount != null || hasGooglePhoto) {
-            Log.d("LoginActivity", "Conta Google detectada. Tentando silentSignIn transparente...")
-            try {
-                googleSignInClient.silentSignIn().addOnCompleteListener(this) { task ->
-                    if (!isAutoRevalidating) return@addOnCompleteListener
-                    if (task.isSuccessful) {
-                        val account = task.result
-                        val idToken = account?.idToken
-                        val photoUrl = account?.photoUrl?.toString()
-                        if (!photoUrl.isNullOrBlank()) {
-                            sessionManager.saveGooglePhotoUrl(photoUrl)
-                        }
-                        if (!idToken.isNullOrBlank()) {
-                            Log.d("LoginActivity", "silentSignIn renovou o idToken com sucesso. Reautenticando no backend...")
-                            viewModel.loginWithGoogle(idToken)
-                            return@addOnCompleteListener
-                        }
-                    }
-                    Log.d("LoginActivity", "silentSignIn nÃ£o completou. Validando token existente com getProfile...")
-                    revalidarSessaoServidor(sessionManager)
-                }
-            } catch (e: Exception) {
-                Log.w("LoginActivity", "ExceÃ§Ã£o em silentSignIn: ${e.message}. Validando com getProfile...")
-                revalidarSessaoServidor(sessionManager)
-            }
-        } else {
-            Log.d("LoginActivity", "Conta padrÃ£o. Validando token existente com getProfile...")
-            revalidarSessaoServidor(sessionManager)
-        }
+        revalidarSessaoServidor(sessionManager)
     }
 
     private fun revalidarSessaoServidor(sessionManager: SessionManager) {
