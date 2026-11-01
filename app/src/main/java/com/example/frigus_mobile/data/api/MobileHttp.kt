@@ -13,9 +13,17 @@ object MobileHttp {
     private val uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     private val routes = listOf(
         "POST" to "/mobile/user/(login|register)",
+        "POST" to "/mobile/core/auth/google",
+        "POST" to "/mobile/core/auth/(forgot-password|verify-reset-code|reset-password)",
+        "POST" to "/mobile/firebase/session",
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
-        "GET" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
+        "GET|POST" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
+        "GET|POST" to "/mobile/core/products",
+        "GET|POST" to "/mobile/shopping-list/?",
+        "GET|DELETE" to "/mobile/shopping-list/$uuid",
+        "POST" to "/mobile/shopping-list/$uuid/items",
+        "PATCH|DELETE" to "/mobile/shopping-list/$uuid/items/[1-9][0-9]*",
         "POST" to "/mobile/inventory/receipts/scan",
         "GET" to "/mobile/inventory/receipts/$uuid",
         "POST" to "/mobile/inventory/receipts/$uuid/confirm",
@@ -31,16 +39,32 @@ object MobileHttp {
         "PATCH" to "/mobile/notifications/$uuid/read",
         "PATCH" to "/mobile/notifications/read-all",
         "GET" to "/mobile/advertisements/active",
-        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)"
+        "POST" to "/mobile/advertisements/$uuid/(impressions|clicks)",
+        "GET" to "/mobile/core/plans/(active|me/limits)",
+        "GET" to "/mobile/core/subscriptions/me",
+        "POST" to "/mobile/core/subscriptions/me/(cancel|reactivate)",
+        "GET" to "/mobile/core/transactions",
+        "POST" to "/mobile/core/transactions/checkout",
+        "GET|POST" to "/mobile/core/groups",
+        "POST" to "/mobile/core/stocks",
+        "GET" to "/mobile/core/groups/$uuid",
+        "GET|POST" to "/mobile/core/groups/$uuid/invitations",
+        "DELETE" to "/mobile/core/groups/$uuid/invitations/$uuid",
+        "GET" to "/mobile/commercial/groups/$uuid/money-saving/(summary|events)",
+        "POST" to "/mobile/commercial/groups/$uuid/food-purchases",
+        "GET|PUT|DELETE" to "/mobile/commercial/groups/$uuid/food-purchases/$uuid",
+        "GET" to "/mobile/core/conversations",
+        "GET" to "/mobile/core/conversations/$uuid",
+        "GET|POST" to "/mobile/core/conversations/$uuid/messages",
+        "POST" to "/mobile/core/conversations/$uuid/messages/[1-9][0-9]*/read"
     ).map { (methods, path) -> Regex("(?:$methods) $path") }
 
     fun allowed(method: String, path: String): Boolean = routes.any { it.matches("$method $path") } &&
         path.split('/').filter { it.isNotEmpty() && it.all(Char::isDigit) }.all { it.toIntOrNull() != null }
 
     fun public(path: String): Boolean {
-        val p = path.trim().lowercase()
-        return p == "/mobile/user/login" || p == "/mobile/user/register" ||
-               p.contains("auth/login") || p.contains("auth/register") || p.contains("auth/google")
+        return path in setOf("/mobile/user/login", "/mobile/user/register", "/mobile/core/auth/google",
+            "/mobile/core/auth/forgot-password", "/mobile/core/auth/verify-reset-code", "/mobile/core/auth/reset-password")
     }
 
     fun isPublicPath(path: String): Boolean = public(path)
@@ -63,7 +87,7 @@ object MobileHttp {
             .followRedirects(false)
             .followSslRedirects(false)
             .retryOnConnectionFailure(false)
-            .connectTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(40, TimeUnit.SECONDS)
             .readTimeout(40, TimeUnit.SECONDS)
             .writeTimeout(40, TimeUnit.SECONDS)
             // OkHttp can also follow up HTTP 503 + Retry-After: 0; never send a call twice.
@@ -88,7 +112,7 @@ object MobileHttp {
                     url.encodedPath() == "/mobile/inventory/receipts/scan"
                 val requestChain = if (longRunning) chain.withReadTimeout(135, TimeUnit.SECONDS) else chain
                 val response = requestChain.proceed(builder.build())
-                if ((response.code() == 401 || response.code() == 403) && access != null && !isPublic) {
+                if (response.code() == 401 && access != null && !isPublic) {
                     unauthorized(active!!)
                 }
                 response

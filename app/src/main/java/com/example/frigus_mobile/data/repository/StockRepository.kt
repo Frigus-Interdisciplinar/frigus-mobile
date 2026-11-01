@@ -34,23 +34,36 @@ class StockRepository(context: Context? = null) {
 
     /** M04 resolves the active group and its stocks on the BFF. */
     suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
+        val credential = sessionManager?.state?.credential()
         val cachedStock = sessionManager?.activeStockId
         val cachedGroup = sessionManager?.activeGroupId
         if (cachedStock != null && cachedStock > 0 && !cachedGroup.isNullOrBlank()) {
             return@withContext cachedStock
         }
         try {
-            val home = api.getInventoryHome().requireBody()
+            val home = api.getInventoryHome(cachedGroup).requireBody()
+            if (sessionManager != null && (!sessionManager.isLoggedIn || sessionManager.state.credential() != credential ||
+                    sessionManager.activeGroupId != cachedGroup))
+                throw kotlinx.coroutines.CancellationException()
+            if (cachedGroup != null && home.groupId != cachedGroup)
+                throw com.example.frigus_mobile.data.api.InvalidBffResponseException()
             val stockId = home.stocks?.filterNotNull()?.firstOrNull()?.id
             sessionManager?.saveActiveGroupAndStock(home.groupId, stockId)
             stockId
         } catch (e: Exception) {
-            sessionManager?.saveActiveGroupAndStock(null, null)
+            if (sessionManager?.state?.credential() == credential && sessionManager?.activeGroupId == cachedGroup)
+                sessionManager?.saveActiveGroupAndStock(null, null)
             throw e
         }
     }
 
-    suspend fun getInventoryContext(): InventoryHomeResponse = api.getInventoryHome().requireBody()
+    suspend fun getInventoryContext(): InventoryHomeResponse = withContext(Dispatchers.IO) {
+        val groupId = sessionManager?.activeGroupId
+        api.getInventoryHome(groupId).requireBody().also {
+            if (groupId != null && it.groupId != groupId)
+                throw com.example.frigus_mobile.data.api.InvalidBffResponseException()
+        }
+    }
 
     suspend fun getStockProducts(): List<StockProductResponse> = withContext(Dispatchers.IO) {
         val stockId = resolveUserStockId() ?: return@withContext emptyList()

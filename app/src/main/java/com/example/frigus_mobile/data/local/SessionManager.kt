@@ -30,7 +30,9 @@ class SessionManager(context: Context) {
                 try {
                     val ciphertext = preferences.getString("access", null)
                     val iv = preferences.getString("iv", null)
-                    if (ciphertext != null && iv != null) {
+                    if (preferences.getString("origin", null) != BuildConfig.BFF_BASE_URL) {
+                        preferences.edit().clear().apply()
+                    } else if (ciphertext != null && iv != null) {
                         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
                         token = String(cipher.doFinal(Base64.decode(ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
@@ -55,6 +57,7 @@ class SessionManager(context: Context) {
                             .commit()) { "Session persistence failed" }
                     },
                     erase = {
+                        com.example.frigus_mobile.data.repository.FirebaseShoppingSession.signOut()
                         preferences.edit()
                             .remove("group")
                             .remove("stock")
@@ -70,9 +73,6 @@ class SessionManager(context: Context) {
                         authenticated.postValue(it)
                         PushRegistration.onSessionChanged(context.applicationContext, it)
                     })
-                if (!token.isNullOrBlank()) {
-                    authenticated.postValue(true)
-                }
             }
             state = sharedState!!
         }
@@ -86,15 +86,20 @@ class SessionManager(context: Context) {
     val userBirthDate: String? get() = state.user?.birthDate
     val userAccountType: String? get() = state.user?.accountType
     val userId: String? get() = state.user?.id
+    /** Cached identity may open only local shopping data; it never authorizes a backend operation. */
+    val canReadCachedShopping: Boolean get() = !accessToken.isNullOrBlank() && userId?.let { id ->
+        runCatching { java.util.UUID.fromString(id).toString().equals(id, ignoreCase = true) }.getOrDefault(false)
+    } == true
     /** Conta do tipo Doméstico (backend: "DOMESTIC"). Usado para liberar o MoneySaving. */
     val isDomestic: Boolean get() = userAccountType.equals("DOMESTIC", ignoreCase = true)
     val activeGroupId: String? get() = preferences.getString("group", null)
     val activeStockId: Int? get() = preferences.getInt("stock", -1).takeIf { it > 0 }
     val googlePhotoUrl: String? get() = preferences.getString("google_photo_url", null)
+        ?.takeIf { isLoggedIn && preferences.getString("google_photo_owner", null) == userId }
 
     fun saveGooglePhotoUrl(url: String?) {
-        if (!url.isNullOrBlank()) {
-            preferences.edit().putString("google_photo_url", url).apply()
+        if (isLoggedIn && !userId.isNullOrBlank() && !url.isNullOrBlank()) {
+            preferences.edit().putString("google_photo_url", url).putString("google_photo_owner", userId).apply()
         }
     }
 

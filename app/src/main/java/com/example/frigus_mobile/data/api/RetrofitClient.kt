@@ -25,4 +25,9 @@ object RetrofitClient {
     val coreAiService: AiRecipeApiService get() = aiRecipeService
     val advertisementService: AdvertisementApiService get() = retrofit.create(AdvertisementApiService::class.java)
     val receiptService: ReceiptApiService get() = retrofit.create(ReceiptApiService::class.java)
+    val subscriptionService: SubscriptionApiService get() = retrofit.create(SubscriptionApiService::class.java)
+    val moneySavingService: MoneySavingApiService get() = retrofit.create(MoneySavingApiService::class.java)
+    val shoppingListService: ShoppingListApiService get() = retrofit.create(ShoppingListApiService::class.java)
+    val firebaseSessionService: FirebaseSessionApiService get() = retrofit.create(FirebaseSessionApiService::class.java)
+    val conversationService: ConversationApiService get() = retrofit.create(ConversationApiService::class.java)
 }

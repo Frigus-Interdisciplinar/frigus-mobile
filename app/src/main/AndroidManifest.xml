@@ -55,6 +55,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.shopping.OfflineShoppingActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.recipes.ReceitaDetalhesActivity"
             android:enabled="true"
             android:exported="false" />
@@ -64,12 +68,15 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.stock.TodasCategoriasActivity"
-            android:enabled="false"
+            android:name=".ui.stock.EstoqueLocalActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.stock.EstoqueLocalActivity"
+            android:name=".ui.stock.TodasCategoriasActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.stock.CategoriaItensActivity"
             android:exported="false" />
 
         <activity
@@ -104,6 +111,15 @@
 
         <activity
             android:name=".ui.ai.ChatIaActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.conversation.ConversationsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.conversation.ConversationActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
     </application>
