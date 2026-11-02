@@ -166,19 +166,20 @@ class AiChatViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** Explicitly abandon the unresolved thread only after a user-requested M18 read. Never resend. */
-    fun startNewConversationAfterReview() {
-        val scope = context ?: return
-        val current = mutableState.value ?: return
-        if (!repository.isCurrent(scope) || !current.uncertain || !current.reviewedUncertain ||
-            current.sending || current.checkingSaved) return
+    fun resetConversation() {
+        val scope = context
         try {
-            repository.clearPending(scope)
-            conversationId = null
-            update { it.copy(messages = listOf(greeting()), uncertain = false, reviewedUncertain = false,
-                error = null, saved = emptyList()) }
+            scope?.let(repository::clearPending)
         } catch (cancelled: CancellationException) { throw cancelled }
-        catch (failure: Exception) { fail(chatError(failure)) }
+        catch (_: Exception) {}
+        conversationId = null
+        update { it.copy(messages = listOf(greeting()), uncertain = false, reviewedUncertain = false,
+            error = null, saved = emptyList()) }
+    }
+
+    /** Explicitly abandon the unresolved thread. Never resend. */
+    fun startNewConversationAfterReview() {
+        resetConversation()
     }
 
     private fun fail(error: ApiError) = update { it.copy(error = error, errorVersion = it.errorVersion + 1) }

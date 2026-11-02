@@ -57,6 +57,9 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        findViewById<View>(R.id.btnRemoverEstoque)?.setOnClickListener {
+            confirmarRemocao()
+        }
 
         preencherDados()
     }
@@ -296,6 +299,61 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
                     executarSaidaEstoque(isConsumo, quantity)
+                }
+            }
+        }
+    }
+
+    private fun confirmarRemocao() {
+        val prod = item ?: return
+        val dialogView = layoutInflater.inflate(R.layout.activity_stock_removal_confirmation, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val unit = lotUnitLabel(prod.product?.unitOfMeasure)
+        val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
+        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName
+        dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
+        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = getString(
+            R.string.lot_detail_expiration_value,
+            stockDetailExpiration(prod.expireDate) ?: getString(R.string.lot_detail_not_informed))
+
+        val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(dialogProdName, prod.category ?: prod.product?.category)
+        imgRem?.clearColorFilter()
+        imgRem?.setImageResource(imgRes)
+
+        dialogView.findViewById<View>(R.id.btnCancelarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<View>(R.id.btnConfirmarRemocao)?.setOnClickListener {
+            dialog.dismiss()
+            removerAlimento()
+        }
+
+        dialog.show()
+    }
+
+    private fun removerAlimento() {
+        val id = item?.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { removerAlimento() }) return
+
+        lifecycleScope.launch {
+            try {
+                item?.id?.let {
+                    StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
+                    StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
+                    ProductNameTracker.remove(this@AlimentoDetalhesActivity, it)
+                }
+                repository.deleteStockProduct(id)
+                Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
+                finish()
+            } catch (e: Exception) {
+                NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
+                    removerAlimento()
                 }
             }
         }

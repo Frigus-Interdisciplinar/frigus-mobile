@@ -337,6 +337,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Linha 1: Consumido e Desperdiçado (Money-Saving) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -371,18 +372,41 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnEditarAlimento"
+            <!-- Linha 2: Editar Alimento e Remover do Estoque -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/bg_btn_outlined_blue"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/stock_edit"
-                android:textAllCaps="false"
-                android:textColor="@color/blue_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEditarAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_blue"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_edit"
+                    android:textAllCaps="false"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnRemoverEstoque"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_red"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_remove_from_stock"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_red"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
