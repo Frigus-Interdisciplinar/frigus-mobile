@@ -45,8 +45,11 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnVoltar).setOnClickListener {
             finish()
         }
-        findViewById<View>(R.id.btnRemoverEstoque).setOnClickListener {
-            confirmarRemocao()
+        findViewById<View>(R.id.btnConsumirAlimento)?.setOnClickListener {
+            abrirConfirmacaoSaida(isConsumo = true)
+        }
+        findViewById<View>(R.id.btnDesperdicadoAlimento)?.setOnClickListener {
+            abrirConfirmacaoSaida(isConsumo = false)
         }
         findViewById<View>(R.id.btnEditarAlimento).setOnClickListener {
             val intent = Intent(this, EditarAlimentoActivity::class.java).apply {
@@ -173,57 +176,126 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         img.setImageResource(imgRes)
     }
 
-    private fun confirmarRemocao() {
+        private fun abrirConfirmacaoSaida(isConsumo: Boolean) {
         val prod = item ?: return
-        val dialogView = layoutInflater.inflate(R.layout.activity_stock_removal_confirmation, null)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_confirmar_saida_estoque, null)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .create()
 
         val unit = lotUnitLabel(prod.product?.unitOfMeasure)
+        val prodName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
+        val maxQty = prod.quantity ?: 1
+        var selectedQty = 1
 
-        val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
-        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName
-        dialogView.findViewById<TextView>(R.id.tvQuantidadeAlimentoRemocao)?.text = "${prod.quantity ?: 1}$unit"
-        dialogView.findViewById<TextView>(R.id.tvValidadeAlimentoRemocao)?.text = getString(
-            R.string.lot_detail_expiration_value,
-            stockDetailExpiration(prod.expireDate) ?: getString(R.string.lot_detail_not_informed))
+        val imgIcone = dialogView.findViewById<ImageView>(R.id.imgIconeSaida)
+        val tvTitulo = dialogView.findViewById<TextView>(R.id.tvTituloSaida)
+        val tvSubtitulo = dialogView.findViewById<TextView>(R.id.tvSubtituloSaida)
+        val btnConfirmar = dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btnConfirmarSaida)
 
-        val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoRemocao)
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(dialogProdName, prod.category ?: prod.product?.category)
+        if (isConsumo) {
+            imgIcone?.setImageResource(R.drawable.ic_savings)
+            imgIcone?.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_green))
+            tvTitulo?.text = "Confirmar Consumo"
+            tvSubtitulo?.text = "Essa ação contabiliza economia no seu Money-Saving."
+            btnConfirmar?.setBackgroundResource(R.drawable.bg_btn_solid_green)
+            btnConfirmar?.text = "Consumir"
+        } else {
+            imgIcone?.setImageResource(R.drawable.ic_stock_remove)
+            imgIcone?.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_red))
+            tvTitulo?.text = "Registrar Desperdício"
+            tvSubtitulo?.text = "Essa ação contabiliza o alimento descartado no Money-Saving."
+            btnConfirmar?.setBackgroundResource(R.drawable.bg_btn_outlined_red)
+            btnConfirmar?.setTextColor(ContextCompat.getColor(this, R.color.color_red))
+            btnConfirmar?.text = "Descartar"
+        }
+
+        dialogView.findViewById<TextView>(R.id.tvNomeAlimentoSaida)?.text = prodName
+        val expireStr = stockDetailExpiration(prod.expireDate) ?: getString(R.string.lot_detail_not_informed)
+        dialogView.findViewById<TextView>(R.id.tvDetalhesAlimentoSaida)?.text = "Disponível: $maxQty$unit • Validade: $expireStr"
+
+        val imgRem = dialogView.findViewById<ImageView>(R.id.imgAlimentoSaida)
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(prodName, prod.category ?: prod.product?.category)
         imgRem?.clearColorFilter()
-        imgRem?.setImageResource(imgRes)
+        val remoteUrl = prod.product?.imageUrl
+        if (!remoteUrl.isNullOrBlank()) {
+            com.example.frigus_mobile.utils.ProductImageLoader.loadInto(imgRem, remoteUrl, imgRes)
+        } else {
+            imgRem?.setImageResource(imgRes)
+        }
 
-        dialogView.findViewById<View>(R.id.btnCancelarRemocao)?.setOnClickListener {
+        val tvQtd = dialogView.findViewById<TextView>(R.id.tvQuantidadeSaida)
+        tvQtd?.text = "$selectedQty"
+
+        dialogView.findViewById<View>(R.id.btnDiminuirQtd)?.setOnClickListener {
+            if (selectedQty > 1) {
+                selectedQty--
+                tvQtd?.text = "$selectedQty"
+            }
+        }
+
+        dialogView.findViewById<View>(R.id.btnAumentarQtd)?.setOnClickListener {
+            if (selectedQty < maxQty) {
+                selectedQty++
+                tvQtd?.text = "$selectedQty"
+            }
+        }
+
+        dialogView.findViewById<View>(R.id.btnTudoQtd)?.setOnClickListener {
+            selectedQty = maxQty
+            tvQtd?.text = "$selectedQty"
+        }
+
+        dialogView.findViewById<View>(R.id.btnCancelarSaida)?.setOnClickListener {
             dialog.dismiss()
         }
 
-        dialogView.findViewById<View>(R.id.btnConfirmarRemocao)?.setOnClickListener {
+        btnConfirmar?.setOnClickListener {
             dialog.dismiss()
-            removerAlimento()
+            executarSaidaEstoque(isConsumo, selectedQty)
         }
 
         dialog.show()
     }
 
-    private fun removerAlimento() {
-        val id = item?.id ?: return
-        if (!NetworkGuard.ensureConnected(this) { removerAlimento() }) return
+    private fun executarSaidaEstoque(isConsumo: Boolean, quantity: Int) {
+        val prod = item ?: return
+        val id = prod.id ?: return
+        if (!NetworkGuard.ensureConnected(this) { executarSaidaEstoque(isConsumo, quantity) }) return
+
+        val totalDisponivel = prod.quantity ?: quantity
+        val isTotal = quantity >= totalDisponivel
 
         lifecycleScope.launch {
             try {
-                item?.id?.let {
-                    StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
-                    ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
-                    StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
-                    ProductNameTracker.remove(this@AlimentoDetalhesActivity, it)
+                if (isConsumo) {
+                    repository.recordConsumption(id, quantity)
+                } else {
+                    repository.recordDiscard(id, quantity)
                 }
-                repository.deleteStockProduct(id)
-                Toast.makeText(this@AlimentoDetalhesActivity, "Alimento removido com sucesso!", Toast.LENGTH_SHORT).show()
-                finish()
+
+                if (isTotal) {
+                    try { repository.deleteStockProduct(id) } catch (_: Exception) {}
+                    item?.id?.let {
+                        StockQuantityTracker.remove(this@AlimentoDetalhesActivity, it)
+                        ProductImageTracker.remove(this@AlimentoDetalhesActivity, it)
+                        StockObservationsTracker.remove(this@AlimentoDetalhesActivity, it)
+                        ProductNameTracker.remove(this@AlimentoDetalhesActivity, it)
+                    }
+                    val msg = if (isConsumo) "Alimento consumido! Economia registrada no Money-Saving."
+                              else "Descarte registrado! Perda atualizada no Money-Saving."
+                    Toast.makeText(this@AlimentoDetalhesActivity, msg, Toast.LENGTH_LONG).show()
+                    finish()
+                } else {
+                    val remaining = totalDisponivel - quantity
+                    val msg = if (isConsumo) "$quantity consumido(s)! Economia registrada no Money-Saving."
+                              else "$quantity descartado(s)! Perda registrada no Money-Saving."
+                    Toast.makeText(this@AlimentoDetalhesActivity, msg, Toast.LENGTH_SHORT).show()
+                    atualizarDetalhesDaApi()
+                }
             } catch (e: Exception) {
                 NetworkGuard.showBlockingError(this@AlimentoDetalhesActivity, e.message) {
-                    removerAlimento()
+                    executarSaidaEstoque(isConsumo, quantity)
                 }
             }
         }

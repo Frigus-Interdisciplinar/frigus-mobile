@@ -38,6 +38,8 @@ object MobileHttp {
         "POST" to "/mobile/inventory/receipts/$uuid/confirm",
         "GET|PUT|DELETE" to "/mobile/inventory/stock-products/[1-9][0-9]*",
         "GET|POST" to "/mobile/inventory/stock-products/[1-9][0-9]*/movements",
+        "POST" to "/mobile/core/stock-products/[1-9][0-9]*/movements",
+        "POST" to "/mobile/core/discard",
         "GET" to "/mobile/recipes",
         "GET" to "/mobile/recipes/(favorites|suggestions)",
         "GET" to "/mobile/recipes/[1-9][0-9]*",

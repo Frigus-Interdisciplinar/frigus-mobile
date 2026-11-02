@@ -335,34 +335,53 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnRemoverEstoque"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_btn_outlined_red"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/stock_remove_from_stock"
-                android:textAllCaps="false"
-                android:textColor="@color/color_red"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnConsumirAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_solid_green"
+                    android:fontFamily="@font/sarabun"
+                    android:text="Consumido"
+                    android:textAllCaps="false"
+                    android:textColor="@color/pure_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnDesperdicadoAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_red"
+                    android:fontFamily="@font/sarabun"
+                    android:text="Desperdiçado"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_red"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnEditarAlimento"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_tab_selected"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_btn_outlined_blue"
                 android:fontFamily="@font/sarabun"
                 android:text="@string/stock_edit"
                 android:textAllCaps="false"
-                android:textColor="@color/pure_white"
-                android:textSize="13sp"
+                android:textColor="@color/blue_primary"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 

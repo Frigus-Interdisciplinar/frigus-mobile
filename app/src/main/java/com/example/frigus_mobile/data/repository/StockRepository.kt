@@ -4,6 +4,8 @@ import android.content.Context
 import com.example.frigus_mobile.data.api.BffException
 import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.model.ApiError
+import com.example.frigus_mobile.data.model.DiscardCreateRequest
+import com.example.frigus_mobile.data.model.DiscardResponse
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.Call
@@ -238,6 +240,38 @@ class StockRepository(context: Context? = null) {
             movement.movementType != request.movementType || movement.quantity != request.quantity)
             throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
         return movement
+    }
+
+    suspend fun recordConsumption(id: Int, quantity: Int, observation: String? = null): StockMovementResponse {
+        val request = StockMovementRequest(
+            movementType = "OUT",
+            quantity = quantity,
+            reasonCode = "CONSUMED",
+            observation = observation ?: "Consumido"
+        )
+        val response = api.recordStockMovement(id, request).awaitLotResponse()
+        if (response.code() != 201) throw BffException(
+            if (response.isSuccessful) ApiError(code = "INVALID_RESPONSE") else ApiError.parse(response), "")
+        val movement = response.body()
+        if (movement == null || (movement.id ?: 0) <= 0)
+            throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return movement
+    }
+
+    suspend fun recordDiscard(id: Int, quantity: Int, reason: String? = null): DiscardResponse {
+        val request = DiscardCreateRequest(
+            stockProductId = id,
+            quantity = quantity,
+            reasonCode = "EXPIRED",
+            reason = reason ?: "Descarte por validade"
+        )
+        val response = api.recordDiscard(request).awaitLotResponse()
+        if (response.code() != 201) throw BffException(
+            if (response.isSuccessful) ApiError(code = "INVALID_RESPONSE") else ApiError.parse(response), "")
+        val discard = response.body()
+        if (discard == null || (discard.id ?: 0) <= 0)
+            throw BffException(ApiError(code = "INVALID_RESPONSE"), "")
+        return discard
     }
 
     /** There is no mobile catalog or direct lot creation endpoint yet. */
