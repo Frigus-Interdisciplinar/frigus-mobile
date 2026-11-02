@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
+import com.example.frigus_mobile.ui.stock.lotUnitLabel
 import com.example.frigus_mobile.utils.ProductCategoryHelper
 import com.example.frigus_mobile.utils.ProductNameTracker
 import com.example.frigus_mobile.utils.ProductImageTracker
@@ -42,7 +43,7 @@ class EstoqueLocalAdapter(
         holder.tvNome.text = displayName
 
         val qtd = item.quantity ?: 1
-        val unit = product?.unitOfMeasure?.takeIf { it.isNotBlank() } ?: "un"
+        val unit = context.lotUnitLabel(product?.unitOfMeasure)
         holder.tvQuantidade.text = "$qtd $unit"
 
         val exp = ProductCategoryHelper.calcularStatusValidade(item.expireDate)
@@ -57,6 +58,14 @@ class EstoqueLocalAdapter(
             holder.tvValidadeStatus.visibility = View.GONE
         }
 
+        val remoteUrl = product?.imageUrl
+        if (!remoteUrl.isNullOrBlank()) {
+            val fallbackRes = ProductCategoryHelper.getImagemParaProduto(displayName, item.category ?: product?.category)
+            holder.imgProduto.setPadding(0, 0, 0, 0)
+            com.example.frigus_mobile.utils.ProductImageLoader.loadInto(holder.imgProduto, remoteUrl, fallbackRes)
+            holder.itemView.setOnClickListener { onItemClick(item) }
+            return
+        }
         val customUri = item.id?.let { ProductImageTracker.getImageUri(context, it) }
         if (!customUri.isNullOrBlank()) {
             try {

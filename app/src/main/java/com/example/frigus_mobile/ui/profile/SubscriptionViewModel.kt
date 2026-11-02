@@ -223,7 +223,18 @@ class SubscriptionViewModel(
         val id = group.id ?: return
         if (!group.isOwner || email.isBlank() || role !in listOf("EDITOR", "VIEWER")) return
         mutate(SubscriptionNotice.INVITED) { generation ->
-            val result = repository.invite(id, email, role)
+            val result = try {
+                repository.invite(id, email, role)
+            } catch (e: Exception) {
+                val invitations = runCatching { repository.invitations(id) }.getOrNull()
+                val existing = invitations?.firstOrNull { it.email.equals(email.trim(), ignoreCase = true) }
+                if (existing != null) {
+                    ensureSession(generation)
+                    update { it.copy(invitations = invitations) }
+                    return@mutate
+                }
+                throw e
+            }
             require(result.id != null)
             ensureSession(generation)
             update { it.copy(invitations = it.invitations + result) }

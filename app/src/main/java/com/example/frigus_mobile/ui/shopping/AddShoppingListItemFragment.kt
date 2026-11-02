@@ -23,6 +23,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.appcompat.app.AlertDialog
 import com.example.frigus_mobile.data.model.ShoppingDraft
 import com.example.frigus_mobile.data.model.validShoppingPrice
@@ -394,6 +396,31 @@ class AddShoppingListItemFragment : Fragment() {
         if (toStock && !validShoppingPrice(price)) {
             etPreco.error = getString(R.string.shopping_remote_price_invalid)
             etPreco.requestFocus()
+            return
+        }
+        val draftUri = customImageUri
+        if (draftUri != null) {
+            btnSalvar.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                val remoteUrl = runCatching {
+                    val bytes = requireContext().contentResolver.openInputStream(draftUri)?.use { it.readBytes() }
+                    if (bytes != null) {
+                        val mime = requireContext().contentResolver.getType(draftUri) ?: "image/jpeg"
+                        val validMime = if (mime in listOf("image/jpeg", "image/png", "image/webp")) mime else "image/jpeg"
+                        com.example.frigus_mobile.data.repository.StockRepository(requireContext()).uploadProductImage(bytes, validMime)
+                    } else null
+                }.getOrNull()
+                btnSalvar.isEnabled = true
+                model.submitDraft(ShoppingDraft(
+                    name = name, quantity = quantity,
+                    unitCode = unitCodes[spinnerUnidade.selectedItemPosition],
+                    categoryCode = categoryCodes[spinnerCategoria.selectedItemPosition],
+                    storagePlace = places[spinnerLugarEstoque.selectedItemPosition],
+                    expireDate = expiry?.toString(),
+                    observation = etObservacoes.text.toString().trim(),
+                    imageUri = remoteUrl ?: draftUri.toString(), unitPrice = price
+                ), toStock)
+            }
             return
         }
         model.submitDraft(ShoppingDraft(

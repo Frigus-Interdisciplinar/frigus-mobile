@@ -18,7 +18,8 @@ data class ShoppingCatalogProduct(
 )
 data class ShoppingCreateProduct(
     val name: String, val category: String, val storagePlace: String,
-    val unitPrice: BigDecimal, val unitOfMeasure: String, val ownerGroupId: String
+    val unitPrice: BigDecimal, val unitOfMeasure: String, val ownerGroupId: String,
+    val imageUrl: String? = null
 )
 /** Real UNIT purchase price is mandatory for every new lot sent by shopping. */
 data class ShoppingCreateLot(val productId: Int, val quantity: Int, val expireDate: String, val purchaseUnitPrice: BigDecimal)

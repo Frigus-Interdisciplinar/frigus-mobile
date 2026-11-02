@@ -267,7 +267,8 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
             checkpointPending(ShoppingPendingMutation(current.groupId, current.stock!!.id,
                 quantity = draft.quantity, expiry = draft.expireDate, purchaseUnitPrice = price))
             val product = selected ?: repository.createProduct(ShoppingCreateProduct(draft.name.trim(),
-                draft.categoryCode, draft.storagePlace, price, draft.unitCode, current.groupId)).also {
+                draft.categoryCode, draft.storagePlace, price, draft.unitCode, current.groupId,
+                imageUrl = draft.imageUri?.takeIf { it.startsWith("http://") || it.startsWith("https://") })).also {
                 checkpointPending(pendingMutation!!.copy(confirmedWrite = true, productId = it.id))
                 guard()
             }

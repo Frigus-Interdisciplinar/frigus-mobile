@@ -1,4 +1,4 @@
-﻿package com.example.frigus_mobile.data.api
+package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.local.SessionCredential
 import okhttp3.HttpUrl
@@ -12,7 +12,7 @@ object MobileHttp {
     private class SendOnce(val sent: AtomicBoolean = AtomicBoolean(false))
     private val uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     private val routes = listOf(
-        "POST" to "/mobile/user/(login|register)",
+        "POST" to "/mobile/user/(login|register|refresh)",
         "POST" to "/mobile/core/auth/google",
         "POST" to "/mobile/core/auth/(forgot-password|verify-reset-code|reset-password)",
         "POST" to "/mobile/firebase/session",
@@ -26,6 +26,7 @@ object MobileHttp {
         "GET|POST" to "/mobile/core/support/requests",
         "GET" to "/mobile/user/profile",
         "GET" to "/mobile/inventory/(home|products)",
+        "POST" to "/mobile/inventory/products/image-upload",
         "GET|POST" to "/mobile/inventory/stocks/[1-9][0-9]*/products",
         "GET|POST" to "/mobile/core/products",
         "GET|POST" to "/mobile/shopping-list/?",
@@ -72,7 +73,7 @@ object MobileHttp {
         path.split('/').filter { it.isNotEmpty() && it.all(Char::isDigit) }.all { it.toIntOrNull() != null }
 
     fun public(path: String): Boolean {
-        return path in setOf("/mobile/user/login", "/mobile/user/register", "/mobile/core/auth/google",
+        return path in setOf("/mobile/user/login", "/mobile/user/register", "/mobile/user/refresh", "/mobile/core/auth/google",
             "/mobile/core/auth/forgot-password", "/mobile/core/auth/verify-reset-code", "/mobile/core/auth/reset-password")
     }
 

@@ -40,7 +40,7 @@ class AuthRepository(
                 if (call.isCanceled || generation != session.generation) return
                 val body = response.body()
                 try {
-                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
+                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.refreshToken, body?.user)) {
                         result(AuthResult.Authenticated)
                     } else {
                         result(AuthResult.Failure(if (response.isSuccessful)
@@ -67,7 +67,7 @@ class AuthRepository(
                 if (call.isCanceled || generation != session.generation) return
                 val body = response.body()
                 try {
-                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.user)) {
+                    if (response.code() == 200 && validUser(body?.user) && session.authenticate(generation, body?.accessToken, body?.refreshToken, body?.user)) {
                         result(AuthResult.Authenticated)
                     } else {
                         finishError(if (response.isSuccessful) ApiError(displayMessage = text(R.string.auth_invalid_response))
@@ -109,8 +109,41 @@ class AuthRepository(
 
     fun restore(result: (AuthResult) -> Unit) {
         val token = session.accessToken ?: return
+        val refreshToken = session.refreshToken
         val generation = session.generation
         result(AuthResult.Loading)
+
+        if (!refreshToken.isNullOrBlank()) {
+            val call = api.refresh(RefreshRequest(refreshToken))
+            pending = call
+            call.enqueue(object : Callback<UserLoginResponse> {
+                override fun onResponse(call: Call<UserLoginResponse>, response: Response<UserLoginResponse>) {
+                    if (call.isCanceled || generation != session.generation) return
+                    val body = response.body()
+                    try {
+                        if (response.code() == 200 && validUser(body?.user) &&
+                            session.authenticate(generation, body?.accessToken, body?.refreshToken ?: refreshToken, body?.user)) {
+                            result(AuthResult.Authenticated)
+                        } else {
+                            if (response.code() == 401 || response.code() == 403) {
+                                session.clear()
+                            }
+                            result(AuthResult.Failure(if (response.isSuccessful)
+                                ApiError(displayMessage = text(R.string.auth_invalid_response)) else ApiError.parse(response)))
+                        }
+                    } catch (_: Exception) {
+                        session.clear()
+                        result(AuthResult.Failure(ApiError(displayMessage = text(R.string.auth_storage_error))))
+                    }
+                }
+
+                override fun onFailure(call: Call<UserLoginResponse>, t: Throwable) {
+                    if (!call.isCanceled && generation == session.generation) result(AuthResult.Failure(networkError()))
+                }
+            })
+            return
+        }
+
         val call = api.getProfile()
         pending = call
         call.enqueue(object : Callback<UserResponse> {
