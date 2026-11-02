@@ -156,6 +156,18 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
+            <!-- Carregar mais páginas de eventos -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/moneyMore"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_more"
+                android:textColor="@color/blue_primary"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <!-- Nota de rodapé da tabela -->

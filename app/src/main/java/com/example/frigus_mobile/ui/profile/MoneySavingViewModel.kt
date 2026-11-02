@@ -25,6 +25,8 @@ data class MoneySavingState(
     val month: YearMonth = YearMonth.now(),
     val category: String? = null,
     val kind: String? = null,
+    val customFrom: String? = null,
+    val customTo: String? = null,
     val page: Int = -1,
     val hasMore: Boolean = false,
     val loading: Boolean = false,
@@ -53,19 +55,40 @@ class MoneySavingViewModel(
         if (state.value?.hasMore == true && state.value?.error == null) request(true)
     }
 
-    fun changeMonth(delta: Int) {
+    fun setMonth(target: YearMonth) {
         val current = state.value ?: return
-        if (current.loading) return
-        mutableState.value = current.copy(month = current.month.plusMonths(delta.toLong()), summary = null,
-            events = emptyList(), page = -1, hasMore = false)
+        if (current.loading || (target == current.month && current.customFrom == null && current.customTo == null)) return
+        mutableState.value = current.copy(
+            month = target,
+            customFrom = null,
+            customTo = null,
+            summary = null,
+            events = emptyList(),
+            page = -1,
+            hasMore = false
+        )
         load()
     }
 
-    fun filter(category: String?, kind: String?) {
+    fun changeMonth(delta: Int) {
         val current = state.value ?: return
-        if (current.loading || (category == current.category && kind == current.kind)) return
+        if (current.loading) return
+        setMonth(current.month.plusMonths(delta.toLong()))
+    }
+
+    fun filter(category: String?, kind: String?, customFrom: String? = null, customTo: String? = null) {
+        val current = state.value ?: return
+        if (current.loading) return
         if (category !in CATEGORIES || kind !in KINDS) return
-        mutableState.value = current.copy(category = category, kind = kind, events = emptyList(), page = -1, hasMore = false)
+        mutableState.value = current.copy(
+            category = category,
+            kind = kind,
+            customFrom = customFrom,
+            customTo = customTo,
+            events = emptyList(),
+            page = -1,
+            hasMore = false
+        )
         load()
     }
 
@@ -90,8 +113,8 @@ class MoneySavingViewModel(
                     else repository.groupId()
                 if (!active()) return@launch
                 groupId = group
-                val from = snapshot.month.atDay(1).toString()
-                val to = snapshot.month.plusMonths(1).atDay(1).toString()
+                val from = snapshot.customFrom ?: snapshot.month.atDay(1).toString()
+                val to = snapshot.customTo ?: snapshot.month.plusMonths(1).atDay(1).toString()
                 if (!append) {
                     val summary = repository.summary(group, from, to)
                     if (!active()) return@launch
@@ -109,10 +132,10 @@ class MoneySavingViewModel(
             } catch (error: Exception) {
                 if (active()) {
                     val failure = when (error) {
-                    is BffException -> error.error
-                    is InvalidBffResponseException -> ApiError(code = "INVALID_RESPONSE")
-                    is IOException -> ApiError(code = "NETWORK_ERROR")
-                    else -> ApiError(code = "INVALID_RESPONSE")
+                        is BffException -> error.error
+                        is InvalidBffResponseException -> ApiError(code = "INVALID_RESPONSE")
+                        is IOException -> ApiError(code = "NETWORK_ERROR")
+                        else -> ApiError(code = "INVALID_RESPONSE")
                     }
                     val current = mutableState.value!!
                     mutableState.value = if (failure.status == 403) current.copy(error = failure,
@@ -135,7 +158,7 @@ class MoneySavingViewModel(
     }
 
     companion object {
-        val CATEGORIES = listOf(null, "HORTIFRUTI", "MEAT", "DAIRY", "GRAIN", "BEVERAGE")
+        val CATEGORIES = listOf(null, "HORTIFRUTI", "MEAT", "DAIRY", "GRAIN", "BEVERAGE", "OTHER")
         val KINDS = listOf(null, "PURCHASE", "CONSUMED", "DISCARDED")
     }
 }

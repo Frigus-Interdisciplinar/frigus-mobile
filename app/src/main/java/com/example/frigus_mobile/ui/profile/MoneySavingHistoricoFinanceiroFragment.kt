@@ -40,10 +40,16 @@ class MoneySavingHistoricoFinanceiroFragment : Fragment(R.layout.fragment_money_
                 .commit()
         }
 
+        val btnMore = view.findViewById<View>(R.id.moneyMore)
+        btnMore.setOnClickListener { model.nextPage() }
+
         model.state.observe(viewLifecycleOwner) { state ->
             val monthText = state.month.format(DateTimeFormatter.ofPattern("MMMM/yyyy", locale))
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
             view.findViewById<TextView>(R.id.tvPeriodoSelecionado).text = monthText
+
+            btnMore.visibility = if (state.hasMore && state.error == null) View.VISIBLE else View.GONE
+            btnMore.isEnabled = !state.loading
 
             renderEvents(view, state.events)
         }
@@ -188,10 +194,7 @@ class MoneySavingHistoricoFinanceiroFragment : Fragment(R.layout.fragment_money_
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.money_saving_period)
             .setItems(labels) { _, which ->
-                val selected = months[which]
-                val current = model.state.value?.month ?: java.time.YearMonth.now()
-                val delta = (selected.year * 12 + selected.monthValue) - (current.year * 12 + current.monthValue)
-                if (delta != 0) model.changeMonth(delta)
+                model.setMonth(months[which])
             }
             .setNegativeButton(R.string.account_cancel, null)
             .show()

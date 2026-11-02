@@ -190,7 +190,7 @@ class MoneySavingDetalhesGastosFragment : Fragment(R.layout.fragment_money_savin
             .setItems(labels) { _, which ->
                 selectedCategoryName = categories[which].first
                 selectedCategoryCode = categories[which].second
-                view?.let { renderCategoryData(it, model.state.value?.events.orEmpty()) }
+                model.filter(selectedCategoryCode, model.state.value?.kind)
             }
             .setNegativeButton(R.string.account_cancel, null)
             .show()
@@ -206,10 +206,7 @@ class MoneySavingDetalhesGastosFragment : Fragment(R.layout.fragment_money_savin
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.money_saving_period)
             .setItems(labels) { _, which ->
-                val selected = months[which]
-                val current = model.state.value?.month ?: java.time.YearMonth.now()
-                val delta = (selected.year * 12 + selected.monthValue) - (current.year * 12 + current.monthValue)
-                if (delta != 0) model.changeMonth(delta)
+                model.setMonth(months[which])
             }
             .setNegativeButton(R.string.account_cancel, null)
             .show()

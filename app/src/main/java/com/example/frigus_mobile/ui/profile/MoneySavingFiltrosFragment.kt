@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.frigus_mobile.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 
 class MoneySavingFiltrosFragment : Fragment(R.layout.fragment_money_saving_filtros) {
 
@@ -62,7 +61,7 @@ class MoneySavingFiltrosFragment : Fragment(R.layout.fragment_money_saving_filtr
         }
 
         view.findViewById<View>(R.id.btnAplicarFiltros).setOnClickListener {
-            model.filter(selectedCategoryCode, selectedStatusCode)
+            model.filter(selectedCategoryCode, selectedStatusCode, fromDate.toString(), toDate.toString())
             parentFragmentManager.popBackStack()
         }
 
@@ -146,10 +145,7 @@ class MoneySavingFiltrosFragment : Fragment(R.layout.fragment_money_saving_filtr
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.money_saving_period)
             .setItems(labels) { _, which ->
-                val selected = months[which]
-                val current = model.state.value?.month ?: java.time.YearMonth.now()
-                val delta = (selected.year * 12 + selected.monthValue) - (current.year * 12 + current.monthValue)
-                if (delta != 0) model.changeMonth(delta)
+                model.setMonth(months[which])
             }
             .setNegativeButton(R.string.account_cancel, null)
             .show()
