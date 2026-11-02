@@ -4,14 +4,14 @@
     <string name="money_saving_back">Voltar</string>
     <string name="money_saving_info">Informações</string>
     <string name="money_saving_overview">Visão geral</string>
-    <string name="money_saving_month_summary">Resumo do mês</string>
+    <string name="money_saving_month_summary">Resumo deste mês</string>
     <string name="money_saving_current_month">Mês atual</string>
     <string name="money_saving_saving">Economia obtida</string>
     <string name="money_saving_spending">Gasto com alimentação</string>
     <string name="money_saving_loss">Desperdício (perdas)</string>
-    <string name="money_saving_comparison">Comparação com mês anterior</string>
+    <string name="money_saving_comparison">Comparado ao mês anterior</string>
     <string name="money_saving_evolution">Evolução da economia</string>
-    <string name="money_saving_recent_months">Histórico mensal confirmado</string>
+    <string name="money_saving_recent_months">Últimos 6 meses</string>
     <string name="money_saving_shortcuts">Acesso rápido</string>
     <string name="money_saving_purchases">Gastos com alimentação</string>
     <string name="money_saving_waste">Economia e desperdício</string>
@@ -19,12 +19,12 @@
     <string name="money_saving_calculation">Como os valores são calculados</string>
     <string name="money_saving_explanation">Gastos somam quantidade × preço unitário das compras financeiras confirmadas do grupo. Economia soma o custo confirmado dos alimentos consumidos até o dia da validade. Perdas somam o custo confirmado dos descartes com motivo Vencido feitos após a validade. Ter alimentos no estoque, ou apenas vencidos, não comprova economia ou perda. Saídas sem custo confirmado ficam fora dos valores; outras saídas podem aparecer no histórico sem compor as métricas. Os filtros de categoria e tipo afetam o histórico; o resumo mostra o mês completo.</string>
     <string name="money_saving_close">Entendi</string>
-    <string name="money_saving_unknown">Valor não confirmado</string>
+    <string name="money_saving_unknown">R$ --</string>
     <string name="money_saving_not_informed">Não informado</string>
     <string name="money_saving_loading">Carregando dados do grupo…</string>
     <string name="money_saving_no_confirmed_values">Sem valores financeiros confirmados neste período.</string>
-    <string name="money_saving_access_denied">Seu plano ou sua permissão não permite acessar o MoneySaving deste grupo.</string>
-    <string name="money_saving_upgrade_plan">Ver planos com MoneySaving</string>
+    <string name="money_saving_access_denied">O MoneySaving é exclusivo para assinantes dos planos pagos.</string>
+    <string name="money_saving_upgrade_plan">Conhecer planos disponíveis</string>
     <string name="money_saving_network_error">Não foi possível conectar. Verifique sua conexão e atualize os dados.</string>
     <string name="money_saving_invalid_response">Não foi possível confirmar os dados recebidos. Tente atualizar.</string>
     <string name="money_saving_load_error">Não foi possível carregar o MoneySaving. Tente atualizar.</string>
@@ -41,18 +41,77 @@
     <string name="money_saving_category">Categoria</string>
     <string name="money_saving_event">Evento</string>
     <string name="money_saving_product">Produto</string>
-    <string name="money_saving_spending_change">Variação dos gastos: %1$s%%</string>
+    <string name="money_saving_spending_change">%1$s menos gastos</string>
+    <string name="money_saving_loss_change">%1$s mais desperdício</string>
     <string name="money_saving_loss_actions">Ações de perda: %1$s</string>
     <string name="money_saving_breakdown">%1$s\nGastos: %2$s · Economia: %3$s · Perdas: %4$s</string>
     <string name="money_saving_event_row">%1$s · %2$s\n%3$s · %4$s %5$s · %6$s\n%7$s</string>
     <string name="money_saving_included">Incluído nas métricas</string>
     <string name="money_saving_excluded">Não incluído nas métricas</string>
+
+    <!-- Telas Detalhadas -->
+    <string name="money_saving_period">Período</string>
+    <string name="money_saving_total_spent">Total gasto</string>
+    <string name="money_saving_spending_by_category">Gastos por categoria</string>
+    <string name="money_saving_spending_evolution">Evolução dos gastos</string>
+    <string name="money_saving_spending_details_link">Detalhes dos gastos &gt;</string>
+
+    <string name="money_saving_spending_details_title">Detalhes dos gastos</string>
+    <string name="money_saving_category_label">Categoria</string>
+    <string name="money_saving_category_total">Total da categoria</string>
+    <string name="money_saving_percent_total">% do total gasto</string>
+    <string name="money_saving_category_items">Itens da categoria</string>
+    <string name="money_saving_others">Outros</string>
+
+    <string name="money_saving_how_calculated_title">Como os valores são calculados</string>
+    <string name="money_saving_calc_prices_title">De onde vêm os preços?</string>
+    <string name="money_saving_calc_prices_desc">Os valores dos alimentos são obtidos a partir das notas fiscais escaneadas. Utilizamos o preço pago no momento da compra.</string>
+    <string name="money_saving_calc_used_title">Alimento aproveitado</string>
+    <string name="money_saving_calc_used_desc">Consideramos aproveitado quando o alimento é consumido antes da data de validade ou ainda dentro do período seguro.</string>
+    <string name="money_saving_calc_discarded_title">Alimento descartado</string>
+    <string name="money_saving_calc_discarded_desc">Consideramos descartado quando o alimento passa da data de validade e é removido do estoque sem ter sido consumido.</string>
+    <string name="money_saving_calc_disclaimer">Os valores apresentados são estimativos e podem variar de acordo com peso, unidade e atualizações de preço.</string>
+
+    <string name="money_saving_economy_waste_title">Economia e desperdício</string>
+    <string name="money_saving_loss_expiry">Perdas por vencimento</string>
+    <string name="money_saving_items_used">Alimentos aproveitados</string>
+    <string name="money_saving_items_discarded">Alimentos descartados</string>
+    <string name="money_saving_waste_evolution">Evolução do desperdício</string>
+    <string name="money_saving_economy_details_link">Detalhes da economia &gt;</string>
+    <string name="money_saving_waste_disclaimer">Os valores de desperdício consideram apenas alimentos vencidos que foram descartados.</string>
+
+    <string name="money_saving_economy_details_title">Detalhes da economia</string>
+    <string name="money_saving_economy_by_category">Economia por categoria</string>
+    <string name="money_saving_economy_disclaimer">A economia representa o valor estimado dos alimentos aproveitados antes do vencimento.</string>
+
+    <string name="money_saving_financial_history_title">Histórico financeiro</string>
+    <string name="money_saving_th_product">Produto</string>
+    <string name="money_saving_th_category">Categoria</string>
+    <string name="money_saving_th_date">Data</string>
+    <string name="money_saving_th_value">Valor</string>
+    <string name="money_saving_th_status">Status</string>
+    <string name="money_saving_status_consumed">Consumido</string>
+    <string name="money_saving_status_discarded">Descartado</string>
+    <string name="money_saving_status_purchased">Comprado</string>
+    <string name="money_saving_receipt_note">* Valores obtidos a partir das notas fiscais.</string>
+    <string name="money_saving_advanced_filters">Filtros avançados</string>
+
+    <string name="money_saving_filters_title">Filtros</string>
+    <string name="money_saving_filter_from">De</string>
+    <string name="money_saving_filter_to">Até</string>
+    <string name="money_saving_apply_filters">Aplicar filtros</string>
+    <string name="money_saving_filters_disclaimer">Os filtros serão aplicados ao seu Histórico financeiro.</string>
+
+    <string name="money_saving_plan_required_title">Recurso Exclusivo do Plano Pago</string>
+    <string name="money_saving_plan_required_message">O MoneySaving está disponível exclusivamente para assinantes de planos pagos. Assine para desbloquear relatórios financeiros, gráficos de economia e métricas de desperdício.</string>
+    <string name="money_saving_plan_required_cta">Conhecer planos disponíveis</string>
+
     <string-array name="money_saving_categories">
-        <item>Todas as categorias</item><item>Hortifruti</item><item>Carnes</item>
-        <item>Laticínios</item><item>Grãos</item><item>Bebidas</item>
+        <item>Todas as categorias</item><item>Hortifrúti</item><item>Carnes</item>
+        <item>Laticínios</item><item>Grãos</item><item>Bebidas</item><item>Outros</item>
     </string-array>
     <string-array name="money_saving_kinds">
-        <item>Todos os tipos</item><item>Compras</item><item>Consumo</item><item>Descarte</item>
+        <item>Todos os status</item><item>Compras</item><item>Consumido</item><item>Descartado</item>
     </string-array>
     <string-array name="money_saving_effects">
         <item>Consumo e economia</item><item>Descarte e desperdício</item>

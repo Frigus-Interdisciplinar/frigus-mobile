@@ -23,4 +23,11 @@
     <color name="profile_divider">#E2E8F0</color>
     <color name="profile_plan_bg">#F5F8FC</color>
     <color name="profile_contact_bg">#EAF3FF</color>
+    <color name="color_category_meat">#EF4444</color>
+    <color name="color_category_dairy">#2563EB</color>
+    <color name="color_category_produce">#10B981</color>
+    <color name="color_category_beverage">#F59E0B</color>
+    <color name="color_category_other">#8B5CF6</color>
+    <color name="color_chart_bar_light">#C7D7F9</color>
+    <color name="color_chart_grid">#F1F5F9</color>
 </resources>
