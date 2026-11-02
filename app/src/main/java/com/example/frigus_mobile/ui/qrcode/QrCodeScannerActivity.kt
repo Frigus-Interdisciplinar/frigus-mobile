@@ -71,7 +71,15 @@ class QrCodeScannerActivity : AppCompatActivity() {
                     ?: getString(R.string.receipt_stock_fallback, stock.id) })
                 stockSelector.adapter = ArrayAdapter(this@QrCodeScannerActivity,
                     android.R.layout.simple_spinner_dropdown_item, labels)
-                stockSelector.setSelection(0)
+                val activeId = SessionManager(this@QrCodeScannerActivity).activeStockId
+                val defaultIndex = if (activeId != null) {
+                    stocks.indexOfFirst { it.id == activeId }.takeIf { it >= 0 }?.plus(1) ?: 1
+                } else if (stocks.size == 1) {
+                    1
+                } else {
+                    0
+                }
+                stockSelector.setSelection(defaultIndex.coerceIn(0, labels.size - 1))
                 if (stocks.isEmpty()) {
                     status.setText(R.string.receipt_no_stocks)
                     status.visibility = View.VISIBLE
@@ -119,8 +127,10 @@ class QrCodeScannerActivity : AppCompatActivity() {
                 val payload = barcode.rawValue?.trim()
                 if (payload.isNullOrBlank()) {
                     showStatus(R.string.receipt_invalid_qr)
+                    android.widget.Toast.makeText(this, R.string.receipt_invalid_qr, android.widget.Toast.LENGTH_LONG).show()
                     return@addOnSuccessListener
                 }
+                android.widget.Toast.makeText(this, "QR Code capturado! Consultando...", android.widget.Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, QrCodeCarregandoActivity::class.java)
                     .putExtra(QrReceiptExtras.STOCK_ID, stockId)
                     .putExtra(QrReceiptExtras.QR_PAYLOAD, payload))
@@ -128,6 +138,7 @@ class QrCodeScannerActivity : AppCompatActivity() {
                 scanning = false
                 scanButton.isEnabled = true
                 showStatus(R.string.receipt_scan_unavailable)
+                android.widget.Toast.makeText(this, R.string.receipt_scan_unavailable, android.widget.Toast.LENGTH_LONG).show()
             }.addOnCanceledListener(this) {
                 scanning = false
                 scanButton.isEnabled = true
@@ -137,6 +148,15 @@ class QrCodeScannerActivity : AppCompatActivity() {
             scanning = false
             scanButton.isEnabled = true
             showStatus(R.string.receipt_scan_unavailable)
+        }
+    }
+
+    
+    override fun onResume() {
+        super.onResume()
+        scanning = false
+        if (stocks.isNotEmpty()) {
+            scanButton.isEnabled = true
         }
     }
 

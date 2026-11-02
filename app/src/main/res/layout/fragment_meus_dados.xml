@@ -155,26 +155,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvMeusDadosStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/account_gap"
-            android:accessibilityLiveRegion="polite"
-            android:fontFamily="@font/sarabun"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="@dimen/account_body_size"
-            android:visibility="gone" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAtualizarMeusDados"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/account_gap"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/account_refresh"
-            android:textAllCaps="false" />
-
         <!-- Seção Meus Dados -->
         <TextView
             android:layout_width="wrap_content"

@@ -85,8 +85,17 @@ class ChatIaActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnSavedAiSuggestions).setOnClickListener { model.loadSavedSuggestions() }
         findViewById<View>(R.id.chatContextStatus).setOnClickListener {
             model.state.value?.let { state ->
-                if (state.uncertain) model.loadSavedSuggestions()
-                else if (state.error != null && !state.contextReady) model.reloadContext()
+                if (state.uncertain) {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.ai_chat_uncertain_title)
+                        .setMessage(R.string.ai_chat_uncertain)
+                        .setPositiveButton(R.string.ai_chat_check_saved) { _, _ -> model.loadSavedSuggestions() }
+                        .setNeutralButton(R.string.ai_chat_new_conversation) { _, _ -> model.resetConversation() }
+                        .setNegativeButton(R.string.ai_chat_close, null)
+                        .show()
+                } else if (state.error != null && !state.contextReady) {
+                    model.reloadContext()
+                }
             }
         }
         SessionManager.authenticated.observe(this) { if (!session.isLoggedIn) openLogin() }
@@ -141,6 +150,7 @@ class ChatIaActivity : AppCompatActivity() {
         if (state.uncertain) {
             dialog.setTitle(R.string.ai_chat_uncertain_title).setMessage(R.string.ai_chat_uncertain)
                 .setPositiveButton(R.string.ai_chat_check_saved) { _, _ -> model.loadSavedSuggestions() }
+                .setNeutralButton(R.string.ai_chat_new_conversation) { _, _ -> model.resetConversation() }
                 .setNegativeButton(R.string.ai_chat_close, null)
         } else {
             dialog.setMessage(state.error?.let(::errorMessage).orEmpty())

@@ -208,13 +208,14 @@ class SubscriptionViewModel(
     }
 
     fun freeCheckout(plan: ActivePlan) {
-        if (plan.price != 0.0 || plan.planCode.isNullOrBlank() || !plan.active || state.value?.checkoutAwaitingRefresh == true) return
+        if (plan.planCode.isNullOrBlank() || !plan.active || state.value?.checkoutAwaitingRefresh == true) return
         mutate(SubscriptionNotice.CHECKOUT) { generation ->
-            val result = repository.freeCheckout(plan.planCode)
+            val result = repository.checkout(plan.planCode, plan.price == 0.0)
             require(result.id != null)
             ensureSession(generation)
             update { it.copy(transactions = listOf(result), transactionPage = -1, hasMoreTransactions = false,
                 checkoutAwaitingRefresh = true) }
+            load()
         }
     }
 

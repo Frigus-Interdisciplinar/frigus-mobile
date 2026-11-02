@@ -145,7 +145,7 @@ class RecipesViewModel(application: Application) : AndroidViewModel(application)
     fun loadIfNeeded() {
         val recipesChanged = aiRevision != AiRecipeUpdates.current()
         aiRevision = AiRecipeUpdates.current()
-        if (mutableCatalog.value == null) refreshCatalog()
+        if (recipesChanged || mutableCatalog.value == null) refreshCatalog()
         if (recipesChanged || mutableSuggestions.value == null || suggestionGroup != session.activeGroupId ||
             suggestionStock != session.activeStockId || suggestionSession != session.state.generation) refreshSuggestions()
     }

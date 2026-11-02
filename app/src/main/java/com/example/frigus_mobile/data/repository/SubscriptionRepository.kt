@@ -17,8 +17,18 @@ class SubscriptionRepository {
     suspend fun transactions(page: Int) = withContext(Dispatchers.IO) { api.transactions(page).requireBody() }
     suspend fun cancel() = withContext(Dispatchers.IO) { api.cancel().requireBody() }
     suspend fun reactivate() = withContext(Dispatchers.IO) { api.reactivate().requireBody() }
-    suspend fun freeCheckout(planCode: String) = withContext(Dispatchers.IO) {
-        api.checkout(UUID.randomUUID().toString(), CheckoutRequest(planCode)).requireBody()
+    suspend fun freeCheckout(planCode: String) = checkout(planCode, true)
+    suspend fun checkout(planCode: String, isFree: Boolean) = withContext(Dispatchers.IO) {
+        val request = if (isFree) {
+            CheckoutRequest(planCode)
+        } else {
+            CheckoutRequest(
+                planCode = planCode,
+                paymentMethod = "PIX",
+                fakePixKey = "12345678900"
+            )
+        }
+        api.checkout(UUID.randomUUID().toString(), request).requireBody()
     }
     suspend fun groups() = withContext(Dispatchers.IO) { api.groups().requireBody() }
     suspend fun createGroup(name: String) = withContext(Dispatchers.IO) {
