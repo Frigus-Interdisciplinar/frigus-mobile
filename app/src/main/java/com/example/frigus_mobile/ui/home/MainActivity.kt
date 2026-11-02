@@ -1,4 +1,4 @@
-﻿package com.example.frigus_mobile.ui.home
+package com.example.frigus_mobile.ui.home
 
 import android.Manifest
 import android.content.Intent
@@ -156,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                 "subscription_group" -> com.example.frigus_mobile.ui.profile.MeuGrupoFragment()
                 "subscription_history" -> com.example.frigus_mobile.ui.profile.HistoricoCobrancasFragment()
                 "profile_data" -> com.example.frigus_mobile.ui.profile.MeusDadosFragment()
+                "money_saving" -> if (subscriptionModel.state.value?.limits?.allowMoneySaving == true) com.example.frigus_mobile.ui.profile.MoneySavingFragment() else null
                 else -> null
             }
             section?.let { supportFragmentManager.beginTransaction()
@@ -184,7 +185,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openMoneySaving() {
-        if (subscriptionModel.state.value?.limits?.allowMoneySaving != true) return
+        if (subscriptionModel.state.value?.limits?.allowMoneySaving != true) {
+            android.widget.Toast.makeText(this, R.string.money_saving_access_denied, android.widget.Toast.LENGTH_SHORT).show()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment())
+                .addToBackStack(null).commit()
+            return
+        }
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, com.example.frigus_mobile.ui.profile.MoneySavingFragment())
             .addToBackStack(null).commit()
