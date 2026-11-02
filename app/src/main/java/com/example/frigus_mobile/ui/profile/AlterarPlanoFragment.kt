@@ -100,9 +100,9 @@ class AlterarPlanoFragment : SubscriptionScreenFragment(R.layout.fragment_altera
                     strokeWidth = if (current) dp(1) else 0
                     strokeColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.profile_divider))
                     setOnClickListener {
-                        if (free && plan.active) confirm(getString(R.string.subscription_confirm_free, value(plan.name))) {
+                        if (plan.active) confirm("Deseja alterar para o plano ${value(plan.name)}?") {
                             model.freeCheckout(plan)
-                        } else message(R.string.profile_choose_plan, getString(R.string.subscription_paid_unavailable))
+                        }
                     }
                 }
                 cards.addView(card)

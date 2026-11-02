@@ -12,7 +12,10 @@ data class ApiError(
     val fields: List<ApiFieldError>? = null,
     val timestamp: String? = null
 ) {
-    fun userMessage(fallback: String): String = displayMessage?.takeIf { it.isNotBlank() } ?: fallback
+    fun userMessage(fallback: String): String =
+        displayMessage?.takeIf { it.isNotBlank() }
+            ?: message?.takeIf { it.isNotBlank() }
+            ?: fallback
 
     companion object {
         fun parse(response: Response<*>): ApiError {

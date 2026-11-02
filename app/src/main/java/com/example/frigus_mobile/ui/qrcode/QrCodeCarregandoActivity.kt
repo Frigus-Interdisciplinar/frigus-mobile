@@ -51,6 +51,7 @@ class QrCodeCarregandoActivity : AppCompatActivity() {
             status.text = when {
                 state.uncertain -> getString(R.string.receipt_scan_uncertain)
                 state.error.status == 409 -> getString(R.string.receipt_already_imported)
+                state.error.code == "INVALID_QR_PAYLOAD" -> state.error.userMessage("O QR Code lido não é uma NFC-e oficial da SEFAZ-SP.")
                 else -> state.error.userMessage(getString(R.string.receipt_scan_error))
             }
         }
