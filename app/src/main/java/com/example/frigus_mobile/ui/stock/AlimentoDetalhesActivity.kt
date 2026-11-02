@@ -60,6 +60,9 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnRemoverEstoque)?.setOnClickListener {
             confirmarRemocao()
         }
+        findViewById<View>(R.id.btnRemoverEstoqueTop)?.setOnClickListener {
+            confirmarRemocao()
+        }
 
         preencherDados()
     }
