@@ -119,8 +119,10 @@ class QrCodeScannerActivity : AppCompatActivity() {
                 val payload = barcode.rawValue?.trim()
                 if (payload.isNullOrBlank()) {
                     showStatus(R.string.receipt_invalid_qr)
+                    android.widget.Toast.makeText(this, R.string.receipt_invalid_qr, android.widget.Toast.LENGTH_LONG).show()
                     return@addOnSuccessListener
                 }
+                android.widget.Toast.makeText(this, "QR Code capturado! Consultando...", android.widget.Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, QrCodeCarregandoActivity::class.java)
                     .putExtra(QrReceiptExtras.STOCK_ID, stockId)
                     .putExtra(QrReceiptExtras.QR_PAYLOAD, payload))
@@ -128,6 +130,7 @@ class QrCodeScannerActivity : AppCompatActivity() {
                 scanning = false
                 scanButton.isEnabled = true
                 showStatus(R.string.receipt_scan_unavailable)
+                android.widget.Toast.makeText(this, R.string.receipt_scan_unavailable, android.widget.Toast.LENGTH_LONG).show()
             }.addOnCanceledListener(this) {
                 scanning = false
                 scanButton.isEnabled = true

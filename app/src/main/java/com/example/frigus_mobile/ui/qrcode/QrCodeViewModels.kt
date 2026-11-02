@@ -88,12 +88,8 @@ class QrReceiptScanViewModel(application: Application, private val savedState: S
 
     fun scan(stockId: Int, payload: String, explicitRetry: Boolean = false) {
         val current = mutableState.value ?: ReceiptScanState()
-        if (!session.isLoggedIn || stockId <= 0 || payload.isBlank() || current.loading || current.receiptId != null) return
-        if (savedState.get<Boolean>(PENDING) == true && !explicitRetry) {
-            mutableState.value = current.copy(uncertain = true)
-            return
-        }
-        savedState[PENDING] = true
+        if (!session.isLoggedIn || stockId <= 0 || payload.isBlank() || current.loading) return
+        if (current.receiptId != null && !explicitRetry) return
         val generation = session.state.generation
         mutableState.value = current.copy(loading = true, error = null, uncertain = false)
         viewModelScope.launch {
@@ -101,25 +97,23 @@ class QrReceiptScanViewModel(application: Application, private val savedState: S
                 val result = repository.scan(stockId, payload)
                 if (!session.isLoggedIn || session.state.generation != generation) return@launch
                 val receiptId = result.receiptId ?: throw InvalidBffResponseException()
-                savedState.remove<Boolean>(PENDING)
                 savedState[RECEIPT_ID] = receiptId
-                mutableState.value = (mutableState.value ?: current).copy(
+                mutableState.value = ReceiptScanState(
                     loading = false, receiptId = receiptId, error = null, uncertain = false)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (failure: Exception) {
                 if (!session.isLoggedIn || session.state.generation != generation) return@launch
                 val error = failureError(failure)
                 val uncertain = isUncertain(error)
-                if (!uncertain) savedState.remove<Boolean>(PENDING)
-                mutableState.value = (mutableState.value ?: current).copy(
+                mutableState.value = ReceiptScanState(
                     loading = false, error = error, uncertain = uncertain)
             }
         }
     }
 
     fun retry(stockId: Int, payload: String) {
-        if (mutableState.value?.loading == true || mutableState.value?.receiptId != null) return
-        savedState.remove<Boolean>(PENDING)
+        if (mutableState.value?.loading == true) return
+        savedState.remove<String>(RECEIPT_ID)
         scan(stockId, payload, explicitRetry = true)
     }
 
