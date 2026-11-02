@@ -121,28 +121,28 @@ class MoneySavingHistoricoFinanceiroFragment : Fragment(R.layout.fragment_money_
         val tvName = TextView(requireContext()).apply {
             text = name
             setTextColor(ContextCompat.getColor(requireContext(), R.color.color_text_primary))
-            textSize = 12sp
+            textSize = 12f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.8f)
         }
 
         val tvCat = TextView(requireContext()).apply {
             text = cat
             setTextColor(ContextCompat.getColor(requireContext(), R.color.color_text_secondary))
-            textSize = 11sp
+            textSize = 11f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.5f)
         }
 
         val tvDate = TextView(requireContext()).apply {
             text = date
             setTextColor(ContextCompat.getColor(requireContext(), R.color.color_text_secondary))
-            textSize = 11sp
+            textSize = 11f
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
         }
 
         val tvVal = TextView(requireContext()).apply {
             text = value
             setTextColor(ContextCompat.getColor(requireContext(), R.color.color_text_primary))
-            textSize = 11.5sp
+            textSize = 11.5f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.5f)
         }
@@ -150,7 +150,7 @@ class MoneySavingHistoricoFinanceiroFragment : Fragment(R.layout.fragment_money_
         // Badge pill
         val badge = TextView(requireContext()).apply {
             text = status
-            textSize = 10.5sp
+            textSize = 10.5f
             gravity = Gravity.CENTER
             setPadding(dp(6), dp(3), dp(6), dp(3))
             if (isDiscarded) {
@@ -198,5 +198,4 @@ class MoneySavingHistoricoFinanceiroFragment : Fragment(R.layout.fragment_money_
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-    private val Int.sp: Float get() = this.toFloat()
 }
