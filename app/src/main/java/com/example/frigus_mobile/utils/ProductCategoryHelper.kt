@@ -20,7 +20,7 @@ data class ExpirationStatus(
 object ProductCategoryHelper {
 
     private val inputDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    private val outputDateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
+    private val outputDateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.ROOT)
 
     /**
      * Calcula o status de vencimento inteligente baseado na data da API.

@@ -24,6 +24,6 @@ internal fun stockCategoryIcon(code: String?): Int = when (code) {
 internal fun stockDisplayDate(value: String?): String {
     if (value.isNullOrBlank()) return ""
     return try {
-        java.time.LocalDate.parse(value).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu"))
+        java.time.LocalDate.parse(value).format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-uuuu"))
     } catch (_: java.time.DateTimeException) { value }
 }

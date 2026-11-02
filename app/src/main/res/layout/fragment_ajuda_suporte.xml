@@ -241,6 +241,18 @@
                 android:fontFamily="@font/sarabun"
                 app:backgroundTint="@color/profile_primary"
                 app:cornerRadius="10dp"/>
+            <TextView
+                android:id="@+id/btnMinhasSolicitacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="@string/profile_support_history_button"
+                android:textColor="@color/profile_primary"
+                android:textSize="13sp"
+                android:fontFamily="@font/sarabun"
+                android:clickable="true"
+                android:focusable="true"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -131,6 +131,7 @@ class MainActivity : AppCompatActivity() {
                 ViewModelProvider(this)[com.example.frigus_mobile.ui.recipes.RecipesViewModel::class.java].refreshSuggestions()
             }
         }
+        subscriptionModel.loadIfNeeded()
         ViewModelProvider(this)[com.example.frigus_mobile.ui.shopping.ShoppingListViewModel::class.java].state.observe(this) { state ->
             if (session.isLoggedIn && state.inventoryRevision > shoppingInventoryRevision) {
                 shoppingInventoryRevision = state.inventoryRevision
@@ -147,15 +148,13 @@ class MainActivity : AppCompatActivity() {
         navigation.menu.findItem(selected)?.isChecked = true
         if (unavailable != 0) showUnavailable(unavailable)
         else openTab(selected)
-        if (unavailable == 0 && (selected == R.id.nav_perfil ||
-                navigationState?.getString(PROFILE_SECTION) == "money_saving")) {
+        if (unavailable == 0 && selected == R.id.nav_perfil) {
             val section = when (navigationState?.getString(PROFILE_SECTION)) {
                 "subscription" -> com.example.frigus_mobile.ui.profile.AssinaturaPlanosFragment()
                 "subscription_manage" -> com.example.frigus_mobile.ui.profile.GerenciarPlanoFragment()
                 "subscription_plans" -> com.example.frigus_mobile.ui.profile.AlterarPlanoFragment()
                 "subscription_group" -> com.example.frigus_mobile.ui.profile.MeuGrupoFragment()
                 "subscription_history" -> com.example.frigus_mobile.ui.profile.HistoricoCobrancasFragment()
-                "money_saving" -> com.example.frigus_mobile.ui.profile.MoneySavingFragment()
                 "profile_data" -> com.example.frigus_mobile.ui.profile.MeusDadosFragment()
                 else -> null
             }
@@ -182,6 +181,13 @@ class MainActivity : AppCompatActivity() {
     fun selectTab(tabId: Int) {
         if (!::navigation.isInitialized) return
         navigation.selectedItemId = tabId
+    }
+
+    fun openMoneySaving() {
+        if (subscriptionModel.state.value?.limits?.allowMoneySaving != true) return
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, com.example.frigus_mobile.ui.profile.MoneySavingFragment())
+            .addToBackStack(null).commit()
     }
 
     fun showHome() {
@@ -310,7 +316,7 @@ class MainActivity : AppCompatActivity() {
             putBundle(INVENTORY_NAVIGATION, source.getBundle(INVENTORY_NAVIGATION))
             putBundle(SUBSCRIPTION_NAVIGATION, source.getBundle(SUBSCRIPTION_NAVIGATION))
             source.getString(PROFILE_SECTION)?.takeIf { it in setOf("subscription", "subscription_manage",
-                "subscription_plans", "subscription_group", "subscription_history", "money_saving", "profile_data") }
+                "subscription_plans", "subscription_group", "subscription_history", "profile_data") }
                 ?.let { putString(PROFILE_SECTION, it) }
         }
     }

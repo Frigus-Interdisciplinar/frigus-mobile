@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="home_default_group_name">Meu grupo</string>
     <string name="home_greeting">Olá!</string>
     <string name="home_named_greeting">Olá, %1$s!</string>
     <string name="home_subtitle">Vamos cuidar do que importa!</string>

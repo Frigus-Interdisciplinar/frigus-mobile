@@ -274,21 +274,37 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvCriarConta"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:fontFamily="@font/sarabun"
-            android:padding="8dp"
-            android:text="@string/auth_create_account_link"
-            android:textColor="@color/blue_primary"
-            android:textSize="14sp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutBtnGoogle" />
+            app:layout_constraintTop_toBottomOf="@id/layoutBtnGoogle">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/auth_no_account"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvCriarConta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/auth_create_account_link"
+                android:textColor="@color/blue_primary"
+                android:textSize="14sp" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -11,4 +11,12 @@
     <string name="profile_request_description_hint">Explique seu problema ou dúvida</string>
     <string name="profile_request_info">Após o envio, você verá a confirmação e receberá um número de protocolo.</string>
     <string name="profile_request_send">Enviar solicitação</string>
+    <string name="profile_support_history_button">Minhas solicitações</string>
+    <string name="profile_request_subject_required">Informe o assunto.</string>
+    <string name="profile_request_description_invalid">Descreva sua solicitação com pelo menos 10 caracteres.</string>
+    <string name="profile_request_sending">Enviando solicitação…</string>
+    <string name="profile_request_sent_title">Solicitação enviada</string>
+    <string name="profile_request_sent_message">Protocolo: %1$s</string>
+    <string name="profile_request_result_uncertain">Não foi possível confirmar o envio. Vamos consultar suas solicitações antes de liberar outro envio.</string>
+    <string name="profile_request_failed">Não foi possível enviar a solicitação. Tente novamente.</string>
 </resources>

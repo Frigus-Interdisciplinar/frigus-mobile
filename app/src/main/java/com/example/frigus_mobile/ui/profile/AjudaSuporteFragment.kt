@@ -2,8 +2,6 @@ package com.example.frigus_mobile.ui.profile
 
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -21,13 +19,11 @@ import retrofit2.Response
 /** Keeps the restored help screen and sends support requests through the BFF. */
 class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
     private var listCall: Call<SupportRequestPage>? = null
-    private var createCall: Call<SupportRequestItem>? = null
     private var busy = false
     private var uncertainRequest: SupportRequestBody? = null
     private var page = 0
     private var loadingSnackbar: Snackbar? = null
     private var feedbackSnackbar: Snackbar? = null
-    private var createDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,7 +36,16 @@ class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
             "Abra o detalhe de um lote existente para consultar o saldo e as movimentações confirmadas pelo servidor.")
         faq(view, R.id.btnFaqMoneySaving, "MoneySaving", getString(R.string.profile_faq_money_saving))
         view.findViewById<View>(R.id.btnEntrarContato).setOnClickListener {
-            if (uncertainRequest != null) loadHistory(0) else showContactOptions()
+            if (uncertainRequest != null) loadHistory(0)
+            else abrirTela(EnviarSolicitacaoFragment())
+        }
+        view.findViewById<View>(R.id.btnMinhasSolicitacoes).setOnClickListener { loadHistory(0) }
+        val subject = arguments?.getString(ARG_UNCERTAIN_SUBJECT)
+        val description = arguments?.getString(ARG_UNCERTAIN_DESCRIPTION)
+        if (!subject.isNullOrBlank() && !description.isNullOrBlank()) {
+            uncertainRequest = SupportRequestBody(subject, description)
+            Snackbar.make(view, R.string.profile_request_result_uncertain, Snackbar.LENGTH_LONG).show()
+            loadHistory(0)
         }
     }
 
@@ -50,89 +55,6 @@ class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
                 .setPositiveButton("Entendi", null).show()
         }
     }
-
-    private fun showContactOptions() {
-        AlertDialog.Builder(requireContext()).setTitle("Suporte")
-            .setItems(arrayOf("Enviar solicitação", "Minhas solicitações")) { _, index ->
-                if (index == 0) showCreateForm() else loadHistory(0)
-            }.setNegativeButton("Fechar", null).show()
-    }
-
-    private fun showCreateForm() {
-        if (busy || uncertainRequest != null) return
-        val content = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            val padding = (20 * resources.displayMetrics.density).toInt()
-            setPadding(padding, padding / 2, padding, 0)
-        }
-        val subject = EditText(requireContext()).apply {
-            hint = "Assunto"
-            maxLines = 1
-            content.addView(this)
-        }
-        val description = EditText(requireContext()).apply {
-            hint = "Descreva sua solicitação"
-            minLines = 3
-            content.addView(this)
-        }
-        val message = TextView(requireContext()).apply { content.addView(this) }
-        val dialog = AlertDialog.Builder(requireContext()).setTitle("Enviar solicitação")
-            .setView(content).setNegativeButton("Cancelar", null).setPositiveButton("Enviar", null).create()
-        createDialog = dialog
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val title = subject.text.toString().trim()
-                val body = description.text.toString().trim()
-                if (title.isBlank() || body.isBlank()) {
-                    message.text = "Informe o assunto e a descrição."
-                    return@setOnClickListener
-                }
-                send(SupportRequestBody(title, body), dialog, message)
-            }
-        }
-        dialog.show()
-    }
-
-    private fun send(requestBody: SupportRequestBody, dialog: AlertDialog, message: TextView) {
-        if (busy || uncertainRequest != null) return
-        busy = true
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
-        message.text = "Enviando solicitação..."
-        createCall = RetrofitClient.supportService.create(requestBody).also { request ->
-            request.enqueue(object : Callback<SupportRequestItem> {
-                override fun onResponse(call: Call<SupportRequestItem>, response: Response<SupportRequestItem>) {
-                    if (call.isCanceled || view == null) return
-                    busy = false
-                    val result = response.body()
-                    if (response.code() == 201 && valid(result)) {
-                        createDialog = null
-                        dialog.dismiss()
-                        Snackbar.make(requireView(), "Solicitação criada. Protocolo: ${result!!.protocol}", Snackbar.LENGTH_LONG).show()
-                    } else if (response.isSuccessful || response.code() >= 500) {
-                        uncertainRequest = requestBody
-                        createDialog = null
-                        dialog.dismiss()
-                        loadHistory(0)
-                    } else {
-                        message.text = ApiError.parse(response).userMessage("Não foi possível enviar (${response.code()}).")
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                    }
-                }
-
-                override fun onFailure(call: Call<SupportRequestItem>, error: Throwable) {
-                    if (call.isCanceled || view == null) return
-                    busy = false
-                    uncertainRequest = requestBody
-                    createDialog = null
-                    dialog.dismiss()
-                    loadHistory(0)
-                }
-            })
-        }
-    }
-
-    private fun valid(item: SupportRequestItem?): Boolean =
-        !item?.id.isNullOrBlank() && !item?.protocol.isNullOrBlank() && !item?.status.isNullOrBlank()
 
     private fun loadHistory(target: Int) {
         if (busy) return
@@ -227,15 +149,24 @@ class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
 
     override fun onDestroyView() {
         listCall?.cancel()
-        createCall?.cancel()
         loadingSnackbar?.dismiss()
         feedbackSnackbar?.dismiss()
         listCall = null
-        createCall = null
         loadingSnackbar = null
         feedbackSnackbar = null
-        createDialog = null
         busy = false
         super.onDestroyView()
+    }
+
+    companion object {
+        private const val ARG_UNCERTAIN_SUBJECT = "uncertain_subject"
+        private const val ARG_UNCERTAIN_DESCRIPTION = "uncertain_description"
+
+        fun newInstance(request: SupportRequestBody) = AjudaSuporteFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_UNCERTAIN_SUBJECT, request.subject)
+                putString(ARG_UNCERTAIN_DESCRIPTION, request.description)
+            }
+        }
     }
 }

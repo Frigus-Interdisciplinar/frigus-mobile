@@ -41,10 +41,10 @@ class PerfilFragment : Fragment(R.layout.fragment_perfil) {
             abrirTela(AjudaSuporteFragment())
         }
         view.findViewById<View>(R.id.btnMoneySaving).setOnClickListener {
-            abrirTela(MoneySavingFragment())
+            host.openMoneySaving()
         }
-        // The BFF determines entitlement; the menu is shared by domestic and commercial accounts.
-        view.findViewById<View>(R.id.groupMoneySaving).visibility = View.VISIBLE
+        val moneySavingEntry = view.findViewById<View>(R.id.groupMoneySaving)
+        moneySavingEntry.visibility = View.GONE
         view.findViewById<View>(R.id.btnSair).setOnClickListener { button ->
             button.isEnabled = false
             AlertDialog.Builder(requireContext())
@@ -97,6 +97,7 @@ class PerfilFragment : Fragment(R.layout.fragment_perfil) {
         }
         subscription.state.observe(viewLifecycleOwner) { state ->
             if (!session.isLoggedIn) return@observe
+            moneySavingEntry.visibility = if (state.limits?.allowMoneySaving == true) View.VISIBLE else View.GONE
             val current = state.subscription
             view.findViewById<TextView>(R.id.tvNomePlanoPerfil).text =
                 current?.plan?.name?.takeIf(String::isNotBlank)
