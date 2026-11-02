@@ -1,6 +1,7 @@
 package com.example.frigus_mobile.ui.profile
 
 import android.os.Bundle
+import android.text.InputFilter
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -12,6 +13,8 @@ import com.example.frigus_mobile.data.api.RetrofitClient
 import com.example.frigus_mobile.data.api.SupportRequestBody
 import com.example.frigus_mobile.data.api.SupportRequestItem
 import com.example.frigus_mobile.data.api.SupportRequestPage
+import com.example.frigus_mobile.data.api.SupportRequestValidationIssue
+import com.example.frigus_mobile.data.api.SupportRequestValidator
 import com.example.frigus_mobile.data.model.ApiError
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
@@ -66,26 +69,47 @@ class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
             setPadding(padding, padding / 2, padding, 0)
         }
         val subject = EditText(requireContext()).apply {
-            hint = "Assunto"
+            hint = getString(R.string.profile_request_subject_hint)
             maxLines = 1
+            filters = arrayOf(InputFilter.LengthFilter(SupportRequestValidator.SUBJECT_MAX_LENGTH))
             content.addView(this)
         }
         val description = EditText(requireContext()).apply {
-            hint = "Descreva sua solicitação"
+            hint = getString(R.string.profile_request_description_hint)
             minLines = 3
+            filters = arrayOf(InputFilter.LengthFilter(SupportRequestValidator.DESCRIPTION_MAX_LENGTH))
             content.addView(this)
         }
         val message = TextView(requireContext()).apply { content.addView(this) }
-        val dialog = AlertDialog.Builder(requireContext()).setTitle("Enviar solicitação")
+        val dialog = AlertDialog.Builder(requireContext()).setTitle(R.string.profile_request_title)
             .setView(content).setNegativeButton("Cancelar", null).setPositiveButton("Enviar", null).create()
         createDialog = dialog
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val title = subject.text.toString().trim()
                 val body = description.text.toString().trim()
-                if (title.isBlank() || body.isBlank()) {
-                    message.text = "Informe o assunto e a descrição."
-                    return@setOnClickListener
+                when (SupportRequestValidator.validate(title, body)) {
+                    SupportRequestValidationIssue.REQUIRED_FIELDS -> {
+                        message.text = getString(R.string.profile_request_required_fields)
+                        return@setOnClickListener
+                    }
+                    SupportRequestValidationIssue.SUBJECT_LENGTH -> {
+                        message.text = getString(
+                            R.string.profile_request_subject_length,
+                            SupportRequestValidator.SUBJECT_MIN_LENGTH,
+                            SupportRequestValidator.SUBJECT_MAX_LENGTH
+                        )
+                        return@setOnClickListener
+                    }
+                    SupportRequestValidationIssue.DESCRIPTION_LENGTH -> {
+                        message.text = getString(
+                            R.string.profile_request_description_length,
+                            SupportRequestValidator.DESCRIPTION_MIN_LENGTH,
+                            SupportRequestValidator.DESCRIPTION_MAX_LENGTH
+                        )
+                        return@setOnClickListener
+                    }
+                    null -> Unit
                 }
                 send(SupportRequestBody(title, body), dialog, message)
             }
