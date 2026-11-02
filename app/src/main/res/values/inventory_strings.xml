@@ -40,6 +40,9 @@
     <string name="inventory_unit_dozen">dúzia(s)</string>
     <string name="inventory_unit_package">pacote(s)</string>
     <string name="inventory_unit_unknown">unidade não informada</string>
+    <string-array name="inventory_unit_edit_labels">
+        <item>Gramas</item><item>Quilos</item><item>Litros</item><item>Mililitros</item><item>Unidades</item><item>Dúzias</item><item>Pacotes</item>
+    </string-array>
     <string-array name="inventory_place_codes">
         <item></item><item>FRIDGE</item><item>FREEZER</item><item>PANTRY</item><item>CABINET</item><item>SHELF</item>
     </string-array>

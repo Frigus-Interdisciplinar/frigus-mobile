@@ -99,6 +99,15 @@
                 android:textColorHint="@color/gray"
                 android:textSize="13sp"/>
             <TextView
+                android:id="@+id/tvStatusSolicitacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/color_red"
+                android:textSize="13sp"
+                android:fontFamily="@font/sarabun"
+                android:visibility="gone"/>
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"

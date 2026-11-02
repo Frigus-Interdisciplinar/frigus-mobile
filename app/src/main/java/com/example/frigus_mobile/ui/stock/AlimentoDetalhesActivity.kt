@@ -99,13 +99,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             "PANTRY", "DESPENSA" -> "Despensa"
             else -> "Geladeira"
         }
-        val unit = when (prod.product?.unitOfMeasure) {
-            "GRAM" -> "g"
-            "KILOGRAM" -> "kg"
-            "LITER" -> "L"
-            "MILLILITER" -> "ml"
-            else -> "un"
-        }
+        val unit = lotUnitLabel(prod.product?.unitOfMeasure)
         val currentQty = prod.quantity ?: 0
         val originalQty = StockQuantityTracker.getOrSetInitialQuantity(this, prod.id ?: 0, currentQty)
         val minQty = prod.minimalQuantity ?: 0
@@ -150,6 +144,14 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
         }
 
         val img = findViewById<ImageView>(R.id.imgDetalhesAlimento)
+        val displayName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(displayName, prod.category ?: prod.product?.category)
+        val remoteUrl = prod.product?.imageUrl
+        if (!remoteUrl.isNullOrBlank()) {
+            img.clearColorFilter()
+            com.example.frigus_mobile.utils.ProductImageLoader.loadInto(img, remoteUrl, imgRes)
+            return
+        }
         val customUriStr = prod.id?.let { ProductImageTracker.getImageUri(this, it) }
         if (!customUriStr.isNullOrBlank()) {
             try {
@@ -178,13 +180,7 @@ class AlimentoDetalhesActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-        val unit = when (prod.product?.unitOfMeasure) {
-            "GRAM" -> "g"
-            "KILOGRAM" -> "kg"
-            "LITER" -> "L"
-            "MILLILITER" -> "ml"
-            else -> "un"
-        }
+        val unit = lotUnitLabel(prod.product?.unitOfMeasure)
 
         val dialogProdName = prod.id?.let { ProductNameTracker.getName(this, it) } ?: prod.product?.name ?: "Alimento"
         dialogView.findViewById<TextView>(R.id.tvNomeAlimentoRemocao)?.text = dialogProdName

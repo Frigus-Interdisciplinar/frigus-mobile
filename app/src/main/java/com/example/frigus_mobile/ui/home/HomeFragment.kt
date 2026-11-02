@@ -50,9 +50,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             startActivity(Intent(requireContext(), ConversationsActivity::class.java))
         }
         view.findViewById<View>(R.id.cardMoneySaving).setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, com.example.frigus_mobile.ui.profile.MoneySavingFragment())
-                .addToBackStack(null).commit()
+            main.openMoneySaving()
+        }
+        val moneySavingCard = view.findViewById<View>(R.id.cardMoneySaving)
+        moneySavingCard.visibility = View.GONE
+        val subscription = ViewModelProvider(requireActivity(),
+            com.example.frigus_mobile.ui.profile.SubscriptionViewModel.Factory(requireContext()))[
+            com.example.frigus_mobile.ui.profile.SubscriptionViewModel::class.java]
+        subscription.state.observe(viewLifecycleOwner) { state ->
+            moneySavingCard.visibility = if (state.limits?.allowMoneySaving == true) View.VISIBLE else View.GONE
         }
         view.findViewById<View>(R.id.cardEscanearQrCode).setOnClickListener {
             startActivity(Intent(requireContext(), QrCodeScannerActivity::class.java))

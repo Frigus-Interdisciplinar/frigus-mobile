@@ -24,11 +24,13 @@ import com.example.frigus_mobile.data.repository.StockRepository
 import com.example.frigus_mobile.ui.login.LoginActivity
 import com.example.frigus_mobile.utils.NetworkGuard
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductImageLoader
 import com.example.frigus_mobile.utils.ProductImageTracker
 import com.example.frigus_mobile.utils.ProductNameTracker
 import com.example.frigus_mobile.utils.StockObservationsTracker
 import com.example.frigus_mobile.utils.StockQuantityTracker
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.util.Calendar
 import java.util.Locale
 
@@ -55,7 +57,7 @@ class EditarAlimentoActivity : AppCompatActivity() {
     private val categoriasGeladeira = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
     private val categoriasFreezer = listOf("Carnes", "Laticínios", "Hortifruti", "Bebidas")
     private val categoriasDespensa = listOf("Grãos", "Hortifruti", "Laticínios", "Bebidas")
-    private val unidades = listOf("Gramas", "Quilos", "Litros", "Mililitros", "Unidades")
+    private val unidades by lazy { resources.getStringArray(R.array.inventory_unit_edit_labels).toList() }
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -144,7 +146,7 @@ class EditarAlimentoActivity : AppCompatActivity() {
         val datePicker = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-                val formatado = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year)
+                val formatado = String.format(Locale.ROOT, "%02d-%02d-%04d", dayOfMonth, month + 1, year)
                 etValidade.setText(formatado)
             },
             calendar.get(Calendar.YEAR),
@@ -239,18 +241,40 @@ class EditarAlimentoActivity : AppCompatActivity() {
             "KILOGRAM" -> 1
             "LITER" -> 2
             "MILLILITER" -> 3
+            "DOZEN" -> 5
+            "PACKAGE" -> 6
             else -> 4
         }
         spinnerUnidade.setSelection(unitIndex)
 
-        // Foto do alimento (customizada pelo usuário ou padrão da categoria)
+        // Foto do alimento (customizada pelo usuário, persistida na nuvem ou padrão da categoria)
         carregarFotoAlimento(prod)
     }
 
     private fun carregarFotoAlimento(prod: StockProductResponse) {
         val prodId = prod.id ?: 0
-        val customUriStr = ProductImageTracker.getImageUri(this, prodId)
+        if (customImageUri != null) {
+            imgEditarAlimento.setPadding(0, 0, 0, 0)
+            imgEditarAlimento.clearColorFilter()
+            imgEditarAlimento.scaleType = ImageView.ScaleType.CENTER_CROP
+            imgEditarAlimento.setImageURI(customImageUri)
+            return
+        }
 
+        val displayName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
+        val imgRes = ProductCategoryHelper.getImagemParaProduto(
+            displayName ?: prod.product?.name,
+            prod.category ?: prod.product?.category
+        )
+
+        val remoteUrl = prod.product?.imageUrl
+        if (!remoteUrl.isNullOrBlank()) {
+            imgEditarAlimento.setPadding(0, 0, 0, 0)
+            ProductImageLoader.loadInto(imgEditarAlimento, remoteUrl, imgRes)
+            return
+        }
+
+        val customUriStr = ProductImageTracker.getImageUri(this, prodId)
         if (!customUriStr.isNullOrBlank()) {
             try {
                 imgEditarAlimento.setPadding(0, 0, 0, 0)
@@ -261,11 +285,6 @@ class EditarAlimentoActivity : AppCompatActivity() {
             } catch (_: Exception) {}
         }
 
-        val displayName = if (prodId > 0) ProductNameTracker.getName(this, prodId) else null
-        val imgRes = ProductCategoryHelper.getImagemParaProduto(
-            displayName ?: prod.product?.name,
-            prod.category ?: prod.product?.category
-        )
         imgEditarAlimento.setPadding(0, 0, 0, 0)
         imgEditarAlimento.clearColorFilter()
         if (imgRes == R.drawable.img_frango) {
@@ -281,8 +300,9 @@ class EditarAlimentoActivity : AppCompatActivity() {
         val trimmed = dataStr.trim()
         if (trimmed.matches(Regex("""^\d{4}-\d{2}-\d{2}$"""))) {
             val p = trimmed.split("-")
-            return "${p[2]}/${p[1]}/${p[0]}"
+            return "${p[2]}-${p[1]}-${p[0]}"
         }
+        if (trimmed.matches(Regex("""^\d{2}/\d{2}/\d{4}$"""))) return trimmed.replace('/', '-')
         return trimmed
     }
 
@@ -320,6 +340,16 @@ class EditarAlimentoActivity : AppCompatActivity() {
             else -> null
         }
 
+        val unidadeCodigo = when (spinnerUnidade.selectedItemPosition) {
+            0 -> "GRAM"
+            1 -> "KILOGRAM"
+            2 -> "LITER"
+            3 -> "MILLILITER"
+            4 -> "UNIT"
+            5 -> "DOZEN"
+            else -> "PACKAGE"
+        }
+
         val observacoes = etObservacoes.text.toString().trim()
 
         // Ativa estado de carregamento no botão
@@ -329,6 +359,17 @@ class EditarAlimentoActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                val finalImageUrl = if (customImageUri != null) {
+                    val uri = customImageUri!!
+                    val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                        ?: throw IOException("Não foi possível ler a imagem selecionada")
+                    val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
+                    val validMimeType = if (mimeType in listOf("image/jpeg", "image/png", "image/webp")) mimeType else "image/jpeg"
+                    repository.uploadProductImage(bytes, validMimeType)
+                } else {
+                    item?.product?.imageUrl
+                }
+
                 repository.updateStockProduct(
                     id = prodId,
                     request = com.example.frigus_mobile.data.model.StockProductUpdateRequest(
@@ -336,7 +377,9 @@ class EditarAlimentoActivity : AppCompatActivity() {
                         category = categoriaCodigo,
                         quantity = novaQtd,
                         expireDate = novaValidade.takeIf(String::isNotBlank)?.let(StockRepository::isoDate),
-                        storagePlace = localSelecionado
+                        storagePlace = localSelecionado,
+                        unitOfMeasure = unidadeCodigo,
+                        imageUrl = finalImageUrl
                     )
                 )
 
@@ -345,11 +388,6 @@ class EditarAlimentoActivity : AppCompatActivity() {
 
                 // Salva observações localmente
                 StockObservationsTracker.setObservation(this@EditarAlimentoActivity, prodId, observacoes)
-
-                // Salva foto personalizada caso o usuário tenha escolhido uma nova
-                customImageUri?.let { uri ->
-                    ProductImageTracker.setImageUri(this@EditarAlimentoActivity, prodId, uri.toString())
-                }
 
                 Toast.makeText(this@EditarAlimentoActivity, "Alimento atualizado com sucesso!", Toast.LENGTH_SHORT).show()
                 finish()

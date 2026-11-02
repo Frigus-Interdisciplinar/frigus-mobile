@@ -109,6 +109,31 @@ data class StockProductUpdateRequest(
     @SerializedName("storagePlace")
     val storagePlace: String? = null,
 
+    @SerializedName("unitOfMeasure")
+    val unitOfMeasure: String? = null,
+
     @SerializedName("batch")
-    val batch: String? = null
+    val batch: String? = null,
+
+    @SerializedName("imageUrl")
+    val imageUrl: String? = null
+)
+
+data class ProductImageUploadRequest(
+    @SerializedName("contentType")
+    val contentType: String
+)
+
+data class ProductImageUploadResponse(
+    @SerializedName("path")
+    val path: String,
+
+    @SerializedName("token")
+    val token: String,
+
+    @SerializedName("uploadUrl")
+    val uploadUrl: String? = null,
+
+    @SerializedName("publicUrl")
+    val publicUrl: String? = null
 )

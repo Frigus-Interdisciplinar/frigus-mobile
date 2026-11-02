@@ -16,6 +16,7 @@ import com.example.frigus_mobile.data.api.requireNoContent
 import com.example.frigus_mobile.data.api.unavailableMobileContract
 import com.example.frigus_mobile.data.local.SessionManager
 import com.example.frigus_mobile.data.model.PageResponse
+import com.example.frigus_mobile.data.model.ProductImageUploadRequest
 import com.example.frigus_mobile.data.model.StockMovementRequest
 import com.example.frigus_mobile.data.model.StockMovementResponse
 import com.example.frigus_mobile.data.model.StockProductProductResponse
@@ -23,12 +24,24 @@ import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.data.model.StockProductUpdateRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import java.io.IOException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 class StockRepository(context: Context? = null) {
     private val api = RetrofitClient.stockService
     private val sessionManager = context?.let { SessionManager(it) }
+
+    private val uploadClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     /** M04 resolves the active group and its stocks on the BFF. */
     suspend fun resolveUserStockId(): Int? = withContext(Dispatchers.IO) {
@@ -171,10 +184,30 @@ class StockRepository(context: Context? = null) {
 
     suspend fun updateStockProduct(id: Int, request: StockProductUpdateRequest): StockProductResponse {
         require(listOf(request.name, request.category, request.quantity, request.initialQuantity,
-            request.minimalQuantity, request.expireDate, request.storagePlace, request.batch).any { it != null }) {
+            request.minimalQuantity, request.expireDate, request.storagePlace, request.unitOfMeasure,
+            request.batch, request.imageUrl).any { it != null }) {
             "Informe ao menos um campo para atualizar o alimento."
         }
         return requireLot(api.updateStockProduct(id, request).awaitLotResponse(), id)
+    }
+
+    suspend fun uploadProductImage(bytes: ByteArray, mimeType: String): String = withContext(Dispatchers.IO) {
+        val uploadRes = api.getProductImageUpload(ProductImageUploadRequest(mimeType)).awaitLotResponse()
+        if (uploadRes.code() != 200) throw BffException(ApiError.parse(uploadRes), "Falha ao preparar upload da imagem")
+        val uploadInfo = uploadRes.body() ?: throw BffException(ApiError(code = "INVALID_RESPONSE"), "Resposta de upload vazia")
+        val uploadUrl = uploadInfo.uploadUrl ?: throw BffException(ApiError(code = "INVALID_RESPONSE"), "URL de upload ausente")
+
+        val mediaType = MediaType.parse(mimeType)
+        val request = Request.Builder()
+            .url(uploadUrl)
+            .put(RequestBody.create(mediaType, bytes))
+            .header("Content-Type", mimeType)
+            .build()
+        val response = uploadClient.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw IOException("Falha no upload da foto: HTTP ${response.code()}")
+        }
+        uploadInfo.publicUrl ?: throw BffException(ApiError(code = "INVALID_RESPONSE"), "URL pública ausente")
     }
 
     suspend fun deleteStockProduct(id: Int): Boolean {
@@ -218,8 +251,12 @@ class StockRepository(context: Context? = null) {
     companion object {
         fun isoDate(value: String): String {
             val trimmed = value.trim()
-            val format = if (trimmed.contains('/')) DateTimeFormatter.ofPattern("dd/MM/uuuu")
-                .withResolverStyle(java.time.format.ResolverStyle.STRICT) else DateTimeFormatter.ISO_LOCAL_DATE
+            val format = when {
+                trimmed.matches(Regex("""^\d{2}[-/]\d{2}[-/]\d{4}$""")) ->
+                    DateTimeFormatter.ofPattern(if (trimmed.contains('/')) "dd/MM/uuuu" else "dd-MM-uuuu")
+                        .withResolverStyle(java.time.format.ResolverStyle.STRICT)
+                else -> DateTimeFormatter.ISO_LOCAL_DATE
+            }
             return LocalDate.parse(trimmed, format).toString()
         }
     }

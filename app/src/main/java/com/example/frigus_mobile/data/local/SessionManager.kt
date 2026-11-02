@@ -26,34 +26,52 @@ class SessionManager(context: Context) {
                 // Old Core credentials must never become BFF credentials implicitly.
                 context.applicationContext.getSharedPreferences("auth", Context.MODE_PRIVATE).edit().clear().apply()
                 var token: String? = null
+                var refreshToken: String? = null
                 var user: UserResponse? = null
                 try {
                     val ciphertext = preferences.getString("access", null)
                     val iv = preferences.getString("iv", null)
+                    val refreshCiphertext = preferences.getString("refresh", null)
+                    val refreshIv = preferences.getString("refresh_iv", null)
                     if (preferences.getString("origin", null) != BuildConfig.BFF_BASE_URL) {
                         preferences.edit().clear().apply()
-                    } else if (ciphertext != null && iv != null) {
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
-                        token = String(cipher.doFinal(Base64.decode(ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
-                        user = Gson().fromJson(preferences.getString("profile", null), UserResponse::class.java)
+                    } else {
+                        if (ciphertext != null && iv != null) {
+                            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                            cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
+                            token = String(cipher.doFinal(Base64.decode(ciphertext, Base64.NO_WRAP)), Charsets.UTF_8)
+                            user = Gson().fromJson(preferences.getString("profile", null), UserResponse::class.java)
+                        }
+                        if (refreshCiphertext != null && refreshIv != null) {
+                            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                            cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, Base64.decode(refreshIv, Base64.NO_WRAP)))
+                            refreshToken = String(cipher.doFinal(Base64.decode(refreshCiphertext, Base64.NO_WRAP)), Charsets.UTF_8)
+                        }
                     }
                 } catch (_: Exception) {
                     token = null
+                    refreshToken = null
                     user = null
                     preferences.edit().clear().apply()
                 }
-                sharedState = SessionState(token, user,
-                    persist = { access, profile ->
+                sharedState = SessionState(token, refreshToken, user,
+                    persist = { access, refresh, profile ->
                         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                         cipher.init(Cipher.ENCRYPT_MODE, key())
                         val encrypted = cipher.doFinal(access.toByteArray(Charsets.UTF_8))
-                        check(preferences.edit().clear()
+                        val editor = preferences.edit().clear()
                             .putString("origin", BuildConfig.BFF_BASE_URL)
                             .putString("access", Base64.encodeToString(encrypted, Base64.NO_WRAP))
                             .putString("iv", Base64.encodeToString(cipher.iv, Base64.NO_WRAP))
                             .putString("profile", Gson().toJson(profile))
-                            .commit()) { "Session persistence failed" }
+                        if (!refresh.isNullOrBlank()) {
+                            val refreshCipher = Cipher.getInstance("AES/GCM/NoPadding")
+                            refreshCipher.init(Cipher.ENCRYPT_MODE, key())
+                            val encryptedRefresh = refreshCipher.doFinal(refresh.toByteArray(Charsets.UTF_8))
+                            editor.putString("refresh", Base64.encodeToString(encryptedRefresh, Base64.NO_WRAP))
+                            editor.putString("refresh_iv", Base64.encodeToString(refreshCipher.iv, Base64.NO_WRAP))
+                        }
+                        check(editor.commit()) { "Session persistence failed" }
                     },
                     erase = {
                         com.example.frigus_mobile.data.repository.FirebaseShoppingSession.signOut()
@@ -64,6 +82,8 @@ class SessionManager(context: Context) {
                             .remove("origin")
                             .remove("access")
                             .remove("iv")
+                            .remove("refresh")
+                            .remove("refresh_iv")
                             .remove("profile")
                             .clear()
                             .apply()
@@ -79,6 +99,7 @@ class SessionManager(context: Context) {
     }
 
     val accessToken: String? get() = state.accessToken
+    val refreshToken: String? get() = state.refreshToken
     val isLoggedIn: Boolean get() = state.validated && !accessToken.isNullOrBlank()
     val userName: String? get() = state.user?.name
     val userEmail: String? get() = state.user?.email

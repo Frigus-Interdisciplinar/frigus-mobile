@@ -2,6 +2,8 @@ package com.example.frigus_mobile.data.api
 
 import com.example.frigus_mobile.data.model.InventoryHomeResponse
 import com.example.frigus_mobile.data.model.PageResponse
+import com.example.frigus_mobile.data.model.ProductImageUploadRequest
+import com.example.frigus_mobile.data.model.ProductImageUploadResponse
 import com.example.frigus_mobile.data.model.StockMovementRequest
 import com.example.frigus_mobile.data.model.StockMovementResponse
 import com.example.frigus_mobile.data.model.StockProductResponse
@@ -60,4 +62,7 @@ interface StockApiService {
 
     @POST("mobile/inventory/stock-products/{id}/movements")
     fun createMovement(@Path("id") id: Int, @Body request: StockMovementRequest): Call<StockMovementResponse>
+
+    @POST("mobile/inventory/products/image-upload")
+    fun getProductImageUpload(@Body request: ProductImageUploadRequest): Call<ProductImageUploadResponse>
 }

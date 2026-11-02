@@ -1,10 +1,11 @@
 package com.example.frigus_mobile.data.api
 
+import com.example.frigus_mobile.data.model.GoogleLoginRequest
+import com.example.frigus_mobile.data.model.RefreshRequest
 import com.example.frigus_mobile.data.model.UserLoginRequest
 import com.example.frigus_mobile.data.model.UserLoginResponse
 import com.example.frigus_mobile.data.model.UserRegisterRequest
 import com.example.frigus_mobile.data.model.UserResponse
-import com.example.frigus_mobile.data.model.GoogleLoginRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -28,6 +29,9 @@ interface AuthApiService {
 
     @POST("mobile/core/auth/google")
     fun loginComGoogle(@Body request: GoogleLoginRequest): Call<UserLoginResponse>
+
+    @POST("mobile/user/refresh")
+    fun refresh(@Body request: RefreshRequest): Call<UserLoginResponse>
 
     @GET("mobile/user/profile")
     fun getProfile(): Call<UserResponse>

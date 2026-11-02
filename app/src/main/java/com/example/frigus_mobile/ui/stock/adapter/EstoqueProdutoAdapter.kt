@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.frigus_mobile.R
 import com.example.frigus_mobile.data.model.StockProductResponse
 import com.example.frigus_mobile.ui.stock.AlimentoDetalhesActivity
+import com.example.frigus_mobile.ui.stock.lotUnitLabel
+import com.example.frigus_mobile.ui.stock.stockDisplayDate
 import com.example.frigus_mobile.utils.ProductCategoryHelper
+import com.example.frigus_mobile.utils.ProductImageLoader
 import com.example.frigus_mobile.utils.ProductNameTracker
 
 class EstoqueProdutoAdapter(
@@ -36,23 +39,22 @@ class EstoqueProdutoAdapter(
             ?: item.product?.name?.takeIf(String::isNotBlank)
             ?: context.getString(R.string.inventory_unnamed_product)
         val qty = item.quantity?.toString() ?: "-"
-        val unit = when (item.product?.unitOfMeasure) {
-            "GRAM" -> "g"
-            "KILOGRAM" -> "kg"
-            "LITER" -> "L"
-            "MILLILITER" -> "ml"
-            else -> "un"
-        }
-        val expireDate = item.expireDate ?: "Sem data"
+        val unit = context.lotUnitLabel(item.product?.unitOfMeasure)
+        val expireDate = stockDisplayDate(item.expireDate).ifBlank { "Sem data" }
 
         holder.tvNome.text = productName
-        holder.tvSubtitulo.text = "$qty$unit • Vence $expireDate"
+        holder.tvSubtitulo.text = "$qty $unit • Vence $expireDate"
 
-        // Ícone unificado baseado na categoria
-        holder.imgProduto.clearColorFilter()
-        holder.imgProduto.setImageResource(
-            ProductCategoryHelper.getIconeCategoria(item.category ?: item.product?.category)
-        )
+        // Ícone unificado baseado na categoria ou imagem da nuvem
+        val remoteUrl = item.product?.imageUrl
+        val fallbackRes = ProductCategoryHelper.getIconeCategoria(item.category ?: item.product?.category)
+        if (!remoteUrl.isNullOrBlank()) {
+            holder.imgProduto.setPadding(0, 0, 0, 0)
+            ProductImageLoader.loadInto(holder.imgProduto, remoteUrl, fallbackRes)
+        } else {
+            holder.imgProduto.clearColorFilter()
+            holder.imgProduto.setImageResource(fallbackRes)
+        }
 
         // Status badge
         when (item.productStatus) {
