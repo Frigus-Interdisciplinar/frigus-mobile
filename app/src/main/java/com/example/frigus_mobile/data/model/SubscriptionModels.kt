@@ -42,6 +42,6 @@ data class GroupInvitation(
     val acceptedAt: String? = null, val revokedAt: String? = null
 )
 data class InviteMemberRequest(val email: String, val memberRole: String)
-data class CheckoutRequest(val planCode: String)
+data class CheckoutRequest(val planCode: String, val paymentMethod: String? = null, val fakePixKey: String? = null)
 data class GroupCreateRequest(val name: String)
 data class StockCreateRequest(val groupId: String, val name: String)
