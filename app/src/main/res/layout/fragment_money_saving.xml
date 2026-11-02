@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:id="@+id/moneyScroll" xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/moneyScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/pure_white"
     android:fillViewport="true">
 
     <LinearLayout
@@ -12,9 +13,9 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingTop="20dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="32dp">
 
-        <!-- Top Bar com Botão Voltar, Título e Ícone de Informação -->
+        <!-- Header: Voltar, Título e Info -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -31,6 +32,7 @@
                 app:tint="@color/darkBlue" />
 
             <TextView
+                android:id="@+id/tvTituloHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -52,537 +54,470 @@
                 app:tint="@color/blue_primary" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/account_gap"
-            android:orientation="horizontal">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/moneyPreviousMonth"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:minHeight="@dimen/account_touch_target"
-                android:text="@string/money_saving_previous_month" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/moneyNextMonth"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:minHeight="@dimen/account_touch_target"
-                android:text="@string/money_saving_next_month" />
-        </LinearLayout>
+        <!-- Loading indicator -->
         <ProgressBar
             android:id="@+id/moneyProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="@string/money_saving_loading"
+            android:layout_marginTop="16dp"
             android:visibility="gone" />
-        <TextView
-            android:id="@+id/moneyStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sarabun"
-            android:textColor="@color/color_text_primary"
-            android:text="@string/money_saving_loading"
-            android:accessibilityLiveRegion="polite" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/moneyUpgradePlan"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/account_touch_target"
-            android:text="@string/money_saving_upgrade_plan"
-            android:visibility="gone" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/moneyRefresh"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/account_touch_target"
-            android:text="@string/money_saving_refresh" />
 
-
-        <!-- Seção Visão Geral -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Locked Plan Required Banner -->
+        <LinearLayout
+            android:id="@+id/layoutPlanRequired"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/money_saving_overview"
-            android:textColor="@color/color_text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <!-- Card Resumo deste mês -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:background="@drawable/bg_card_white_rounded"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp"
+            android:visibility="gone">
 
-            <RelativeLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_plan_required_title"
+                android:textColor="@color/darkBlue"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_plan_required_message"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/moneyUpgradePlan"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/blue_primary"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_plan_required_cta"
+                android:textAllCaps="false"
+                android:textColor="@color/pure_white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:cornerRadius="10dp" />
+        </LinearLayout>
+
+        <!-- Main Content -->
+        <LinearLayout
+            android:id="@+id/layoutContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Seção Visão Geral -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_overview"
+                android:textColor="@color/color_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Card Resumo deste mês -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_month_summary"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvMesReferencia"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_current_month"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <!-- Linha 1 de métricas: Economia vs Gastos -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_saving"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvEconomiaObtida"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_unknown"
+                            android:textColor="@color/color_green"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_spending"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvGastoAlimentacao"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_unknown"
+                            android:textColor="@color/darkBlue"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Linha 2 de métricas: Desperdício vs Comparativo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_loss"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvDesperdicio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_unknown"
+                            android:textColor="@color/color_red"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="@string/money_saving_comparison"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/tvComparadoGastos"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/sarabun"
+                            android:text="↑ 12% menos gastos"
+                            android:textColor="@color/color_green"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvComparadoDesperdicio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:fontFamily="@font/sarabun"
+                            android:text="↓ 5% mais desperdício"
+                            android:textColor="@color/color_red"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Card Evolução da Economia -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_month_summary"
+                    android:text="@string/money_saving_evolution"
                     android:textColor="@color/color_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvMesReferencia"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="2dp"
                     android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_current_month"
+                    android:text="@string/money_saving_recent_months"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
-            </RelativeLayout>
 
-            <!-- Linha 1 de métricas (Economia vs Gastos) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                <!-- Custom Line Chart -->
+                <com.example.frigus_mobile.ui.profile.chart.MoneySavingLineChartView
+                    android:id="@+id/chartEvolucaoEconomia"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_marginTop="12dp" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_saving"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvEconomiaObtida"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_unknown"
-                        android:textColor="@color/color_green"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_spending"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvGastoAlimentacao"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_unknown"
-                        android:textColor="@color/darkBlue"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="12dp"
-                android:background="@color/color_divider" />
-
-            <!-- Linha 2 de métricas (Desperdício vs Comparativo) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_loss"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvDesperdicio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_unknown"
-                        android:textColor="@color/color_red"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_comparison"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/tvComparadoGastos"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_unknown"
-                        android:textColor="@color/color_green"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvComparadoDesperdicio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="1dp"
-                        android:fontFamily="@font/sarabun"
-                        android:text="@string/money_saving_unknown"
-                        android:textColor="@color/color_red"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Card Evolução da Economia (Gráfico reservado para API) -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/bg_card_white_rounded"
-            android:orientation="vertical"
-            android:padding="16dp">
-
+            <!-- Seção Acesso Rápido -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
                 android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_evolution"
+                android:text="@string/money_saving_shortcuts"
                 android:textColor="@color/color_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_recent_months"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="12sp" />
-
+            <!-- Card Opções de Acesso Rápido -->
             <LinearLayout
-                android:id="@+id/moneyMonths"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/account_gap"
-                android:orientation="vertical" />
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:paddingVertical="4dp">
 
-        </LinearLayout>
-
-        <!-- Seção Acesso Rápido -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/sarabun"
-            android:text="@string/money_saving_shortcuts"
-            android:textColor="@color/color_text_primary"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Card Opções de Acesso Rápido -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_card_white_rounded"
-            android:orientation="vertical"
-            android:paddingVertical="4dp">
-
-            <!-- Gastos com alimentação -->
-            <LinearLayout
-                android:id="@+id/btnGastosAlimentacao"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_pie_chart"
-                    app:tint="@color/color_text_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
+                <!-- Gastos com alimentação -->
+                <LinearLayout
+                    android:id="@+id/btnGastosAlimentacao"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_purchases"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp">
 
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_receipt_long"
+                        app:tint="@color/color_text_secondary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_purchases"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Economia e desperdício -->
+                <LinearLayout
+                    android:id="@+id/btnEconomiaDesperdicio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_savings"
+                        app:tint="@color/color_text_secondary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_waste"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Histórico financeiro -->
+                <LinearLayout
+                    android:id="@+id/btnHistoricoFinanceiro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_history"
+                        app:tint="@color/color_text_secondary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_history"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Como os valores são calculados -->
+                <LinearLayout
+                    android:id="@+id/btnComoValoresCalculados"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_calculate"
+                        app:tint="@color/color_text_secondary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_calculation"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_text_secondary" />
+                </LinearLayout>
+
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Economia e desperdício -->
-            <LinearLayout
-                android:id="@+id/btnEconomiaDesperdicio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_savings"
-                    app:tint="@color/color_text_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_waste"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Histórico financeiro -->
-            <LinearLayout
-                android:id="@+id/btnHistoricoFinanceiro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_history"
-                    app:tint="@color/color_text_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_history"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Como os valores são calculados -->
-            <LinearLayout
-                android:id="@+id/btnComoValoresCalculados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_calculate"
-                    app:tint="@color/color_text_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/sarabun"
-                    android:text="@string/money_saving_calculation"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="15sp" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/moneyEventsCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/account_section_gap"
-            android:background="@drawable/bg_card_white_rounded"
-            android:orientation="vertical"
-            android:padding="@dimen/recipe_browser_section_gap">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_categories_title"
-                android:textColor="@color/color_text_primary"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/moneyCategoryTotals"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:textColor="@color/color_text_primary" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/account_section_gap"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_events_title"
-                android:textColor="@color/color_text_primary"
-                android:textStyle="bold"
-                android:accessibilityHeading="true" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_events_note"
-                android:textColor="@color/color_text_secondary" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_category_filter"
-                android:labelFor="@id/moneyCategoryFilter"
-                android:textColor="@color/color_text_primary" />
-            <Spinner
-                android:id="@+id/moneyCategoryFilter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="@dimen/account_touch_target" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sarabun"
-                android:text="@string/money_saving_kind_filter"
-                android:labelFor="@id/moneyKindFilter"
-                android:textColor="@color/color_text_primary" />
-            <Spinner
-                android:id="@+id/moneyKindFilter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="@dimen/account_touch_target" />
-            <LinearLayout
-                android:id="@+id/moneyEvents"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/moneyMore"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="@dimen/account_touch_target"
-                android:text="@string/money_saving_more"
-                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

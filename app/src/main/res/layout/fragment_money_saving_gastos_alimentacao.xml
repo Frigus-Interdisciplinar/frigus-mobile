@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="32dp">
+
+        <!-- Header: Voltar e Título -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/money_saving_back"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_purchases"
+                android:textColor="@color/darkBlue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <!-- Dropdown Seletor de Período -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/money_saving_period"
+            android:textColor="@color/color_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/btnPeriodo"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_dropdown_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <TextView
+                android:id="@+id/tvPeriodoSelecionado"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/sarabun"
+                android:text="Maio/2026"
+                android:textColor="@color/color_text_primary"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_down"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Dois Cards lado a lado: Total Gasto e Mês Anterior -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <!-- Card Total Gasto -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_total_spent"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvTotalGasto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="R$ 458,70"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Card Mês Anterior -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_previous_month"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvMesAnterior"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="R$ 502,10"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvVariacaoMesAnterior"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="↓ 8,6%"
+                    android:textColor="@color/color_green"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Card Gastos por categoria -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_spending_by_category"
+                android:textColor="@color/color_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Donut Chart -->
+                <com.example.frigus_mobile.ui.profile.chart.MoneySavingDonutChartView
+                    android:id="@+id/chartGastosCategoria"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp" />
+
+                <!-- Legenda de categorias -->
+                <LinearLayout
+                    android:id="@+id/layoutLegendaCategorias"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <!-- Carnes -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_circle_dot"
+                            android:backgroundTint="@color/color_category_meat" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sarabun"
+                            android:text="Carnes"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvValorCarnes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="R$ 165,40 (36%)"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Laticínios -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_circle_dot"
+                            android:backgroundTint="@color/color_category_dairy" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sarabun"
+                            android:text="Laticínios"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvValorLaticinios"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="R$ 120,10 (26%)"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Hortifrúti -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_circle_dot"
+                            android:backgroundTint="@color/color_category_produce" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sarabun"
+                            android:text="Hortifrúti"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvValorHortifruti"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="R$ 89,40 (19%)"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Bebidas -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_circle_dot"
+                            android:backgroundTint="@color/color_category_beverage" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sarabun"
+                            android:text="Bebidas"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvValorBebidas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="R$ 54,00 (12%)"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Outros -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_circle_dot"
+                            android:backgroundTint="@color/color_category_other" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sarabun"
+                            android:text="Outros"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvValorOutros"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/sarabun"
+                            android:text="R$ 29,80 (7%)"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Card Evolução dos gastos -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_spending_evolution"
+                android:textColor="@color/color_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_recent_months"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="12sp" />
+
+            <com.example.frigus_mobile.ui.profile.chart.MoneySavingBarChartView
+                android:id="@+id/chartEvolucaoGastos"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:id="@+id/btnDetalhesGastos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/sarabun"
+                android:padding="6dp"
+                android:text="@string/money_saving_spending_details_link"
+                android:textColor="@color/blue_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
