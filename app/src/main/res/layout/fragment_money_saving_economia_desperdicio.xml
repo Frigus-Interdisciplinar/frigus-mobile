@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="32dp">
+
+        <!-- Header: Voltar e Título -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/money_saving_back"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_economy_waste_title"
+                android:textColor="@color/darkBlue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <!-- Dropdown Seletor de Período -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/money_saving_period"
+            android:textColor="@color/color_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/btnPeriodo"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_dropdown_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <TextView
+                android:id="@+id/tvPeriodoSelecionado"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/sarabun"
+                android:text="Maio/2026"
+                android:textColor="@color/color_text_primary"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_down"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Dois Cards lado a lado: Economia Obtida e Perdas por Vencimento -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <!-- Card Economia Obtida -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_saving"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvEconomiaObtida"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="R$ 84,30"
+                    android:textColor="@color/color_green"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Card Perdas por Vencimento -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_white_rounded"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_loss_expiry"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvPerdasVencimento"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="R$ 21,60"
+                    android:textColor="@color/color_red"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Card Alimentos Aproveitados / Descartados com Barras de Progresso -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Alimentos aproveitados -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_items_used"
+                android:textColor="@color/color_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCountAproveitados"
+                    android:layout_width="32dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="32"
+                    android:textColor="@color/color_green"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ProgressBar
+                    android:id="@+id/progressAproveitados"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:max="100"
+                    android:progress="80"
+                    android:progressDrawable="@drawable/bg_progress_green" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="@color/color_divider" />
+
+            <!-- Alimentos descartados -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_items_discarded"
+                android:textColor="@color/color_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCountDescartados"
+                    android:layout_width="32dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="4"
+                    android:textColor="@color/color_red"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ProgressBar
+                    android:id="@+id/progressDescartados"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:max="100"
+                    android:progress="15"
+                    android:progressDrawable="@drawable/bg_progress_red" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Card Evolução do Desperdício -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_waste_evolution"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="@font/sarabun"
+                        android:text="@string/money_saving_recent_months"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btnDetalhesEconomia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/sarabun"
+                    android:padding="4dp"
+                    android:text="@string/money_saving_economy_details_link"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- Line chart com linha vermelha para desperdício -->
+            <com.example.frigus_mobile.ui.profile.chart.MoneySavingLineChartView
+                android:id="@+id/chartEvolucaoDesperdicio"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_marginTop="12dp" />
+
+        </LinearLayout>
+
+        <!-- Callout informativo no rodapé -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card_info_callout"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/blue_primary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/sarabun"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/money_saving_waste_disclaimer"
+                android:textColor="@color/darkBlue"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

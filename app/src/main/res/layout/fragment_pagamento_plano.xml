@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/pure_white">
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:clipToPadding="false" android:paddingBottom="104dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="32dp" android:paddingBottom="32dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="48dp">
+                <ImageButton android:id="@+id/btnVoltar" android:layout_width="48dp" android:layout_height="48dp" android:layout_alignParentStart="true" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/profile_back" android:src="@drawable/ic_chevron_left" app:tint="@color/darkBlue" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="18sp" android:text="@string/profile_payment" android:textStyle="bold" android:layout_centerInParent="true" android:maxLines="1" android:ellipsize="end" />
+            </RelativeLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:background="@drawable/bg_profile_plan" android:minHeight="86dp" android:layout_marginTop="22dp" android:paddingHorizontal="18dp">
+                <ImageView android:layout_width="35dp" android:layout_height="35dp" android:src="@drawable/ic_profile_enterprise" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1" android:layout_marginStart="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="16sp" android:id="@+id/tvPagamentoPlano" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="17sp" android:id="@+id/tvPagamentoPreco" android:textStyle="bold" android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_payment_method" android:textStyle="bold" android:layout_marginTop="18dp" />
+            <RadioGroup android:id="@+id/rgFormaPagamento" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="10dp">
+                <RadioButton android:id="@+id/rbPixPagamento" android:layout_width="match_parent" android:layout_height="64dp" android:layout_marginBottom="10dp" android:background="@drawable/bg_card_white_rounded" android:paddingHorizontal="18dp" android:buttonTint="@color/blue1" android:drawableStart="@drawable/ic_qr_code_scanner" android:drawableTint="@color/darkBlue" android:drawablePadding="12dp" android:fontFamily="@font/sarabun" android:text="@string/profile_payment_pix" android:textColor="@color/darkBlue" android:textSize="14sp" />
+                <RadioButton android:id="@+id/rbCartaoPagamento" android:layout_width="match_parent" android:layout_height="64dp" android:layout_marginBottom="10dp" android:background="@drawable/bg_card_white_rounded" android:paddingHorizontal="18dp" android:buttonTint="@color/blue1" android:drawableStart="@drawable/ic_profile_figma_creditcard" android:drawableTint="@color/darkBlue" android:drawablePadding="12dp" android:fontFamily="@font/sarabun" android:text="@string/profile_payment_card" android:textColor="@color/darkBlue" android:textSize="14sp" />
+            </RadioGroup>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:id="@+id/cardDadosCartao" android:background="@drawable/bg_card_white_rounded" android:minHeight="74dp" android:paddingHorizontal="20dp" android:layout_marginTop="2dp" android:clickable="true" android:focusable="true" android:visibility="gone">
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_profile_figma_creditcard" android:contentDescription="@null" android:id="@+id/ivBandeiraCartao" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="14sp" android:id="@+id/tvCartaoFinal" android:textStyle="bold" android:layout_weight="1" android:layout_marginStart="16dp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/blue1" android:textSize="13sp" android:text="@string/profile_change" />
+            </LinearLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="15sp" android:text="@string/profile_you_are_subscribing" android:textStyle="bold" android:layout_marginTop="42dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_card_white_rounded" android:padding="16dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="13sp" android:id="@+id/tvResumoDescricao" android:layout_weight="1" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="13sp" android:id="@+id/tvResumoValor" />
+                </LinearLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/profile_divider" android:layout_marginVertical="24dp" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="14sp" android:text="@string/profile_total" android:textStyle="bold" android:layout_weight="1" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/darkBlue" android:textSize="14sp" android:id="@+id/tvPagamentoTotal" android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_gravity="bottom" android:background="@color/pure_white" android:paddingBottom="12dp">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnPagarAgora" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginHorizontal="16dp" android:layout_marginTop="16dp" android:text="@string/profile_pay_now" android:textAllCaps="false" android:textSize="16sp" android:fontFamily="@font/sarabun" android:textColor="@color/pure_white" app:backgroundTint="@color/blue1" app:cornerRadius="13dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="@font/sarabun" android:textColor="@color/gray" android:textSize="11sp" android:text="@string/profile_secure_environment" android:gravity="center" android:layout_marginTop="12dp" />
+    </LinearLayout>
+</FrameLayout>

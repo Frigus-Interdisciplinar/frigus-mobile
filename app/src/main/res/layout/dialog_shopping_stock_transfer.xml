@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/sarabun"
+        android:text="@string/lista_qual_lugar_estoque"
+        android:textColor="@color/darkBlue" />
+
+    <Spinner
+        android:id="@+id/spinnerTransferPlace"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_shopping_list_field"
+        android:contentDescription="@string/lista_qual_lugar_estoque" />
+
+    <TextView
+        android:id="@+id/tvTransferGrainHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/shopping_grain_pantry"
+        android:textColor="@color/color_text_secondary" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/sarabun"
+        android:text="@string/lista_data_validade_obrigatoria"
+        android:textColor="@color/darkBlue" />
+
+    <EditText
+        android:id="@+id/etTransferExpiry"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_shopping_list_field"
+        android:clickable="true"
+        android:focusable="false"
+        android:hint="@string/lista_validade_hint"
+        android:paddingHorizontal="14dp"
+        android:singleLine="true"
+        android:textColor="@color/darkBlue" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/sarabun"
+        android:text="@string/shopping_unit_price_label"
+        android:textColor="@color/darkBlue" />
+
+    <EditText
+        android:id="@+id/etTransferPrice"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_shopping_list_field"
+        android:hint="@string/shopping_unit_price_hint"
+        android:inputType="numberDecimal"
+        android:paddingHorizontal="14dp"
+        android:singleLine="true"
+        android:textColor="@color/darkBlue" />
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="inventory_page_padding">20dp</dimen>
+    <dimen name="inventory_gap">8dp</dimen>
+    <dimen name="inventory_section_gap">16dp</dimen>
+    <dimen name="inventory_touch_target">48dp</dimen>
+    <dimen name="inventory_body_size">14sp</dimen>
+    <dimen name="inventory_heading_size">16sp</dimen>
+    <dimen name="inventory_title_size">24sp</dimen>
+</resources>

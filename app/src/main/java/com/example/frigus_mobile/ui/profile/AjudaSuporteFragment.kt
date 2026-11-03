@@ -1,0 +1,172 @@
+package com.example.frigus_mobile.ui.profile
+
+import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import com.example.frigus_mobile.R
+import com.example.frigus_mobile.data.api.RetrofitClient
+import com.example.frigus_mobile.data.api.SupportRequestBody
+import com.example.frigus_mobile.data.api.SupportRequestItem
+import com.example.frigus_mobile.data.api.SupportRequestPage
+import com.example.frigus_mobile.data.model.ApiError
+import com.google.android.material.snackbar.Snackbar
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+/** Keeps the restored help screen and sends support requests through the BFF. */
+class AjudaSuporteFragment : Fragment(R.layout.fragment_ajuda_suporte) {
+    private var listCall: Call<SupportRequestPage>? = null
+    private var busy = false
+    private var uncertainRequest: SupportRequestBody? = null
+    private var page = 0
+    private var loadingSnackbar: Snackbar? = null
+    private var feedbackSnackbar: Snackbar? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.findViewById<View>(R.id.btnVoltar).setOnClickListener { parentFragmentManager.popBackStack() }
+        faq(view, R.id.btnFaqScanner, "Scanner de nota fiscal",
+            "Leia o QR Code da nota pelo fluxo do Estoque. Revise os campos e os itens retornados pelo servidor antes de confirmar qualquer inclusão.")
+        faq(view, R.id.btnFaqManual, "Adicionar alimentos",
+            "O estoque exibe os produtos e lotes associados à sua conta. A inclusão depende das opções disponíveis no aplicativo e das permissões retornadas pelo servidor.")
+        faq(view, R.id.btnFaqQuantidade, "Atualizar quantidade",
+            "Abra o detalhe de um lote existente para consultar o saldo e as movimentações confirmadas pelo servidor.")
+        faq(view, R.id.btnFaqMoneySaving, "MoneySaving", getString(R.string.profile_faq_money_saving))
+        view.findViewById<View>(R.id.btnEntrarContato).setOnClickListener {
+            if (uncertainRequest != null) loadHistory(0)
+            else abrirTela(EnviarSolicitacaoFragment())
+        }
+        view.findViewById<View>(R.id.btnMinhasSolicitacoes).setOnClickListener { loadHistory(0) }
+        val subject = arguments?.getString(ARG_UNCERTAIN_SUBJECT)
+        val description = arguments?.getString(ARG_UNCERTAIN_DESCRIPTION)
+        if (!subject.isNullOrBlank() && !description.isNullOrBlank()) {
+            uncertainRequest = SupportRequestBody(subject, description)
+            Snackbar.make(view, R.string.profile_request_result_uncertain, Snackbar.LENGTH_LONG).show()
+            loadHistory(0)
+        }
+    }
+
+    private fun faq(view: View, id: Int, title: String, body: String) {
+        view.findViewById<View>(id).setOnClickListener {
+            AlertDialog.Builder(requireContext()).setTitle(title).setMessage(body)
+                .setPositiveButton("Entendi", null).show()
+        }
+    }
+
+    private fun loadHistory(target: Int) {
+        if (busy) return
+        busy = true
+        feedbackSnackbar?.dismiss()
+        feedbackSnackbar = null
+        loadingSnackbar?.dismiss()
+        loadingSnackbar = Snackbar.make(requireView(), "Carregando solicitações...", Snackbar.LENGTH_INDEFINITE).also { it.show() }
+        listCall?.cancel()
+        listCall = RetrofitClient.supportService.requests(target, 20).also { request ->
+            request.enqueue(object : Callback<SupportRequestPage> {
+                override fun onResponse(call: Call<SupportRequestPage>, response: Response<SupportRequestPage>) {
+                    if (call.isCanceled || view == null) return
+                    busy = false
+                    loadingSnackbar?.dismiss()
+                    loadingSnackbar = null
+                    val data = response.body()
+                    if (response.code() != 200 || data?.content == null || data.number != target || data.last == null) {
+                        val message = when {
+                            response.isSuccessful -> "Resposta inválida ao consultar solicitações."
+                            response.code() >= 500 -> "O serviço de suporte está indisponível. Tente novamente."
+                            else -> ApiError.parse(response).userMessage("Não foi possível carregar (${response.code()}).")
+                        }
+                        showFeedback(message) { loadHistory(target) }
+                        return
+                    }
+                    page = target
+                    val entries = data.content.orEmpty()
+                    val pending = uncertainRequest
+                    val matching = pending?.let { expected -> entries.firstOrNull { item ->
+                        item.subject?.trim()?.equals(expected.subject.trim(), ignoreCase = true) == true &&
+                            item.description?.trim() == expected.description.trim()
+                    } }
+                    if (matching != null) {
+                        uncertainRequest = null
+                        AlertDialog.Builder(requireContext()).setTitle("Solicitação encontrada")
+                            .setMessage("O histórico contém uma solicitação com os mesmos dados. Protocolo: ${matching.protocol ?: "não informado"}\nStatus: ${matching.status ?: "não informado"}")
+                            .setPositiveButton("Fechar", null).show()
+                    } else {
+                        showHistoryPage(data)
+                    }
+                }
+
+                override fun onFailure(call: Call<SupportRequestPage>, error: Throwable) {
+                    if (call.isCanceled || view == null) return
+                    busy = false
+                    loadingSnackbar?.dismiss()
+                    loadingSnackbar = null
+                    showFeedback("Falha de conexão ao consultar solicitações.") { loadHistory(target) }
+                }
+            })
+        }
+    }
+
+    private fun showHistoryPage(data: SupportRequestPage) {
+        val entries = data.content.orEmpty()
+        val message = if (entries.isEmpty()) "Nenhuma solicitação encontrada."
+            else entries.joinToString("\n\n") { item ->
+                listOfNotNull(
+                    item.protocol?.takeIf(String::isNotBlank)?.let { "Protocolo: $it" },
+                    item.status?.takeIf(String::isNotBlank)?.let { "Status: $it" },
+                    item.subject?.takeIf(String::isNotBlank)?.let { "Assunto: $it" },
+                    item.createdAt?.takeIf(String::isNotBlank)
+                ).joinToString("\n").ifBlank { "Solicitação sem detalhes disponíveis." }
+            }
+        val pending = uncertainRequest != null
+        val dialog = AlertDialog.Builder(requireContext()).setTitle("Minhas solicitações")
+            .setMessage(message).setNegativeButton("Fechar", null)
+            .apply {
+                if (data.last != true) setNeutralButton("Carregar mais", null)
+                if (pending && data.last == true) setPositiveButton("Não encontrei; liberar novo envio", null)
+            }.create()
+        dialog.setOnShowListener {
+            if (data.last != true) dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                dialog.dismiss()
+                loadHistory(page + 1)
+            }
+            if (pending && data.last == true) dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                uncertainRequest = null
+                dialog.dismiss()
+                Snackbar.make(requireView(), "O histórico foi consultado. Revise antes de enviar outra solicitação.", Snackbar.LENGTH_LONG).show()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun showFeedback(message: String, retry: () -> Unit) {
+        feedbackSnackbar?.dismiss()
+        feedbackSnackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_INDEFINITE)
+            .setAction("Tentar novamente") { retry() }.also { it.show() }
+    }
+
+    override fun onDestroyView() {
+        listCall?.cancel()
+        loadingSnackbar?.dismiss()
+        feedbackSnackbar?.dismiss()
+        listCall = null
+        loadingSnackbar = null
+        feedbackSnackbar = null
+        busy = false
+        super.onDestroyView()
+    }
+
+    companion object {
+        private const val ARG_UNCERTAIN_SUBJECT = "uncertain_subject"
+        private const val ARG_UNCERTAIN_DESCRIPTION = "uncertain_description"
+
+        fun newInstance(request: SupportRequestBody) = AjudaSuporteFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_UNCERTAIN_SUBJECT, request.subject)
+                putString(ARG_UNCERTAIN_DESCRIPTION, request.description)
+            }
+        }
+    }
+}

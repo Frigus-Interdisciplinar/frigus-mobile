@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qr_confirmation_background">#FBFCFF</color>
+    <color name="qr_confirmation_halo">#DCF7E8</color>
+    <color name="qr_confirmation_blue">#1A57D1</color>
+    <color name="qr_confirmation_secondary">#5975A1</color>
+    <color name="recipe_ingredient_card">#FCFCFF</color>
+    <color name="recipe_instructions_background">#EAF1FF</color>
+</resources>

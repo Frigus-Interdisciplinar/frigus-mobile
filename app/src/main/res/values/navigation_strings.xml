@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigation_inventory_all_statuses">Os alertas estão no resumo geral. Esta lista inclui lotes de todos os status; o filtro por situação de validade ainda não está disponível.</string>
+</resources>

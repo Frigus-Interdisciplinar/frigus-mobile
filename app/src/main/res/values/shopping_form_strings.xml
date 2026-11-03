@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shopping_form_name_required">Informe o nome do item.</string>
+    <string name="shopping_form_stock_added">Alimento adicionado ao estoque.</string>
+    <string name="shopping_form_catalog_option">%1$s · %2$s · %3$s</string>
+    <string-array name="shopping_form_categories">
+        <item>Carnes</item><item>Laticínios</item><item>Hortifruti</item><item>Bebidas</item><item>Grãos</item>
+    </string-array>
+    <string-array name="shopping_form_category_codes">
+        <item>MEAT</item><item>DAIRY</item><item>VEGETABLE</item><item>BEVERAGE</item><item>GRAIN</item>
+    </string-array>
+</resources>

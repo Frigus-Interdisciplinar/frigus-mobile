@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_chat_title">Frigulino</string>
+    <string name="ai_chat_subtitle">Seu assistente inteligente</string>
+    <string name="ai_chat_quick_suggestions">Sugestões rápidas</string>
+    <string name="ai_chat_cook">O que posso cozinhar hoje?</string>
+    <string name="ai_chat_expiration">Quais alimentos estão próximos de vencer?</string>
+    <string name="ai_chat_shopping">Monte uma lista de compras para a semana</string>
+    <string name="ai_chat_saving">Quanto economizei esse mês?</string>
+    <string name="ai_chat_prompt_cook">O que posso cozinhar hoje com os alimentos do meu estoque?</string>
+    <string name="ai_chat_prompt_expiration">Quais alimentos estão próximos de vencer no meu estoque?</string>
+    <string name="ai_chat_prompt_shopping">Monte uma lista de compras para a semana com base no meu estoque.</string>
+    <string name="ai_chat_prompt_saving">Quanto economizei evitando desperdício este mês? Use somente dados financeiros confirmados e explique se não houver dados suficientes.</string>
+    <string name="ai_chat_input_hint">Digite sua mensagem…</string>
+    <string name="ai_chat_send">Enviar mensagem</string>
+    <string name="ai_chat_greeting">Olá! Como posso te ajudar hoje com seus alimentos e receitas?</string>
+    <string name="ai_chat_named_greeting">Olá, %1$s! Como posso te ajudar hoje com seus alimentos e receitas?</string>
+    <string name="ai_chat_thinking">Pensando…</string>
+    <string name="ai_chat_avatar">Frigulino, assistente do Frigus</string>
+    <string name="ai_chat_sending">Enviando…</string>
+    <string name="ai_chat_confirmed">Enviada</string>
+    <string name="ai_chat_not_confirmed">Envio não confirmado</string>
+    <string name="ai_chat_rejected">Não enviada</string>
+    <string name="ai_chat_recipe_name">Receita sugerida: %1$s</string>
+    <string name="ai_chat_recipe_instructions">Modo de preparo:\n%1$s</string>
+    <string name="ai_chat_loading_context">Consultando o estoque do seu grupo…</string>
+    <string name="ai_chat_active_stock">Estoque em uso: %1$s</string>
+    <string name="ai_chat_context_name">Estoque ativo</string>
+    <string name="ai_chat_no_stock">Nenhum estoque foi encontrado no grupo atual. Crie ou selecione seu grupo no Perfil antes de conversar com a IA.</string>
+    <string name="ai_chat_ambiguous_stock">Selecione seu grupo e estoque pelo aplicativo antes de conversar com a IA. Não é necessário digitar nenhum código aqui.</string>
+    <string name="ai_chat_changed_stock">O estoque ativo não está disponível no grupo atual. Confira a seleção pelo aplicativo e tente novamente.</string>
+    <string name="ai_chat_send_error">Não foi possível enviar a mensagem. Nenhuma mensagem será reenviada automaticamente.</string>
+    <string name="ai_chat_forbidden">Sua conta ou plano não permite esta conversa. Seu login continua ativo.</string>
+    <string name="ai_chat_input_too_long">A mensagem ficou muito longa junto às preferências alimentares. Reduza o texto e tente novamente.</string>
+    <string name="ai_chat_storage_error">Não foi possível atualizar o estado desta conversa no aparelho. Consulte as sugestões salvas antes de iniciar outra conversa.</string>
+    <string name="ai_chat_uncertain_title">Envio sem confirmação</string>
+    <string name="ai_chat_uncertain">O servidor pode ter processado a mensagem. O envio fica bloqueado nesta conversa para evitar uma repetição. Consulte as sugestões salvas antes de iniciar outra conversa.</string>
+    <string name="ai_chat_check_saved">Consultar sugestões salvas</string>
+    <string name="ai_chat_loading_saved">Consultando sugestões salvas…</string>
+    <string name="ai_chat_saved_title">Sugestões salvas pela IA</string>
+    <string name="ai_chat_history_limit">As receitas salvas podem ser consultadas, mas o histórico completo das mensagens ainda não está integrado nesta versão. Esta consulta não confirma o resultado da mensagem anterior.</string>
+    <string name="ai_chat_new_conversation">Iniciar outra conversa</string>
+    <string name="ai_chat_confirm_new">Iniciar outra conversa sem reenviar a mensagem anterior? A resposta que ficou sem confirmação não poderá ser recuperada aqui.</string>
+    <string name="ai_chat_return_to_app">Voltar ao aplicativo</string>
+    <string name="ai_chat_close">Fechar</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_back">Voltar</string>
+    <string name="ai_title">Assistente IA</string>
+    <string name="ai_subtitle">Sugestões salvas para seu estoque</string>
+    <string name="ai_home_entry_label">Consultar sugestões salvas</string>
+    <string name="ai_select_stock_label">Escolha um estoque</string>
+    <string name="ai_select_stock">Selecione um estoque</string>
+    <string name="ai_unnamed_stock">Estoque %1$d</string>
+    <string name="ai_stock_note">As sugestões são consultadas somente para o estoque escolhido.</string>
+    <string name="ai_loading_stocks">Carregando seus estoques…</string>
+    <string name="ai_no_stocks">Nenhum estoque disponível no grupo atual.</string>
+    <string name="ai_stock_error">Não foi possível carregar os estoques.</string>
+    <string name="ai_retry">Tentar novamente</string>
+    <string name="ai_suggestions_title">Sugestões de receitas</string>
+    <string name="ai_suggestions_note">Receitas sugeridas anteriormente para este estoque.</string>
+    <string name="ai_refresh">Atualizar sugestões</string>
+    <string name="ai_choose_stock">Escolha um estoque para consultar as sugestões.</string>
+    <string name="ai_loading_suggestions">Consultando sugestões…</string>
+    <string name="ai_empty_suggestions">Nenhuma sugestão salva para este estoque.</string>
+    <string name="ai_suggestions_error">Não foi possível consultar as sugestões.</string>
+    <string name="ai_forbidden">Você não tem permissão para consultar este estoque ou suas sugestões.</string>
+    <string name="ai_network_error">Não foi possível conectar. Verifique sua conexão e tente novamente.</string>
+    <string name="ai_invalid_response">Não foi possível interpretar a resposta do servidor.</string>
+    <string name="ai_suggestion_counts">Ingredientes disponíveis: %1$s · Faltantes: %2$s</string>
+    <string name="ai_chat_unavailable">O envio de mensagens ainda não está disponível.</string>
+</resources>

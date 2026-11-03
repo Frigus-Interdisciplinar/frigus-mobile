@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp">
+
+        <ImageButton
+            android:id="@+id/btnVoltar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/category_browser_back"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/darkBlue" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/category_browser_title"
+            android:textColor="@color/darkBlue"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp">
+
+        <!-- Search Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_search_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_search"
+                app:tint="@color/color_text_secondary" />
+
+            <EditText
+                android:id="@+id/etBuscarCategorias"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:fontFamily="@font/sarabun"
+                android:hint="@string/stock_search_food_plural"
+                android:inputType="text"
+                android:textColor="@color/color_text_primary"
+                android:textColorHint="@color/color_text_secondary"
+                android:textSize="13sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_sliders"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/categoryBrowserStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/color_text_secondary"
+            android:visibility="gone" />
+
+        <!-- Category Item: Carnes -->
+        <LinearLayout
+            android:id="@+id/itemCarnes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_pill_expired">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/imgCategoryBrowserPrimary"
+                    android:src="@drawable/ic_cat_meat" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:id="@+id/tvCategoryBrowserPrimary"
+                    android:text="@string/category_browser_meat"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQtdTodasCarnes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text=""
+                    tools:text="6 itens"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Category Item: Laticínios -->
+        <LinearLayout
+            android:id="@+id/itemLaticinios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_card_blue_tint">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_cat_dairy" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/category_browser_dairy"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQtdTodasLaticinios"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text=""
+                    tools:text="6 itens"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Category Item: Hortifruti -->
+        <LinearLayout
+            android:id="@+id/itemHortifruti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_pill_fresh">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_cat_hortifruti" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/category_browser_produce"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQtdTodasHortifruti"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text=""
+                    tools:text="6 itens"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Category Item: Bebidas -->
+        <LinearLayout
+            android:id="@+id/itemBebidas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_pill_expired">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_cat_beverages" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/category_browser_beverages"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvQtdTodasBebidas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text=""
+                    tools:text="6 itens"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

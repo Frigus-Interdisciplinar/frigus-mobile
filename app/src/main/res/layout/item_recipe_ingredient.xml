@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="42dp"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="9dp">
+
+        <ImageView
+            android:id="@+id/imgIngredientIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_food_meat"
+            app:tint="@color/blue1" />
+
+        <TextView
+            android:id="@+id/txtIngredientQuantity"
+            android:layout_width="76dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/darkBlue"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:text="500g" />
+
+        <TextView
+            android:id="@+id/txtIngredientName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/sarabun"
+            android:textColor="@color/gray"
+            android:textSize="12sp"
+            tools:text="Peito de frango" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/viewDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@color/color_card_border" />
+</LinearLayout>

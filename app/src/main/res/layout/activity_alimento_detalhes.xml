@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    android:fitsSystemWindows="true"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
+        <!-- Top Bar -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/stock_back"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/stock_details"
+                android:textColor="@color/darkBlue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnRemoverEstoqueTop"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/stock_remove_from_stock"
+                android:src="@drawable/ic_delete_outline"
+                app:tint="@color/color_red" />
+        </RelativeLayout>
+
+        <!-- Imagem do Alimento -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgDetalhesAlimento"
+            android:layout_width="match_parent"
+            android:layout_height="218dp"
+            android:background="@drawable/bg_card_blue_tint"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/stock_product_image"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.MediumComponent" />
+
+        <!-- Título do Alimento -->
+        <TextView
+            android:id="@+id/tvDetalhesNome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/sarabun"
+            tools:text="Nome do alimento"
+            android:textColor="@color/darkBlue"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- Chips de Categoria e Local -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chipCategoria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_chip_ingredient"
+                android:fontFamily="@font/sarabun"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                tools:text="Categoria"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/chipLocal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip_ingredient"
+                android:fontFamily="@font/sarabun"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                tools:text="Local"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Card de Progresso / Quantidade Restante -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_remaining_quantity"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPercentualRestante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="50%"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/pbQuantidadeRestante"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/color_green" />
+
+            <TextView
+                android:id="@+id/tvFracaoQuantidade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/sarabun"
+                tools:text="Quantidade restante de quantidade total"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Card Informações / Tabela -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Validade -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_expiration"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoValidade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="DD-MM-AAAA"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Preço unitário real: aquisição do lote ou catálogo identificado. -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:id="@+id/tvInfoPrecoRotulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/tvInfoPreco"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/lot_detail_purchase_unit_price"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoPreco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Categoria -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_category"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoCategoria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="Categoria"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Quantidade original -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_original_quantity"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvInfoQuantidadeOriginal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/sarabun"
+                    tools:text="Quantidade"
+                    android:textColor="@color/darkBlue"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- Observações (se houver) -->
+            <LinearLayout
+                android:id="@+id/layoutInfoObservacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/color_divider" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sarabun"
+                        android:text="Observações"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvInfoObservacoes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:fontFamily="@font/sarabun"
+                        tools:text="Observação"
+                        android:textColor="@color/darkBlue"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- Botões de Ação -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Linha 1: Consumido e Desperdiçado (Money-Saving) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnConsumirAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_solid_green"
+                    android:fontFamily="@font/sarabun"
+                    android:text="Consumido"
+                    android:textAllCaps="false"
+                    android:textColor="@color/pure_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnDesperdicadoAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_red"
+                    android:fontFamily="@font/sarabun"
+                    android:text="Desperdiçado"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_red"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Linha 2: Editar Alimento e Remover do Estoque -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnEditarAlimento"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_blue"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_edit"
+                    android:textAllCaps="false"
+                    android:textColor="@color/blue_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnRemoverEstoque"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_outlined_red"
+                    android:drawableStart="@drawable/ic_delete_outline"
+                    app:drawableTint="@color/color_red"
+                    android:drawablePadding="6dp"
+                    android:paddingHorizontal="10dp"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/stock_remove_from_stock"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_red"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

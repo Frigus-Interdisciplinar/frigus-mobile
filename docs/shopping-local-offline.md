@@ -1,0 +1,49 @@
+# Compras local/offline com sincronização Firebase
+
+## Decisão atual
+
+Esta decisão substitui o CRUD de listas/itens pelo BFF descrito em `shopping-recovery.md`. O usuário definiu uma lista que pode ser criada, editada, excluída e marcada inteiramente offline. Em seguida autorizou explicitamente sincronizar essa lista no Firebase quando houver internet. A lista não cadastra produtos, lotes ou compras financeiras no Core até a confirmação explícita de adicionar ao estoque. Marcar e escolher NÃO altera somente a lista local, que depois participa da sincronização Firebase; não movimenta estoque.
+
+`ShoppingLocalStore` grava um documento atômico em SharedPreferences privado com itens e outbox por usuário real. Não há `local_user`, cache global ou dados fictícios. Cache antigo válido em `shopping_list_user_items-{userId}` ou `shopping_local_v2/{userId}` migra para o envelope v3, preservando dados e enfileirando sincronização. Campos de vínculos remotos antigos são removidos na migração. Cache inválido permanece preservado, com erro amigável; não é substituído silenciosamente por uma lista vazia.
+
+CRUD local não depende de grupo, estoque, catálogo, conectividade ou resultado de transferência. A pesquisa fica no ViewModel da Activity e é limpa ao trocar de conta. Nome, categoria, unidade, quantidade, observações e foto local continuam editáveis. Foto por URI de documento permanece neste aparelho: a referência local não é anunciada como imagem sincronizada nem enviada como se estivesse acessível em outro aparelho.
+
+No início offline, a Activity específica de compras só usa o proprietário do perfil previamente validado, com token armazenado e UUID válido (`canReadCachedShopping`). Isso não autentica a sessão para rede. CRUD local admite esse acesso limitado; estoque e Firebase continuam exigindo `isLoggedIn` validado por M03. Ao a rede voltar, o fluxo restaura a sessão por GET M03 e chama `loadIfNeeded()`/`reload(false)` para iniciar sincronização; não faz login POST nem envia transferência automaticamente.
+
+## Outbox e sincronização
+
+Cada alteração local gera uma revisão opaca e durável. Exclusão gera tombstone. Uma escrita confirmada só retira da outbox a revisão exata enviada; uma edição posterior, feita durante a requisição, permanece pendente. Snapshot remoto não sobrescreve uma edição/exclusão local pendente. O formato Firestore é `users/{CoreUserUUID}/shopping_list/{localItemId}` com campos da lista, revisão, tombstone e timestamp do servidor; não contém preço de compra, lote, produto Core, token ou URI de foto local.
+
+`ShoppingFirebaseSync` observa rede, autenticação e snapshots, usa o cache offline do SDK e envia batches de até 400 documentos. Quando volta uma rede validada, retoma a tentativa de sincronização enquanto o processo está ativo; após encerramento do processo, a retomada ocorre quando a lista é reaberta. Um batch somente recebe confirmação depois do `Task` de commit bem-sucedido; snapshots de cache ou com escritas locais pendentes não representam confirmação remota. Falhas não apagam a outbox. O status exposto à UI é LOCAL_PENDING, SYNCING, SYNCED, AUTH_REQUIRED ou ERROR, acompanhado da quantidade pendente. Em SYNCED já foi mesclado snapshot de servidor sem escritas pendentes e não há mudanças locais pendentes; apenas confirmar o primeiro batch não substitui a leitura inicial dos dados de outros aparelhos.
+
+O adaptador de persistência restaura o valor anterior quando SharedPreferences.commit retorna false (Android já pode ter atualizado sua memória nessa situação). Isso vale para itens/outbox e para checkpoints de estoque, inclusive a remoção de marcador: uma falha de disco não cria uma alteração fantasma para sincronizar nem desbloqueia indevidamente uma transferência.
+
+A ponte oficial `FirebaseShoppingSession.ensureAuthenticated()` é de responsabilidade da infraestrutura de autenticação: obtém custom token pelo BFF, cujo UID deve ser exatamente o UUID da conta Core. O sincronizador valida essa igualdade antes de ler ou escrever. Troca de conta/geração interrompe listeners e descarta atualizações visuais antigas; confirmações de revisões antigas só podem afetar a outbox da conta capturada. Não há autenticação anônima nem reaproveitamento do bearer Core como token Firebase. Sem configuração de Firebase Admin/credenciais no BFF ou sem permissão nas regras, a lista continua funcionando offline e a outbox fica pendente/AUTH_REQUIRED/ERROR; não há falso sucesso nem abertura automática de regras.
+
+Conflitos entre aparelhos usam a última escrita de documento aceita pelo Firestore, com prioridade local enquanto a revisão ainda não foi confirmada. Não há fusão automática de quantidades. Tombstones propagam exclusões sem ressuscitar um item por snapshot atrasado.
+
+## Confirmação de estoque e valor financeiro
+
+Somente Adicionar ao estoque, confirmado pelo usuário, executa o fluxo remoto. Antes de qualquer POST, a ViewModel exige quantidade inteira positiva, validade ISO válida, local permitido e preço UNITÁRIO real positivo, com até duas casas decimais e limite de oito inteiros. GRAIN só aceita PANTRY, tanto para categoria local quanto para a categoria real do produto encontrado no catálogo. Produto real com unidade diferente exige corrigir a unidade local; nome ambíguo não cria um produto duplicado silenciosamente.
+
+O estoque é inferido do contexto autenticado retornado por M04 e da seleção salva válida. Um único estoque real pode ser inferido quando ainda não há seleção. Se houver mais de um, a UI oferece somente os nomes reais e exige nova confirmação de envio depois de escolher; nunca pede stockId, nunca repete a mutação automaticamente. Uma seleção salva inválida não é substituída silenciosamente.
+
+Se o produto existe, usa seu ID e não altera seu preço global. Se precisa criar produto, só o faz durante a transferência confirmada, usando o preço real informado. Em ambos os casos o POST de lote envia obrigatoriamente `purchaseUnitPrice` com esse preço unitário real. O Repository exige 201, identidade/estoque/quantidade/validade e o preço confirmado na resposta. O PUT de local deve conservar o mesmo preço. O registro financeiro USER_CONFIRMED e sua associação ao lote são feitos atomicamente pelo Core; o app não envia uma segunda compra financeira que duplicaria quantidades/valores.
+
+## Interrupções e reconciliação
+
+Continuam ativos os checkpoints duráveis por usuário. Antes de enviar mutação há marcador privado; antes do POST lote são persistidos os IDs já existentes, produto, quantidade, validade, chave do item e preço real. O ID de lote confirmado é salvo antes de qualquer passo posterior. Timeout/408/5xx, resposta inválida, cancelamento ou falha depois de escrita confirmada bloqueiam somente novos envios ao estoque; CRUD e sincronização da lista continuam disponíveis.
+
+GET automático de abertura não libera novas tentativas. Atualizar explicitamente consulta o contexto original, catálogo e lotes, conferindo também o preço. Uma transferência confirmada reutiliza o ID estável do lote, inclusive quando Core clonou produto global para mudar local. Um POST sem resposta só pode reutilizar candidato novo inequívoco comparado ao baseline, produto, quantidade, validade e preço; ambiguidades permanecem bloqueadas. Não há replay automático nem sucesso presumido de compra. Pendências anteriores a esta mudança são preservadas; IDs de lote confirmados continuam protegidos, mesmo que a intenção legada ainda não possua o novo campo de preço.
+
+Limitação conservadora: uma transferência pendente em outro grupo ainda bloqueia novos envios ao estoque dessa conta até a conferência no grupo original; perder acesso a esse grupo mantém o bloqueio. Isso não impede usar/editar/excluir/marcar a lista offline. Alterar quantidade/validade de um item que já teve lote confirmado exige conferir a transferência anterior antes de um novo envio. Edições locais durante um envio não são sobrescritas nem marcadas como compradas se mudaram a identidade/quantidade do item.
+
+## Verificação e roteiro
+
+Testes JVM adicionados cobrem persistência/reabertura offline, isolamento de contas, rejeição de fallback global/local_user, migração válida, cache inválido preservado, falha de disco sem sucesso, tombstone contra ressurreição e confirmação de revisão antiga sem perder edição nova. Testes de contrato verificam preço obrigatório no corpo de lote, ausência de stockId digitado no corpo, regra GRAIN/PANTRY e reconciliação distinguindo preços diferentes. Gradle é executado centralmente pelo agente principal; testes de integração de Firebase/BFF dependem das configurações reais do ambiente.
+
+1. Sem internet, adicionar, editar todos os campos, marcar NÃO, desmarcar, excluir e reabrir o app. Conferir persistência e status pendente. Nenhum produto/lote deve existir no Core por essas ações.
+2. Voltar a internet com ponte/regras configuradas; conferir estado SYNCING e depois SYNCED somente após commit. Abrir outro aparelho na mesma conta e verificar alterações/exclusões. Editar novamente enquanto a primeira escrita está em andamento e confirmar que a revisão nova permanece pendente até sua própria confirmação.
+3. Sem ponte/configuração/permissão Firebase, verificar AUTH_REQUIRED/ERROR e outbox preservada, mantendo todos os controles locais utilizáveis. Trocar conta e conferir que nada da lista/outbox da outra conta aparece.
+4. Marcar SIM: exigir preço real, validade e local; GRAIN não aceita geladeira/freezer. Confirmar destino real inferido e preço recebido no lote e no financeiro USER_CONFIRMED, sem modificar preço global de produto existente.
+5. Interromper POST/PUT, matar processo e reabrir. A lista permanece editável; novo envio ao estoque exige GET explícito e reutiliza o lote confirmado. Testar preço diferente, lote ambíguo, grupo inacessível e resposta sem preço: nenhum cenário pode causar replay automático ou sucesso fictício.

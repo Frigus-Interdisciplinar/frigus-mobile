@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="32dp">
+
+        <!-- Header: Voltar e Título -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/money_saving_back"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/darkBlue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_financial_history_title"
+                android:textColor="@color/darkBlue"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+        <!-- Dropdown Seletor de Período -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/money_saving_period"
+            android:textColor="@color/color_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/btnPeriodo"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_dropdown_card"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <TextView
+                android:id="@+id/tvPeriodoSelecionado"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/sarabun"
+                android:text="Maio/2026"
+                android:textColor="@color/color_text_primary"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_down"
+                app:tint="@color/color_text_secondary" />
+        </LinearLayout>
+
+        <!-- Card Tabela de Histórico Financeiro -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_white_rounded"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Cabeçalho da Tabela -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.8"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_th_product"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_th_category"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.0"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_th_date"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:fontFamily="@font/sarabun"
+                    android:text="@string/money_saving_th_value"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.8"
+                    android:fontFamily="@font/sarabun"
+                    android:gravity="end"
+                    android:text="@string/money_saving_th_status"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_divider" />
+
+            <!-- Linhas dinâmicas -->
+            <LinearLayout
+                android:id="@+id/layoutTabelaMovimentacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Carregar mais páginas de eventos -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/moneyMore"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/sarabun"
+                android:text="@string/money_saving_more"
+                android:textColor="@color/blue_primary"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Nota de rodapé da tabela -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/money_saving_receipt_note"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="11sp" />
+
+        <!-- Botão Filtros Avançados -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFiltrosAvancados"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/sarabun"
+            android:text="@string/money_saving_advanced_filters"
+            android:textAllCaps="false"
+            android:textColor="@color/blue_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:cornerRadius="10dp"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1.5dp" />
+
+    </LinearLayout>
+</ScrollView>
